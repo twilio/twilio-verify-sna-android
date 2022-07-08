@@ -19,6 +19,7 @@ references:
 
 jobs:
   build_and_unit_test:
+    <<: *android_config
     steps:
       - checkout
       - run:
@@ -26,6 +27,7 @@ jobs:
           command: ./gradlew verifysna:test --no-daemon
   
   ktlint_check:
+    <<: *android_config
     steps:
       - checkout
       - run:
@@ -37,5 +39,5 @@ workflows:
     jobs:
       - ktlint_check
       - build_and_unit_test:
-        requires:
-          - ktlint_check
+          requires:
+            - ktlint_check
