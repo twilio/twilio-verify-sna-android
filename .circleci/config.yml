@@ -3,28 +3,39 @@ version: 2.1
 orbs:
   android: circleci/android@1.0.3
 
+references:
+  workspace: &workspace
+    ~/code
+
+  ## Docker configuration
+  android_config: &android_config
+    working_directory: *workspace
+    docker:
+      - image: circleci/android:api-28
+    environment:
+      - _JAVA_OPTIONS: "-XX:+UseContainerSupport"
+      - JVM_OPTS: -Xmx3200m
+    resource_class: large
+
 jobs:
-
   build_and_unit_test:
-
     steps:
       - checkout
       - run:
-          name: Running Unit Tests
-          command: cd Authy; ./gradlew testAuthyAndroid4DebugUnitTest --no-daemon --max-workers 2
-
-
+        name: Running Unit Tests
+        command: ./gradlew verifysna:test --no-daemon
+  
   ktlint_check:
     steps:
       - checkout
       - run:
-          name: Running Ktlint
-          command: cd Authy; ./gradlew ktlintCheck
+        name: Running Ktlint
+        command: cd Authy; ./gradlew ktlintCheck
 
 workflows:
   workflow:
     jobs:
       - ktlint_check
       - build_and_unit_test:
-          requires:
-            - ktlint_check
+        requires:
+          - ktlint_check
