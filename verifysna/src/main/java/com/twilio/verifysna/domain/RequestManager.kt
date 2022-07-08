@@ -14,12 +14,20 @@
  * limitations under the License.
  */
 
-package com.twilio.verifysna
+package com.twilio.verifysna.domain
 
-import com.twilio.verifysna.exception.VerifySnaException
+import com.twilio.verifysna.network.CellularNetworkConnection
 
-sealed class VerificationResult {
-  object Success : VerificationResult()
+interface RequestManager {
 
-  data class Fail(val verifySnaException: VerifySnaException) : VerificationResult()
+  fun processUrl(url: String)
+}
+
+class ConcreteRequestManager(
+  private val networkConnection: CellularNetworkConnection
+) : RequestManager {
+
+  override fun processUrl(url: String) {
+    networkConnection.performRequest(url)
+  }
 }
