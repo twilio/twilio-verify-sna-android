@@ -1,0 +1,56 @@
+/*
+ * Copyright (c) 2022 Twilio Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.twilio.verify_sna
+
+import android.content.Context
+import com.twilio.verify_sna.domain.ConcreteRequestManager
+import com.twilio.verify_sna.domain.ConcreteTwilioVerifySna
+import com.twilio.verify_sna.domain.RequestManager
+import com.twilio.verify_sna.domain.VerificationResult
+import com.twilio.verify_sna.network.ConcreteCellularNetworkConnection
+
+/**
+ * Describes the available operations to process  SNA verification
+ */
+interface TwilioVerifySna {
+
+  /**
+   * Consume the required SNA URL using cellular network
+   * @param snaUrl Silent phone number authentication URL
+   */
+  fun processUrl(snaUrl: String): VerificationResult
+
+  class Builder(
+    private val context: Context
+  ) {
+
+    private var requestManager: RequestManager = ConcreteRequestManager(
+      ConcreteCellularNetworkConnection(context)
+    )
+
+    internal fun requestManager(
+      requestManager: RequestManager
+    ) = apply { this.requestManager = requestManager }
+
+    /**
+     * Builds an instance of TwilioVerifySna
+     */
+    fun build(): TwilioVerifySna {
+      return ConcreteTwilioVerifySna(context, requestManager)
+    }
+  }
+}

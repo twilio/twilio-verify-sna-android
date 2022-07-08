@@ -1,0 +1,61 @@
+version: 2.1
+
+orbs:
+  android: circleci/android@1.0.3
+
+references:
+  workspace: &workspace
+    ~/code
+
+  ## Docker configuration
+  android_config: &android_config
+    working_directory: *workspace
+    docker:
+      - image: circleci/android:api-28
+    environment:
+      - _JAVA_OPTIONS: "-XX:+UseContainerSupport"
+      - JVM_OPTS: -Xmx3200m
+    resource_class: large
+
+  ## Cache
+  gradle_key: &gradle_key
+    jars-{{ checksum "build.gradle" }}
+
+  restore_gradle_cache: &restore_gradle_cache
+    restore_cache:
+      key: *gradle_key
+
+  save_gradle_cache: &save_gradle_cache
+    save_cache:
+      key: *gradle_key
+      paths:
+        - ~/.gradle
+
+jobs:
+  build_and_unit_test:
+    <<: *android_config
+    steps:
+      - checkout
+      - *restore_gradle_cache
+      - run:
+          name: Running Unit Tests
+          command: ./gradlew verify_sna:test --no-daemon
+      - *save_gradle_cache
+  
+  ktlint_check:
+    <<: *android_config
+    steps:
+      - checkout
+      - *restore_gradle_cache
+      - run:
+          name: Running Ktlint
+          command: ./gradlew ktlintCheck
+      - *save_gradle_cache
+
+workflows:
+  workflow:
+    jobs:
+      - ktlint_check
+      - build_and_unit_test:
+          requires:
+            - ktlint_check
