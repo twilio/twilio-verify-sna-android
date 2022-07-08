@@ -22,15 +22,15 @@ jobs:
     steps:
       - checkout
       - run:
-        name: Running Unit Tests
-        command: ./gradlew verifysna:test --no-daemon
+          name: Running Unit Tests
+          command: ./gradlew verifysna:test --no-daemon
   
   ktlint_check:
     steps:
       - checkout
       - run:
-        name: Running Ktlint
-        command: cd Authy; ./gradlew ktlintCheck
+          name: Running Ktlint
+          command: ./gradlew ktlintCheck
 
 workflows:
   workflow:
