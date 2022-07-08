@@ -19,7 +19,7 @@ references:
 
   ## Cache
   gradle_key: &gradle_key
-    jars-{{ checksum "Authy/build.gradle" }}-{{ checksum "Authy/authy-android/build.gradle" }}
+    jars-{{ checksum "build.gradle" }}
 
   restore_gradle_cache: &restore_gradle_cache
     restore_cache:
