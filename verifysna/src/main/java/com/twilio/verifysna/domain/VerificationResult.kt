@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-package com.twilio.verifysna
+package com.twilio.verifysna.domain
 
-class TwilioVerifySnaBuilder {
+import com.twilio.verifysna.exception.VerifySnaException
 
-  fun build(): TwilioVerifySna {
-return ConcreteTwilioVerifySna()
-  }
+sealed class VerificationResult {
+  object Success : VerificationResult()
+
+  data class Fail(val verifySnaException: VerifySnaException) : VerificationResult()
 }
