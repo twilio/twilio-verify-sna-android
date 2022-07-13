@@ -28,5 +28,14 @@ class MainActivity : AppCompatActivity() {
     super.onCreate(savedInstanceState)
     binding = ActivityMainBinding.inflate(layoutInflater)
     setContentView(binding.root)
+
+    binding.button.setOnClickListener {
+      invokeCellularNetwork()
+    }
+  }
+
+  private fun invokeCellularNetwork() {
+    val sna = TwilioVerifySna.Builder(this).build()
+    sna.processUrl("http://test.using.nrok.com")
   }
 }
