@@ -18,7 +18,8 @@ package com.twilio.sample
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.twilio.verify_sna.databinding.ActivityMainBinding
+import com.twilio.verifysna.TwilioVerifySna
+import com.twilio.verifysna.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
 
@@ -28,5 +29,14 @@ class MainActivity : AppCompatActivity() {
     super.onCreate(savedInstanceState)
     binding = ActivityMainBinding.inflate(layoutInflater)
     setContentView(binding.root)
+
+    binding.button.setOnClickListener {
+      invokeCellularNetwork()
+    }
+  }
+
+  private fun invokeCellularNetwork() {
+    val sna = TwilioVerifySna.Builder(this).build()
+    sna.processUrl("http://test.using.nrok.com")
   }
 }
