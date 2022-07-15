@@ -14,18 +14,6 @@
  * limitations under the License.
  */
 
-package com.twilio.verifysna.network
+package com.twilio.verify_sna.exception
 
-import android.content.Context
-
-interface CellularNetworkConnection {
-
-  fun performRequest(url: String)
-}
-
-class ConcreteCellularNetworkConnection(
-  private val context: Context
-) : CellularNetworkConnection {
-
-  override fun performRequest(url: String) {}
-}
+open class VerifySnaException : Exception()

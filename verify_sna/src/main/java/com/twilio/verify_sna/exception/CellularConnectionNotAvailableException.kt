@@ -14,12 +14,6 @@
  * limitations under the License.
  */
 
-package com.twilio.verifysna.domain
+package com.twilio.verify_sna.exception
 
-import com.twilio.verifysna.exception.VerifySnaException
-
-sealed class VerificationResult {
-  object Success : VerificationResult()
-
-  data class Fail(val verifySnaException: VerifySnaException) : VerificationResult()
-}
+class CellularConnectionNotAvailableException : VerifySnaException()

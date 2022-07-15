@@ -30,4 +30,4 @@ dependencyResolutionManagement {
 }
 rootProject.name = "twilio-verify-sna-android"
 include ':sample'
-include ':verifysna'
+include ':verify_sna'

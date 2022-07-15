@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package com.twilio.verifysna
+package com.twilio.verify_sna
 
 import android.content.Context
-import com.twilio.verifysna.domain.ConcreteRequestManager
-import com.twilio.verifysna.domain.RequestManager
-import com.twilio.verifysna.domain.VerificationResult
-import com.twilio.verifysna.network.ConcreteCellularNetworkConnection
+import com.twilio.verify_sna.domain.ConcreteRequestManager
+import com.twilio.verify_sna.domain.RequestManager
+import com.twilio.verify_sna.domain.VerificationResult
+import com.twilio.verify_sna.network.ConcreteCellularNetworkConnection
 
 class TwilioVerifySna private constructor(
   private val context: Context,

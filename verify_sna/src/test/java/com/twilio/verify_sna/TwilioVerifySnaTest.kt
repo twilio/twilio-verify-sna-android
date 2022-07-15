@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package com.twilio.verifysna
+package com.twilio.verify_sna
 
 import android.content.Context
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
-import com.twilio.verifysna.domain.RequestManager
-import com.twilio.verifysna.domain.VerificationResult
+import com.twilio.verify_sna.domain.RequestManager
+import com.twilio.verify_sna.domain.VerificationResult
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
