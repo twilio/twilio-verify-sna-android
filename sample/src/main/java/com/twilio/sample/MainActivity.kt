@@ -18,8 +18,7 @@ package com.twilio.sample
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.twilio.verifysna.TwilioVerifySna
-import com.twilio.verifysna.databinding.ActivityMainBinding
+import com.twilio.verify_sna.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
 
