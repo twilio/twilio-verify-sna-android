@@ -16,9 +16,13 @@
 
 package com.twilio.sample
 
+import android.net.Uri
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.twilio.verifysna.databinding.ActivityMainBinding
+import androidx.browser.customtabs.CustomTabColorSchemeParams
+import androidx.browser.customtabs.CustomTabsIntent
+import androidx.core.content.ContextCompat
+import com.twilio.sample.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
 
@@ -27,6 +31,30 @@ class MainActivity : AppCompatActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     binding = ActivityMainBinding.inflate(layoutInflater)
+    binding.button.setOnClickListener {
+      val url = binding.editText.text.toString()
+      if (url.isNotEmpty()) {
+        startCustomTab(url)
+      }
+    }
     setContentView(binding.root)
+  }
+
+  private fun startCustomTab(url: String) {
+    val customTabsIntent = CustomTabsIntent.Builder()
+      .apply {
+        title = "Example in-app browser"
+        setDefaultColorSchemeParams(
+          CustomTabColorSchemeParams.Builder()
+            .setToolbarColor(
+              ContextCompat.getColor(this@MainActivity, R.color.red)
+            )
+            .build()
+        )
+      }
+      .build()
+
+    customTabsIntent.intent.data = Uri.parse(url)
+    startActivity(customTabsIntent.intent)
   }
 }
