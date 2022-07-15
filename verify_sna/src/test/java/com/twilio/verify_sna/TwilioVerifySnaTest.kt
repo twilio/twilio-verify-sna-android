@@ -33,9 +33,9 @@ class TwilioVerifySnaTest {
   @Test
   fun `Process an url invokes request manager`() {
     val url = "http://www.test.com"
-    val twilioVerifySna = TwilioVerifySna.Builder(
-      context, requestManager
-    ).build()
+    val twilioVerifySna = TwilioVerifySna.Builder(context)
+      .requestManager(requestManager)
+      .build()
 
     val result = twilioVerifySna.processUrl(url)
 
