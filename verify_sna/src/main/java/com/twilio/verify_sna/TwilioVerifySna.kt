@@ -42,7 +42,7 @@ interface TwilioVerifySna {
       ConcreteCellularNetworkConnection(context)
     )
 
-    fun requestManager(
+    internal fun requestManager(
       requestManager: RequestManager
     ) = apply { this.requestManager = requestManager }
 

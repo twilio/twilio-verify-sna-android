@@ -18,8 +18,8 @@ package com.twilio.verify_sna.domain
 
 import com.twilio.verify_sna.exception.VerifySnaException
 
-sealed class VerificationResult {
-  object Success : VerificationResult()
+sealed interface VerificationResult {
+  object Success : VerificationResult
 
-  data class Fail(val verifySnaException: VerifySnaException) : VerificationResult()
+  data class Fail(val verifySnaException: VerifySnaException) : VerificationResult
 }
