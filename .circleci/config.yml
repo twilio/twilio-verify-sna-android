@@ -39,7 +39,7 @@ jobs:
       - *restore_gradle_cache
       - run:
           name: Running Unit Tests
-          command: ./gradlew verifysna:test --no-daemon
+          command: ./gradlew verify_sna:test --no-daemon
       - *save_gradle_cache
   
   ktlint_check:

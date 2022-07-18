@@ -14,20 +14,18 @@
  * limitations under the License.
  */
 
-package com.twilio.verifysna.domain
+package com.twilio.verify_sna.network
 
-import com.twilio.verifysna.network.CellularNetworkConnection
+import android.content.Context
 
-interface RequestManager {
+interface CellularNetworkConnection {
 
-  fun processUrl(url: String)
+  fun performRequest(url: String)
 }
 
-class ConcreteRequestManager(
-  private val networkConnection: CellularNetworkConnection
-) : RequestManager {
+class ConcreteCellularNetworkConnection(
+  private val context: Context
+) : CellularNetworkConnection {
 
-  override fun processUrl(url: String) {
-    networkConnection.performRequest(url)
-  }
+  override fun performRequest(url: String) {}
 }

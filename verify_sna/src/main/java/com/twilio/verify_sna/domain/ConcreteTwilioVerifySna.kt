@@ -14,6 +14,18 @@
  * limitations under the License.
  */
 
-package com.twilio.verifysna.exception
+package com.twilio.verify_sna.domain
 
-class CellularConnectionNotAvailableException : VerifySnaException()
+import android.content.Context
+import com.twilio.verify_sna.TwilioVerifySna
+
+class ConcreteTwilioVerifySna(
+  private val context: Context,
+  private val requestManager: RequestManager
+) : TwilioVerifySna {
+
+  override fun processUrl(snaUrl: String): VerificationResult {
+    requestManager.processUrl(snaUrl)
+    return VerificationResult.Success
+  }
+}
