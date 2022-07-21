@@ -29,7 +29,7 @@ import com.twilio.verify_sna.network.ConcreteCellularNetworkConnection
 interface TwilioVerifySna {
 
   /**
-   * Process the required snaUrl
+   * Consume the required SNA URL using cellular network
    * @param snaUrl Silent phone number authentication URL
    */
   fun processUrl(snaUrl: String): VerificationResult
