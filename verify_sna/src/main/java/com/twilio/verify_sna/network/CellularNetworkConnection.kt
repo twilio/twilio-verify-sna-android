@@ -17,15 +17,60 @@
 package com.twilio.verify_sna.network
 
 import android.content.Context
+import android.content.Context.CONNECTIVITY_SERVICE
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
+import android.net.NetworkRequest
+import java.io.BufferedReader
+import java.io.InputStreamReader
+import java.net.HttpURLConnection
+import java.net.URL
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 interface CellularNetworkConnection {
 
-  fun performRequest(url: String)
+  suspend fun performRequest(urlText: String): SnaResponse
 }
 
 class ConcreteCellularNetworkConnection(
   private val context: Context
 ) : CellularNetworkConnection {
 
-  override fun performRequest(url: String) {}
+  override suspend fun performRequest(urlText: String): SnaResponse {
+    return suspendCoroutine { continuation ->
+      val connectivityManager = context.getSystemService(
+        CONNECTIVITY_SERVICE
+      ) as ConnectivityManager
+      val networkRequest = NetworkRequest.Builder()
+        .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
+        .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+        .build()
+      connectivityManager.requestNetwork(
+        networkRequest,
+        object : ConnectivityManager.NetworkCallback() {
+          override fun onAvailable(network: Network) {
+            val snaUrlResponse = connect(urlText)
+            continuation.resume(snaUrlResponse)
+          }
+        }
+      )
+    }
+  }
+
+  private fun connect(urlText: String): SnaResponse {
+    val httpURLConnection: HttpURLConnection?
+    val url = URL(urlText)
+    httpURLConnection = url.openConnection() as HttpURLConnection
+
+    val code = httpURLConnection.responseCode
+    val br = BufferedReader(InputStreamReader(httpURLConnection.inputStream))
+    var message = ""
+    var strCurrentLine: String?
+    while (br.readLine().also { strCurrentLine = it } != null) {
+      message += strCurrentLine
+    }
+    return SnaResponse(code, message)
+  }
 }

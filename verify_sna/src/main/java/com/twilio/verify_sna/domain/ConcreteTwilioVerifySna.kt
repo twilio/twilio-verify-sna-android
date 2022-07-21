@@ -20,12 +20,11 @@ import android.content.Context
 import com.twilio.verify_sna.TwilioVerifySna
 
 class ConcreteTwilioVerifySna(
-  private val context: Context,
   private val requestManager: RequestManager
 ) : TwilioVerifySna {
 
-  override fun processUrl(snaUrl: String): VerificationResult {
-    requestManager.processUrl(snaUrl)
-    return VerificationResult.Success
+  override suspend fun processUrl(snaUrl: String): VerificationResult {
+    val snaResponse = requestManager.processUrl(snaUrl)
+    return VerificationResult.Success(snaResponse)
   }
 }
