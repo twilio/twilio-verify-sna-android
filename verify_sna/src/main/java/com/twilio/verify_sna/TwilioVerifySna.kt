@@ -32,10 +32,10 @@ interface TwilioVerifySna {
    * Consume the required SNA URL using cellular network
    * @param snaUrl Silent phone number authentication URL
    */
-  fun processUrl(snaUrl: String): VerificationResult
+  suspend fun processUrl(snaUrl: String): VerificationResult
 
   class Builder(
-    private val context: Context
+    context: Context
   ) {
 
     private var requestManager: RequestManager = ConcreteRequestManager(
@@ -50,7 +50,7 @@ interface TwilioVerifySna {
      * Builds an instance of TwilioVerifySna
      */
     fun build(): TwilioVerifySna {
-      return ConcreteTwilioVerifySna(context, requestManager)
+      return ConcreteTwilioVerifySna(requestManager)
     }
   }
 }

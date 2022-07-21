@@ -17,17 +17,18 @@
 package com.twilio.verify_sna.domain
 
 import com.twilio.verify_sna.network.CellularNetworkConnection
+import com.twilio.verify_sna.network.SnaResponse
 
 interface RequestManager {
 
-  fun processUrl(url: String)
+  suspend fun processUrl(url: String): SnaResponse
 }
 
 class ConcreteRequestManager(
-  private val networkConnection: CellularNetworkConnection
+  private val cellularNetworkConnection: CellularNetworkConnection
 ) : RequestManager {
 
-  override fun processUrl(url: String) {
-    networkConnection.performRequest(url)
+  override suspend fun processUrl(url: String): SnaResponse {
+    return cellularNetworkConnection.performRequest(url)
   }
 }
