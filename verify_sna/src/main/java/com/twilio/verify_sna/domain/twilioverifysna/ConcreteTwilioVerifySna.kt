@@ -14,17 +14,26 @@
  * limitations under the License.
  */
 
-package com.twilio.verify_sna.domain
+package com.twilio.verify_sna.domain.twilioverifysna
 
-import android.content.Context
+import com.twilio.verify_sna.ProcessUrlResult
 import com.twilio.verify_sna.TwilioVerifySna
+import com.twilio.verify_sna.common.TwilioVerifySnaException
+import com.twilio.verify_sna.common.UnexpectedError
+import com.twilio.verify_sna.domain.requestmanager.RequestManager
 
 class ConcreteTwilioVerifySna(
   private val requestManager: RequestManager
 ) : TwilioVerifySna {
 
-  override suspend fun processUrl(snaUrl: String): VerificationResult {
-    val snaResponse = requestManager.processUrl(snaUrl)
-    return VerificationResult.Success(snaResponse)
+  override suspend fun processUrl(snaUrl: String): ProcessUrlResult {
+    return try {
+      val snaResponse = requestManager.processUrl(snaUrl)
+      ProcessUrlResult.Success(snaResponse)
+    } catch (twilioVerifySnaException: TwilioVerifySnaException) {
+      ProcessUrlResult.Fail(twilioVerifySnaException)
+    } catch (exception: Exception) {
+      ProcessUrlResult.Fail(UnexpectedError(exception))
+    }
   }
 }

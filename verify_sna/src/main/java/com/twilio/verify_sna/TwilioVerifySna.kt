@@ -17,11 +17,10 @@
 package com.twilio.verify_sna
 
 import android.content.Context
-import com.twilio.verify_sna.domain.ConcreteRequestManager
-import com.twilio.verify_sna.domain.ConcreteTwilioVerifySna
-import com.twilio.verify_sna.domain.RequestManager
-import com.twilio.verify_sna.domain.VerificationResult
-import com.twilio.verify_sna.network.ConcreteCellularNetworkConnection
+import com.twilio.verify_sna.domain.requestmanager.ConcreteRequestManager
+import com.twilio.verify_sna.domain.requestmanager.RequestManager
+import com.twilio.verify_sna.domain.twilioverifysna.ConcreteTwilioVerifySna
+import com.twilio.verify_sna.networking.ConcreteNetworkRequestProvider
 
 /**
  * Describes the available operations to process  SNA verification
@@ -32,14 +31,14 @@ interface TwilioVerifySna {
    * Consume the required SNA URL using cellular network
    * @param snaUrl Silent phone number authentication URL
    */
-  suspend fun processUrl(snaUrl: String): VerificationResult
+  suspend fun processUrl(snaUrl: String): ProcessUrlResult
 
   class Builder(
     context: Context
   ) {
 
     private var requestManager: RequestManager = ConcreteRequestManager(
-      ConcreteCellularNetworkConnection(context)
+      context, ConcreteNetworkRequestProvider()
     )
 
     internal fun requestManager(
