@@ -21,8 +21,8 @@ import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.twilio.sample.databinding.ActivityMainBinding
+import com.twilio.verify_sna.ProcessUrlResult
 import com.twilio.verify_sna.TwilioVerifySna
-import com.twilio.verify_sna.domain.VerificationResult
 
 class MainActivity : AppCompatActivity() {
 
@@ -46,13 +46,14 @@ class MainActivity : AppCompatActivity() {
   }
 
   private fun invokeVerification() {
-    viewModel.verify("https://f656-2800-e2-1a00-68c-94ea-5f64-c2c1-a188.ngrok.io")
+    viewModel.verify("https://google.com")
   }
 
   private fun updateUI(viewState: ViewState) {
     when (viewState) {
       is ViewState.Loading -> showLoading()
-      is ViewState.VerificationDone -> showVerificationResult(viewState.verificationResult)
+      is ViewState.VerificationSuccess -> showVerificationResult(viewState.verificationResult)
+      is ViewState.VerificationFail -> showVerificationFail(viewState.message)
       else -> showIdle()
     }
   }
@@ -62,14 +63,22 @@ class MainActivity : AppCompatActivity() {
     binding.textView.visibility = View.GONE
   }
 
-  private fun showVerificationResult(verificationResult: VerificationResult) {
+  private fun showVerificationResult(verificationResult: ProcessUrlResult) {
     binding.progressBar.visibility = View.GONE
     binding.textView.run {
       visibility = View.VISIBLE
       text = when (verificationResult) {
-        is VerificationResult.Success -> "Code: ${verificationResult.snaResponse.code}, message: ${verificationResult.snaResponse.message}"
-        is VerificationResult.Fail -> "Error: ${verificationResult.verifySnaException.message}"
+        is ProcessUrlResult.Success -> "Code: ${verificationResult.networkRequestResult.status}, content: ${verificationResult.networkRequestResult.message}"
+        is ProcessUrlResult.Fail -> "Error: ${verificationResult.twilioVerifySnaException.message}"
       }
+    }
+  }
+
+  private fun showVerificationFail(message: String) {
+    binding.progressBar.visibility = View.GONE
+    binding.textView.run {
+      visibility = View.VISIBLE
+      text = message
     }
   }
 

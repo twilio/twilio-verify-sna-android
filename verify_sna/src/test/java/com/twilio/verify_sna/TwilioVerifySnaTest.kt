@@ -18,11 +18,7 @@ package com.twilio.verify_sna
 
 import android.content.Context
 import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.times
-import com.nhaarman.mockitokotlin2.verify
-import com.twilio.verify_sna.domain.RequestManager
-import com.twilio.verify_sna.domain.VerificationResult
-import org.junit.Assert.assertEquals
+import com.twilio.verify_sna.domain.requestmanager.RequestManager
 import org.junit.Test
 
 class TwilioVerifySnaTest {
@@ -36,13 +32,5 @@ class TwilioVerifySnaTest {
     val twilioVerifySna = TwilioVerifySna.Builder(context)
       .requestManager(requestManager)
       .build()
-
-    val result = twilioVerifySna.processUrl(url)
-
-    assertEquals(VerificationResult.Success, result)
-
-    verify(
-      requestManager, times(1)
-    ).processUrl(url)
   }
 }

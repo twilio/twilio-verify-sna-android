@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package com.twilio.verify_sna.domain
+package com.twilio.verify_sna
 
-import com.twilio.verify_sna.exception.VerifySnaException
-import com.twilio.verify_sna.network.SnaResponse
+import com.twilio.verify_sna.common.TwilioVerifySnaException
+import com.twilio.verify_sna.networking.NetworkRequestResult
 
-sealed interface VerificationResult {
-  data class Success(val snaResponse: SnaResponse) : VerificationResult
+sealed interface ProcessUrlResult {
+  data class Success(val networkRequestResult: NetworkRequestResult) : ProcessUrlResult
 
-  data class Fail(val verifySnaException: VerifySnaException) : VerificationResult
+  data class Fail(val twilioVerifySnaException: TwilioVerifySnaException) : ProcessUrlResult
 }

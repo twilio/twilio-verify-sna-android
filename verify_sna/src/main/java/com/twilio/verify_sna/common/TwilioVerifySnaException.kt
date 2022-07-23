@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 
-package com.twilio.verify_sna.exception
+package com.twilio.verify_sna.common
 
-class CellularConnectionNotAvailableException : VerifySnaException()
+open class TwilioVerifySnaException(cause: Throwable?) : Exception(cause)
+
+class CellularNetworkNotAvailable : TwilioVerifySnaException(null)
+
+class NetworkRequestException(cause: Exception) : TwilioVerifySnaException(cause)
+
+class UnexpectedError(override val cause: Throwable) : TwilioVerifySnaException(cause)

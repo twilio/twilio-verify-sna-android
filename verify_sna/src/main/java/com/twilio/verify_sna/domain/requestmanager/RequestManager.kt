@@ -14,34 +14,37 @@
  * limitations under the License.
  */
 
-package com.twilio.verify_sna.network
+package com.twilio.verify_sna.domain.requestmanager
 
 import android.content.Context
-import android.content.Context.CONNECTIVITY_SERVICE
 import android.net.ConnectivityManager
+import android.net.ConnectivityManager.NetworkCallback
 import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
-import java.io.BufferedReader
-import java.io.InputStreamReader
-import java.net.HttpURLConnection
-import java.net.URL
+import com.twilio.verify_sna.common.CellularNetworkNotAvailable
+import com.twilio.verify_sna.common.NetworkRequestException
+import com.twilio.verify_sna.networking.NetworkRequestProvider
+import com.twilio.verify_sna.networking.NetworkRequestResult
 import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
-interface CellularNetworkConnection {
+interface RequestManager {
 
-  suspend fun performRequest(urlText: String): SnaResponse
+  suspend fun processUrl(url: String): NetworkRequestResult
 }
 
-class ConcreteCellularNetworkConnection(
-  private val context: Context
-) : CellularNetworkConnection {
+class ConcreteRequestManager(
+  private val context: Context,
+  private val networkRequestProvider: NetworkRequestProvider
+) : RequestManager {
 
-  override suspend fun performRequest(urlText: String): SnaResponse {
+  override suspend fun processUrl(url: String): NetworkRequestResult {
+
     return suspendCoroutine { continuation ->
       val connectivityManager = context.getSystemService(
-        CONNECTIVITY_SERVICE
+        Context.CONNECTIVITY_SERVICE
       ) as ConnectivityManager
       val networkRequest = NetworkRequest.Builder()
         .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
@@ -49,28 +52,26 @@ class ConcreteCellularNetworkConnection(
         .build()
       connectivityManager.requestNetwork(
         networkRequest,
-        object : ConnectivityManager.NetworkCallback() {
+        object : NetworkCallback() {
           override fun onAvailable(network: Network) {
-            val snaUrlResponse = connect(urlText)
-            continuation.resume(snaUrlResponse)
+            try {
+              val networkRequestResult = networkRequestProvider.performRequest(url)
+              continuation.resume(networkRequestResult)
+            } catch (networkRequestException: NetworkRequestException) {
+              continuation.resumeWithException(
+                networkRequestException
+              )
+            }
+          }
+
+          override fun onUnavailable() {
+            // super.onUnavailable()
+            continuation.resumeWithException(
+              CellularNetworkNotAvailable()
+            )
           }
         }
       )
     }
-  }
-
-  private fun connect(urlText: String): SnaResponse {
-    val httpURLConnection: HttpURLConnection?
-    val url = URL(urlText)
-    httpURLConnection = url.openConnection() as HttpURLConnection
-
-    val code = httpURLConnection.responseCode
-    val br = BufferedReader(InputStreamReader(httpURLConnection.inputStream))
-    var message = ""
-    var strCurrentLine: String?
-    while (br.readLine().also { strCurrentLine = it } != null) {
-      message += strCurrentLine
-    }
-    return SnaResponse(code, message)
   }
 }
