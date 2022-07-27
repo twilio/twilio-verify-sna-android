@@ -1,6 +1,12 @@
 package com.twilio.verify_sna.networking
 
 data class NetworkRequestResult(
+  /**
+   * Http response status
+   */
   val status: Int,
-  val message: String
+  /**
+   * Property used for debug only
+   */
+  val message: String?
 )
