@@ -21,7 +21,7 @@ open class TwilioVerifySnaException(
   cause: Exception?,
 ) : Exception(message, cause)
 
-class InvalidSnaUrlException: TwilioVerifySnaException(
+class InvalidSnaUrlException : TwilioVerifySnaException(
   message = "Invalid SNA URL",
   cause = null
 )
