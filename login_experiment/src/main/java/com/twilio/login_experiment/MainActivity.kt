@@ -65,7 +65,7 @@ class MainActivity : AppCompatActivity() {
       outputText.text = "Sna Url response successful"
       openAuthorizeWebPage(
         clientId, countryCode, phoneNumber,
-        requestSnaResponse.correlationId, "loginexperiment.twilio.com"
+        requestSnaResponse.correlationId, "loginexperiment://loginexperiment.twilio.com"
       )
       stopLoading()
     }
