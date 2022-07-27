@@ -13,22 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.twilio.login_experiment
 
-pluginManagement {
-  repositories {
-    gradlePluginPortal()
-    google()
-    mavenCentral()
-  }
+import retrofit2.http.Field
+import retrofit2.http.FormUrlEncoded
+import retrofit2.http.POST
+
+interface Service {
+
+  @FormUrlEncoded
+  @POST("/sna/create_evurl")
+  suspend fun requestSnaUrl(
+    @Field("countryCode") countryCode: String,
+    @Field("phoneNumber") phoneNumber: String,
+    @Field("clientId") clientId: String
+  ): RequestSnaResponse
 }
-dependencyResolutionManagement {
-  repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-  repositories {
-    google()
-    mavenCentral()
-  }
-}
-rootProject.name = "twilio-verify-sna-android"
-include ':sample'
-include ':verify_sna'
-include ':login_experiment'
