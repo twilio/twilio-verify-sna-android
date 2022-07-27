@@ -16,10 +16,12 @@
 
 package com.twilio.verify_sna.domain.twilioverifysna
 
+import android.util.Patterns
 import com.twilio.verify_sna.ProcessUrlResult
 import com.twilio.verify_sna.TwilioVerifySna
+import com.twilio.verify_sna.common.InvalidSnaUrlException
 import com.twilio.verify_sna.common.TwilioVerifySnaException
-import com.twilio.verify_sna.common.UnexpectedError
+import com.twilio.verify_sna.common.UnexpectedException
 import com.twilio.verify_sna.domain.requestmanager.RequestManager
 
 class ConcreteTwilioVerifySna(
@@ -28,12 +30,15 @@ class ConcreteTwilioVerifySna(
 
   override suspend fun processUrl(snaUrl: String): ProcessUrlResult {
     return try {
+      if (!Patterns.WEB_URL.matcher(snaUrl).matches()) {
+        throw InvalidSnaUrlException()
+      }
       val snaResponse = requestManager.processUrl(snaUrl)
       ProcessUrlResult.Success(snaResponse)
     } catch (twilioVerifySnaException: TwilioVerifySnaException) {
       ProcessUrlResult.Fail(twilioVerifySnaException)
     } catch (exception: Exception) {
-      ProcessUrlResult.Fail(UnexpectedError(exception))
+      ProcessUrlResult.Fail(UnexpectedException(exception))
     }
   }
 }

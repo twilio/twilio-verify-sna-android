@@ -26,6 +26,8 @@ import com.twilio.verify_sna.common.CellularNetworkNotAvailable
 import com.twilio.verify_sna.common.NetworkRequestException
 import com.twilio.verify_sna.networking.NetworkRequestProvider
 import com.twilio.verify_sna.networking.NetworkRequestResult
+import java.lang.reflect.Method
+import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
@@ -41,37 +43,62 @@ class ConcreteRequestManager(
 ) : RequestManager {
 
   override suspend fun processUrl(url: String): NetworkRequestResult {
-
     return suspendCoroutine { continuation ->
       val connectivityManager = context.getSystemService(
         Context.CONNECTIVITY_SERVICE
       ) as ConnectivityManager
-      val networkRequest = NetworkRequest.Builder()
-        .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
-        .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-        .build()
-      connectivityManager.requestNetwork(
-        networkRequest,
-        object : NetworkCallback() {
-          override fun onAvailable(network: Network) {
-            try {
-              val networkRequestResult = networkRequestProvider.performRequest(url)
-              continuation.resume(networkRequestResult)
-            } catch (networkRequestException: NetworkRequestException) {
-              continuation.resumeWithException(
-                networkRequestException
-              )
-            }
-          }
 
-          override fun onUnavailable() {
-            // super.onUnavailable()
+      if (isMobileDataEnabled(connectivityManager)) {
+        establishCellularConnection(connectivityManager, url, continuation)
+      } else {
+        continuation.resumeWithException(
+          CellularNetworkNotAvailable()
+        )
+      }
+    }
+  }
+
+  /**
+   * Android Framework doesn't count with a pre-build way of getting mobile network status,
+   * when Wi-Fi is active. Reflection fits well.
+   * Taken from https://stackoverflow.com/a/8243305
+   */
+  private fun isMobileDataEnabled(cm: ConnectivityManager): Boolean {
+    return try {
+      val c = Class.forName(cm.javaClass.name)
+      val m: Method = c.getDeclaredMethod("getMobileDataEnabled")
+      m.isAccessible = true
+      m.invoke(cm) as Boolean
+    } catch (exception: Exception) {
+      exception.printStackTrace()
+      false
+    }
+  }
+
+  private fun establishCellularConnection(
+    connectivityManager: ConnectivityManager,
+    url: String,
+    continuation: Continuation<NetworkRequestResult>
+  ) {
+    val networkRequest = NetworkRequest.Builder()
+      .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
+      .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+      .build()
+    connectivityManager.requestNetwork(
+      networkRequest,
+      object : NetworkCallback() {
+        override fun onAvailable(network: Network) {
+          try {
+            val networkRequestResult = networkRequestProvider.performRequest(url)
+            connectivityManager.unregisterNetworkCallback(this)
+            continuation.resume(networkRequestResult)
+          } catch (networkRequestException: NetworkRequestException) {
             continuation.resumeWithException(
-              CellularNetworkNotAvailable()
+              networkRequestException
             )
           }
         }
-      )
-    }
+      }
+    )
   }
 }

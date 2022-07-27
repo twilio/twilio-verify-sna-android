@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <!--
   ~ Copyright (c) 2022 Twilio Inc.
   ~
@@ -13,8 +14,7 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
+
 <resources>
-  <string name="app_name">Twilio Verify SNA Sample</string>
-  <string name="verify">Verify</string>
-  <string name="sampleSnaUrl"><![CDATA[https://mi-sbox.dnlsrv.com/msbox/id/t20AHVnl?data=j1lsSG7eB3Ly1NtyzQamzkytfIVg7VOsrKxzsr7hpdvJWBDmB3DkG7PANl%2F0thvxhXcJpTCRPQa7z34pB20fYHRaOQeOGbz33qtguNCzap5%2F2fh2dlPXqnnhb4Mqs%2Bg%2FYKFBmlsV3q96lAFHgOJcxH0MEulXFvXN5JiSmzs1rFdQ8QuFWhQyktjKeQVHlqIQ4VmzaS4SU0WGaExxEmCUxjZN87RFPQwAJ3w6O2z9FtqjmGiu%2FdnY8LZnf1pq1MSTZEHsNqDNNkLMPm%2F2IgG8YB0IXKGxQCsWvqlNmyy%2FuEHxZTVPCC1sfWlC6rHV1DFu&cipherSalt=CZ52W87jK3WuXAZn&redirect=www.google.com&air=false]]></string>
+  <dimen name="marginNormal">16dp</dimen>
 </resources>

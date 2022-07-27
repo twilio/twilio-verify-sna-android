@@ -31,22 +31,30 @@ class ConcreteNetworkRequestProvider : NetworkRequestProvider {
 
   override fun performRequest(urlText: String): NetworkRequestResult {
     try {
-      val httpURLConnection: HttpURLConnection?
+      val httpUrlConnection: HttpURLConnection?
       val url = URL(urlText)
-      httpURLConnection = url.openConnection() as HttpURLConnection
-
-      val status = httpURLConnection.responseCode
-      val bufferedReader = BufferedReader(InputStreamReader(httpURLConnection.inputStream))
-      var message = ""
-      var currentLine: String?
-      while (bufferedReader.readLine().also { currentLine = it } != null) {
-        message += currentLine
-      }
+      httpUrlConnection = url.openConnection() as HttpURLConnection
+      val status = httpUrlConnection.responseCode
+      val message = obtainResponseMessage(httpUrlConnection)
       return NetworkRequestResult(status, message).also {
-        httpURLConnection.disconnect()
+        httpUrlConnection.disconnect()
       }
     } catch (exception: Exception) {
       throw NetworkRequestException(exception)
     }
+  }
+
+  /**
+   * Get String conversion of response, used for debug only.
+   * TODO: deserialize the response with an object
+   */
+  private fun obtainResponseMessage(httpURLConnection: HttpURLConnection): String {
+    val bufferedReader = BufferedReader(InputStreamReader(httpURLConnection.inputStream))
+    var message = ""
+    var currentLine: String?
+    while (bufferedReader.readLine().also { currentLine = it } != null) {
+      message += currentLine
+    }
+    return message
   }
 }
