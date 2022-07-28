@@ -20,9 +20,7 @@ import android.content.Context
 import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.whenever
-import com.twilio.verify_sna.common.InvalidSnaUrlException
 import com.twilio.verify_sna.common.TwilioVerifySnaException
-import com.twilio.verify_sna.common.UnexpectedException
 import com.twilio.verify_sna.domain.requestmanager.RequestManager
 import com.twilio.verify_sna.networking.NetworkRequestResult
 import kotlinx.coroutines.runBlocking
@@ -56,7 +54,7 @@ class TwilioVerifySnaTest {
       val actualResult = processUrlResult as? ProcessUrlResult.Fail
       Assert.assertNotNull(actualResult)
       Assert.assertTrue(
-        actualResult?.twilioVerifySnaException is InvalidSnaUrlException
+        actualResult?.twilioVerifySnaException is TwilioVerifySnaException.InvalidSnaUrlException
       )
     }
   }
@@ -118,7 +116,7 @@ class TwilioVerifySnaTest {
       val actualResult = processUrlResult as? ProcessUrlResult.Fail
       Assert.assertNotNull(actualResult)
       Assert.assertTrue(
-        actualResult?.twilioVerifySnaException is UnexpectedException
+        actualResult?.twilioVerifySnaException is TwilioVerifySnaException.UnexpectedException
       )
     }
   }

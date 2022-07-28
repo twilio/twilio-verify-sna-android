@@ -22,8 +22,7 @@ import android.net.ConnectivityManager.NetworkCallback
 import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
-import com.twilio.verify_sna.common.CellularNetworkNotAvailable
-import com.twilio.verify_sna.common.NetworkRequestException
+import com.twilio.verify_sna.common.TwilioVerifySnaException
 import com.twilio.verify_sna.networking.NetworkRequestProvider
 import com.twilio.verify_sna.networking.NetworkRequestResult
 import java.lang.reflect.Method
@@ -52,7 +51,7 @@ class ConcreteRequestManager(
         establishCellularConnection(connectivityManager, url, continuation)
       } else {
         continuation.resumeWithException(
-          CellularNetworkNotAvailable()
+          TwilioVerifySnaException.CellularNetworkNotAvailable
         )
       }
     }
@@ -90,12 +89,13 @@ class ConcreteRequestManager(
         override fun onAvailable(network: Network) {
           try {
             val networkRequestResult = networkRequestProvider.performRequest(url)
-            connectivityManager.unregisterNetworkCallback(this)
             continuation.resume(networkRequestResult)
-          } catch (networkRequestException: NetworkRequestException) {
+          } catch (networkRequestException: TwilioVerifySnaException.NetworkRequestException) {
             continuation.resumeWithException(
               networkRequestException
             )
+          } finally {
+            connectivityManager.unregisterNetworkCallback(this)
           }
         }
       }
