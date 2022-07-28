@@ -17,6 +17,16 @@ android {
   }
 
   buildTypes {
+    debug {
+      def localProperties = new Properties()
+      localProperties.load(new FileInputStream(rootProject.file("local.properties")))
+      resValue("string", "request_evurl_url", localProperties['request_evurl_url'])
+      resValue("string", "application_seed_secret", localProperties['application_seed_secret'])
+      resValue("string", "client_id", localProperties['client_id'])
+      resValue("string", "silent_auth_url", localProperties['silent_auth_url'])
+      resValue("string", "silent_auth_country_code", localProperties['silent_auth_country_code'])
+      resValue("string", "silent_auth_phone_number", localProperties['silent_auth_phone_number'])
+    }
     release {
       minifyEnabled false
       proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'

@@ -22,18 +22,16 @@ class MainActivity : AppCompatActivity() {
 
   private lateinit var service: Service
   private lateinit var twilioVerifySna: TwilioVerifySna
-  lateinit var button: Button
-  lateinit var progressBar: ProgressBar
-  lateinit var outputText: TextView
-  private val baseUrl = "https://742c2330fb17.ngrok.io"
-  private val clientId = "ugESDWcLp1"
+  private lateinit var button: Button
+  private lateinit var progressBar: ProgressBar
+  private lateinit var outputText: TextView
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_main)
 
     val retrofit = Retrofit.Builder()
-      .baseUrl(baseUrl)
+      .baseUrl(getString(R.string.request_evurl_url))
       .addConverterFactory(GsonConverterFactory.create())
       .build()
     service = retrofit.create(Service::class.java)
@@ -56,7 +54,7 @@ class MainActivity : AppCompatActivity() {
       val phoneNumber = findViewById<EditText>(R.id.phoneNumberField).text.toString()
       outputText.text = "Consuming /sna/create_evurl"
       val requestSnaResponse = withContext(Dispatchers.IO) {
-        service.requestSnaUrl(countryCode, phoneNumber, clientId)
+        service.requestSnaUrl(countryCode, phoneNumber, getString(R.string.client_id))
       }
       outputText.text = "Consuming Sna Url"
       withContext(Dispatchers.IO) {
@@ -64,8 +62,11 @@ class MainActivity : AppCompatActivity() {
       }
       outputText.text = "Sna Url response successful"
       openAuthorizeWebPage(
-        clientId, countryCode, phoneNumber,
-        requestSnaResponse.correlationId, "loginexperiment://loginexperiment.twilio.com"
+        clientId = getString(R.string.client_id),
+        countryCode = getString(R.string.silent_auth_country_code),
+        phoneNumber = getString(R.string.silent_auth_phone_number),
+        associationKey = requestSnaResponse.correlationId,
+        redirectUrl = "loginexperiment://loginexperiment.twilio.com"
       )
       stopLoading()
     }
@@ -85,7 +86,7 @@ class MainActivity : AppCompatActivity() {
     redirectUrl: String
   ) {
     val url =
-      "$baseUrl/authorize-silent-auth?client_id=$clientId&country_code=$countryCode&phone_number=$phoneNumber&association_key=$associationKey&redirect_url=$redirectUrl"
+      "${getString(R.string.silent_auth_url)}?client_id=$clientId&country_code=$countryCode&phone_number=$phoneNumber&association_key=$associationKey&redirect_url=$redirectUrl"
     startCustomTab(url)
   }
 
