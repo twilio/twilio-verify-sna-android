@@ -31,16 +31,18 @@ import kotlinx.coroutines.withContext
 class MainActivity : AppCompatActivity() {
 
   private lateinit var binding: ActivityMainBinding
-  private lateinit var twilioVerifySna: TwilioVerifySna
+
+  // Create TwilioVerifySna instance using builder
+  private val twilioVerifySna: TwilioVerifySna by lazy {
+    TwilioVerifySna.Builder(this).build()
+  }
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     binding = ActivityMainBinding.inflate(layoutInflater)
     setContentView(binding.root)
-    // Create TwilioVerifySna instance using builder
-    twilioVerifySna = TwilioVerifySna.Builder(this).build()
 
-    binding.button.setOnClickListener {
+    binding.verifySnaUrlButton.setOnClickListener {
       val snaUrl = binding.snaUrlField.text.toString()
       invokeVerification(snaUrl)
     }
@@ -49,28 +51,26 @@ class MainActivity : AppCompatActivity() {
   private fun invokeVerification(snaUrl: String) {
     // Start loading animation
     startLoading()
-    CoroutineScope(Job()).launch {
+    CoroutineScope(Job()).launch(Dispatchers.Main) {
       // Consume SNA URL verification in background thread
       val processUrlResult = withContext(Dispatchers.IO) {
         twilioVerifySna.processUrl(snaUrl)
       }
-      // Return back to main thread to update result
-      withContext(Dispatchers.Main) {
-        binding.result.text = when (processUrlResult) {
-          is ProcessUrlResult.Success -> "Success"
-          is ProcessUrlResult.Fail -> {
-            "Fail: ${processUrlResult.twilioVerifySnaException.message}"
-          }
+
+      binding.result.text = when (processUrlResult) {
+        is ProcessUrlResult.Success -> "Success"
+        is ProcessUrlResult.Fail -> {
+          "Fail: ${processUrlResult.twilioVerifySnaException.message}"
         }
-        // Stop loading animation
-        stopLoading()
       }
+      // Stop loading animation
+      stopLoading()
     }
   }
 
   private fun startLoading() {
     binding.run {
-      button.visibility = View.GONE
+      verifySnaUrlButton.visibility = View.GONE
       progressBar.visibility = View.VISIBLE
       result.visibility = View.GONE
     }
@@ -78,7 +78,7 @@ class MainActivity : AppCompatActivity() {
 
   private fun stopLoading() {
     binding.run {
-      button.visibility = View.VISIBLE
+      verifySnaUrlButton.visibility = View.VISIBLE
       progressBar.visibility = View.GONE
       result.visibility = View.VISIBLE
     }

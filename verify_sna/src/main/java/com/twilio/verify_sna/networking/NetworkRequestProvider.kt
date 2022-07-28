@@ -16,7 +16,7 @@
 
 package com.twilio.verify_sna.networking
 
-import com.twilio.verify_sna.common.NetworkRequestException
+import com.twilio.verify_sna.common.TwilioVerifySnaException
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.net.HttpURLConnection
@@ -40,7 +40,7 @@ class ConcreteNetworkRequestProvider : NetworkRequestProvider {
         httpUrlConnection.disconnect()
       }
     } catch (exception: Exception) {
-      throw NetworkRequestException(exception)
+      throw TwilioVerifySnaException.NetworkRequestException(exception)
     }
   }
 

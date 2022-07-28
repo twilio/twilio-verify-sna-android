@@ -16,29 +16,28 @@
 
 package com.twilio.verify_sna.common
 
-open class TwilioVerifySnaException(
+sealed class TwilioVerifySnaException(
   message: String,
-  cause: Exception?,
-) : Exception(message, cause)
+  cause: Exception?
+) : Exception(message, cause) {
+  object InvalidSnaUrlException : TwilioVerifySnaException(
+    message = "Invalid SNA URL",
+    cause = null
+  )
 
-class InvalidSnaUrlException : TwilioVerifySnaException(
-  message = "Invalid SNA URL",
-  cause = null
-)
+  object CellularNetworkNotAvailable : TwilioVerifySnaException(
+    message = "Cellular network not available.",
+    cause = null
+  )
 
-class CellularNetworkNotAvailable : TwilioVerifySnaException(
-  message = "Cellular network not available.",
-  cause = null
-)
+  data class NetworkRequestException(private val exception: Exception) : TwilioVerifySnaException(
+    message = "Network request exception: ${exception.message}.", cause = exception
+  )
 
-class NetworkRequestException(cause: Exception) : TwilioVerifySnaException(
-  message = "Network request exception: ${cause.message}.",
-  cause = cause
-)
-
-class UnexpectedException(
-  cause: Exception
-) : TwilioVerifySnaException(
-  message = "Unexpected error happened: ${cause.message}.",
-  cause = cause
-)
+  data class UnexpectedException(
+    private val exception: Exception
+  ) : TwilioVerifySnaException(
+    message = "Unexpected error happened: ${exception.message}.",
+    cause = exception
+  )
+}
