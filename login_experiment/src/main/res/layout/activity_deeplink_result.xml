@@ -5,19 +5,21 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".DeeplinkResultActivity"
+    android:padding="@dimen/paddingNormal"
     >
 
   <TextView
       android:id="@+id/title"
-      android:text="Login finishes successfully &#127881;"
-      android:layout_width="wrap_content"
+      android:text="Welcome to Owl Bank!"
+      android:layout_width="0dp"
       android:layout_height="wrap_content"
-      app:layout_constraintBottom_toTopOf="@id/resultText"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toStartOf="parent"
       app:layout_constraintTop_toTopOf="parent"
-      android:textSize="16sp"
-      app:layout_constraintVertical_chainStyle="packed"
+      android:textSize="40sp"
+      style="@style/formComponent"
+      tools:visibility="visible"
+      android:visibility="gone"
       />
 
   <TextView

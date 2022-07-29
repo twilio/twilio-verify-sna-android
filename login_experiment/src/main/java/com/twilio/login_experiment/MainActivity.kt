@@ -49,26 +49,31 @@ class MainActivity : AppCompatActivity() {
 
   private fun performLogin() {
     CoroutineScope(Job()).launch(Dispatchers.Main) {
-      startLoading()
-      val countryCode = findViewById<EditText>(R.id.countryCodeField).text.toString()
-      val phoneNumber = findViewById<EditText>(R.id.phoneNumberField).text.toString()
-      outputText.text = "Consuming /sna/create_evurl"
-      val requestSnaResponse = withContext(Dispatchers.IO) {
-        service.requestSnaUrl(countryCode, phoneNumber, getString(R.string.client_id))
+      try {
+        startLoading()
+        val countryCode = findViewById<EditText>(R.id.countryCodeField).text.toString()
+        val phoneNumber = findViewById<EditText>(R.id.phoneNumberField).text.toString()
+        outputText.text = "Consuming /sna/create_evurl"
+        val requestSnaResponse = withContext(Dispatchers.IO) {
+          service.requestSnaUrl(countryCode, phoneNumber, getString(R.string.client_id))
+        }
+        outputText.text = "Consuming Sna Url"
+        withContext(Dispatchers.IO) {
+          twilioVerifySna.processUrl(requestSnaResponse.snaUrl)
+        }
+        outputText.text = "Sna Url response successful"
+        openAuthorizeWebPage(
+          clientId = getString(R.string.client_id),
+          countryCode = countryCode,
+          phoneNumber = phoneNumber,
+          associationKey = requestSnaResponse.correlationId,
+          redirectUrl = "loginexperiment://loginexperiment.twilio.com"
+        )
+      } catch (exception: Exception) {
+        outputText.text = "Error: ${exception.message}"
+      } finally {
+        stopLoading()
       }
-      outputText.text = "Consuming Sna Url"
-      withContext(Dispatchers.IO) {
-        twilioVerifySna.processUrl(requestSnaResponse.snaUrl)
-      }
-      outputText.text = "Sna Url response successful"
-      openAuthorizeWebPage(
-        clientId = getString(R.string.client_id),
-        countryCode = getString(R.string.silent_auth_country_code),
-        phoneNumber = getString(R.string.silent_auth_phone_number),
-        associationKey = requestSnaResponse.correlationId,
-        redirectUrl = "loginexperiment://loginexperiment.twilio.com"
-      )
-      stopLoading()
     }
   }
 

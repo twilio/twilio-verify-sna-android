@@ -1,4 +1,4 @@
-package com.twilio.login_experiment
+package com.twilio.login_experiment.model
 
 import com.google.gson.annotations.SerializedName
 

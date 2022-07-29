@@ -15,6 +15,8 @@
  */
 package com.twilio.login_experiment
 
+import com.twilio.login_experiment.model.AccessTokenResponse
+import com.twilio.login_experiment.model.RequestSnaResponse
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.POST
@@ -28,4 +30,12 @@ interface Service {
     @Field("phoneNumber") phoneNumber: String,
     @Field("clientId") clientId: String
   ): RequestSnaResponse
+
+  @FormUrlEncoded
+  @POST("/oauth/token")
+  suspend fun requestAccessToken(
+    @Field("clientId") clientId: String,
+    @Field("clientSecret") clientSecret: String,
+    @Field("code") code: String
+  ): AccessTokenResponse
 }

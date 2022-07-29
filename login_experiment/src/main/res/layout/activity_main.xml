@@ -17,7 +17,7 @@
       app:layout_constraintStart_toStartOf="parent"
       app:layout_constraintTop_toTopOf="parent"
       style="@style/formComponent"
-      android:text="1"
+      android:text="57"
       />
 
   <EditText
@@ -29,7 +29,7 @@
       app:layout_constraintStart_toStartOf="parent"
       app:layout_constraintTop_toBottomOf="@id/countryCodeField"
       style="@style/formComponent"
-      android:text="4085040458"
+      android:text="3158356004"
       />
 
   <Button
