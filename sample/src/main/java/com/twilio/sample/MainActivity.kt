@@ -19,9 +19,9 @@ package com.twilio.sample
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import com.twilio.sample.databinding.ActivityMainBinding
 import com.twilio.verify_sna.ProcessUrlResult
 import com.twilio.verify_sna.TwilioVerifySna
+import com.twilio.verify_sna.databinding.ActivityMainBinding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
