@@ -52,4 +52,5 @@ dependencies {
   implementation project(path: ':verify_sna')
   implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
   implementation "androidx.browser:browser:1.4.0"
+  implementation "androidx.activity:activity-ktx:1.5.1"
 }

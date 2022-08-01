@@ -1,5 +1,6 @@
 package com.twilio.login_experiment
 
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
@@ -20,94 +21,13 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 class MainActivity : AppCompatActivity() {
 
-  private lateinit var service: Service
-  private lateinit var twilioVerifySna: TwilioVerifySna
-  private lateinit var button: Button
-  private lateinit var progressBar: ProgressBar
-  private lateinit var outputText: TextView
-
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_main)
 
-    val retrofit = Retrofit.Builder()
-      .baseUrl(getString(R.string.request_evurl_url))
-      .addConverterFactory(GsonConverterFactory.create())
-      .build()
-    service = retrofit.create(Service::class.java)
-
-    twilioVerifySna = TwilioVerifySna.Builder(this).build()
-
-    button = findViewById(R.id.loginWithAuthy)
-    progressBar = findViewById(R.id.progressBar)
-    outputText = findViewById(R.id.outputText)
-
-    button.setOnClickListener {
-      performLogin()
+    findViewById<Button>(R.id.loginWithAuthy).setOnClickListener {
+      val intent = Intent(this, LoginWithAuthyActivity::class.java)
+      startActivity(intent)
     }
-  }
-
-  private fun performLogin() {
-    CoroutineScope(Job()).launch(Dispatchers.Main) {
-      try {
-        startLoading()
-        val countryCode = findViewById<EditText>(R.id.countryCodeField).text.toString()
-        val phoneNumber = findViewById<EditText>(R.id.phoneNumberField).text.toString()
-        outputText.text = "Consuming /sna/create_evurl"
-        val requestSnaResponse = withContext(Dispatchers.IO) {
-          service.requestSnaUrl(countryCode, phoneNumber, getString(R.string.client_id))
-        }
-        outputText.text = "Consuming Sna Url"
-        withContext(Dispatchers.IO) {
-          twilioVerifySna.processUrl(requestSnaResponse.snaUrl)
-        }
-        outputText.text = "Sna Url response successful"
-        openAuthorizeWebPage(
-          clientId = getString(R.string.client_id),
-          countryCode = countryCode,
-          phoneNumber = phoneNumber,
-          associationKey = requestSnaResponse.correlationId,
-          redirectUrl = "loginexperiment://loginexperiment.twilio.com"
-        )
-      } catch (exception: Exception) {
-        outputText.text = "Error: ${exception.message}"
-      } finally {
-        stopLoading()
-      }
-    }
-  }
-
-  private fun startLoading() {
-    button.isEnabled = false
-    progressBar.visibility = View.VISIBLE
-    outputText.text = ""
-  }
-
-  private fun openAuthorizeWebPage(
-    clientId: String,
-    countryCode: String,
-    phoneNumber: String,
-    associationKey: String,
-    redirectUrl: String
-  ) {
-    val url =
-      "${getString(R.string.silent_auth_url)}?client_id=$clientId&country_code=$countryCode&phone_number=$phoneNumber&association_key=$associationKey&redirect_url=$redirectUrl"
-    startCustomTab(url)
-  }
-
-  private fun stopLoading() {
-    button.isEnabled = true
-    progressBar.visibility = View.INVISIBLE
-  }
-
-  private fun startCustomTab(url: String) {
-    val customTabsIntent = CustomTabsIntent.Builder()
-      .apply {
-        title = "Silent-auth Authorize webpage"
-      }
-      .build()
-
-    customTabsIntent.intent.data = Uri.parse(url)
-    startActivity(customTabsIntent.intent)
   }
 }

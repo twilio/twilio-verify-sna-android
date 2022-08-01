@@ -4,65 +4,152 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="@dimen/paddingNormal"
+    android:padding="@dimen/dimenLarge"
     tools:context=".MainActivity"
     >
 
-  <EditText
-      android:id="@+id/countryCodeField"
-      android:layout_width="0dp"
-      android:layout_height="wrap_content"
-      android:hint="@string/country_code"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toTopOf="parent"
-      style="@style/formComponent"
-      android:text="57"
-      />
-
-  <EditText
-      android:id="@+id/phoneNumberField"
-      android:layout_width="0dp"
-      android:layout_height="wrap_content"
-      android:hint="@string/phone_number"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toBottomOf="@id/countryCodeField"
-      style="@style/formComponent"
-      android:text="3158356004"
-      />
-
-  <Button
-      android:id="@+id/loginWithAuthy"
-      android:layout_width="0dp"
-      android:layout_height="wrap_content"
-      android:text="@string/login_with_authy"
-      android:textAllCaps="false"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toBottomOf="@id/phoneNumberField"
-      style="@style/formComponent"
-      />
-
-  <ProgressBar
-      android:id="@+id/progressBar"
+  <TextView
+      android:id="@+id/loginTitle"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:visibility="invisible"
-      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintTop_toTopOf="parent"
       app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toBottomOf="@+id/loginWithAuthy"
-      style="@style/formComponent"
+      app:layout_constraintEnd_toEndOf="parent"
+      android:text="Welcome to Owl Bank"
+      style="@style/titleStyle"
       />
 
   <TextView
-      android:id="@+id/outputText"
+      android:id="@+id/loginSubtitle"
       android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      app:layout_constraintTop_toBottomOf="@+id/loginTitle"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintEnd_toEndOf="parent"
+      android:text="Please enter your credentials to login"
+      android:textSize="16sp"
+      android:textColor="@android:color/black"
+      android:layout_marginTop="16dp"
+      />
+
+  <TextView
+      android:id="@+id/userLabel"
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="@dimen/dimenExtraLarge"
+      android:text="User"
+      android:textColor="@android:color/black"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@+id/loginSubtitle"
+      />
+
+  <EditText
+      android:id="@+id/userField"
+      android:layout_width="0dp"
       android:layout_height="wrap_content"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toBottomOf="@+id/progressBar"
-      style="@style/formComponent"
+      app:layout_constraintTop_toBottomOf="@id/userLabel"
+      android:layout_marginTop="@dimen/marginSmall"
+      android:background="@drawable/edit_text_border"
+      style="@style/loginExperimentEditText"
+      />
+
+  <TextView
+      android:id="@+id/passwordLabel"
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      app:layout_constraintTop_toBottomOf="@+id/userField"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintEnd_toEndOf="parent"
+      android:text="Password"
+      android:textColor="@android:color/black"
+      android:layout_marginTop="12dp"
+      />
+
+  <EditText
+      android:id="@+id/passwordField"
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@id/passwordLabel"
+      android:layout_marginTop="@dimen/marginSmall"
+      style="@style/loginExperimentEditText"
+      />
+
+  <Button
+      android:id="@+id/loginButton"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="Login"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@id/passwordField"
+      android:layout_marginTop="@dimen/dimenExtraLarge"
+      style="@style/loginExperimentButton"
+      />
+
+  <View
+      android:id="@+id/separatorStart"
+      android:layout_width="0dp"
+      android:layout_height="1dp"
+      android:background="@android:color/darker_gray"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintEnd_toStartOf="@id/orText"
+      app:layout_constraintTop_toTopOf="@id/orText"
+      app:layout_constraintBottom_toBottomOf="@id/orText"
+      />
+
+  <TextView
+      android:id="@+id/orText"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginStart="@dimen/dimenNormal"
+      android:layout_marginEnd="@dimen/dimenNormal"
+      android:layout_marginTop="@dimen/dimenExtraLarge"
+      android:text="or"
+      app:layout_constraintEnd_toStartOf="@id/separatorEnd"
+      app:layout_constraintStart_toEndOf="@id/separatorStart"
+      app:layout_constraintTop_toBottomOf="@id/loginButton"
+      />
+
+  <View
+      android:id="@+id/separatorEnd"
+      android:layout_width="0dp"
+      android:layout_height="1dp"
+      android:background="@android:color/darker_gray"
+      app:layout_constraintStart_toEndOf="@id/orText"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintTop_toTopOf="@id/orText"
+      app:layout_constraintBottom_toBottomOf="@id/orText"
+      />
+
+  <Button
+      android:id="@+id/loginWithGoogle"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="@dimen/dimenNormal"
+      android:drawableLeft="@drawable/ic_google"
+      android:text="Login with Google"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@id/orText"
+      style="@style/iconButton"
+      />
+
+  <com.google.android.material.button.MaterialButton
+      android:id="@+id/loginWithAuthy"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="@dimen/dimenNormal"
+      android:drawableLeft="@drawable/ic_authy"
+      android:text="Login with Authy"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@id/loginWithGoogle"
+      style="@style/iconButton"
       />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

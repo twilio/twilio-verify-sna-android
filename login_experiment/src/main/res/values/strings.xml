@@ -3,4 +3,11 @@
   <string name="login_with_authy">Login with Authy</string>
   <string name="country_code">Country code</string>
   <string name="phone_number">Phone number</string>
+  <string name="login_description">We need to verify your identity, please enter your phone number</string>
+
+  <string-array name="country_codes">
+    <item></item>
+    <item>United States (+1)</item>
+    <item>Colombia (+57)</item>
+  </string-array>
 </resources>
