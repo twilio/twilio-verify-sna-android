@@ -16,6 +16,7 @@
 
 package com.twilio.verify_sna.domain.twilioverifysna
 
+import android.os.Looper
 import android.util.Patterns
 import com.twilio.verify_sna.ProcessUrlResult
 import com.twilio.verify_sna.TwilioVerifySna
@@ -30,6 +31,9 @@ class ConcreteTwilioVerifySna(
     return try {
       if (!Patterns.WEB_URL.matcher(snaUrl).matches()) {
         throw TwilioVerifySnaException.InvalidSnaUrlException
+      }
+      if (Looper.myLooper() == Looper.getMainLooper()) {
+        throw TwilioVerifySnaException.RunInMainThreadException
       }
       val snaResponse = requestManager.processUrl(snaUrl)
       ProcessUrlResult.Success(snaResponse)

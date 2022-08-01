@@ -34,6 +34,11 @@ sealed class TwilioVerifySnaException(
     message = "Network request exception: ${exception.message}.", cause = exception
   )
 
+  object RunInMainThreadException : TwilioVerifySnaException(
+    message = "Can't run inside main thread.",
+    cause = null
+  )
+
   data class UnexpectedException(
     private val exception: Exception
   ) : TwilioVerifySnaException(

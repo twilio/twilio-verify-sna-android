@@ -23,7 +23,9 @@ import com.nhaarman.mockitokotlin2.whenever
 import com.twilio.verify_sna.common.TwilioVerifySnaException
 import com.twilio.verify_sna.domain.requestmanager.RequestManager
 import com.twilio.verify_sna.networking.NetworkRequestResult
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -49,7 +51,9 @@ class TwilioVerifySnaTest {
     runBlocking {
       val url = "invalidurl"
 
-      val processUrlResult = twilioVerifySna.processUrl(url)
+      val processUrlResult = withContext(Dispatchers.IO) {
+        twilioVerifySna.processUrl(url)
+      }
 
       val actualResult = processUrlResult as? ProcessUrlResult.Fail
       Assert.assertNotNull(actualResult)
@@ -71,7 +75,9 @@ class TwilioVerifySnaTest {
         networkRequestResult
       )
 
-      val result = twilioVerifySna.processUrl(url)
+      val result = withContext(Dispatchers.IO) {
+        twilioVerifySna.processUrl(url)
+      }
 
       assertThat(result).isEqualTo(ProcessUrlResult.Success(networkRequestResult))
     }
@@ -89,7 +95,9 @@ class TwilioVerifySnaTest {
         throw twilioVerifySnaException
       }
 
-      val processUrlResult = twilioVerifySna.processUrl(url)
+      val processUrlResult = withContext(Dispatchers.IO) {
+        twilioVerifySna.processUrl(url)
+      }
 
       val actualResult = processUrlResult as? ProcessUrlResult.Fail
       Assert.assertNotNull(actualResult)
@@ -110,13 +118,29 @@ class TwilioVerifySnaTest {
       ).then {
         throw exception
       }
+      val processUrlResult = withContext(Dispatchers.IO) {
+        twilioVerifySna.processUrl(url)
+      }
+
+      val actualResult = processUrlResult as? ProcessUrlResult.Fail
+      Assert.assertNotNull(actualResult)
+      Assert.assertTrue(
+        actualResult?.twilioVerifySnaException is TwilioVerifySnaException.UnexpectedException
+      )
+    }
+  }
+
+  @Test
+  fun `Process on main thread not permitted`() {
+    runBlocking {
+      val url = "https://www.test.com"
 
       val processUrlResult = twilioVerifySna.processUrl(url)
 
       val actualResult = processUrlResult as? ProcessUrlResult.Fail
       Assert.assertNotNull(actualResult)
       Assert.assertTrue(
-        actualResult?.twilioVerifySnaException is TwilioVerifySnaException.UnexpectedException
+        actualResult?.twilioVerifySnaException is TwilioVerifySnaException.RunInMainThreadException
       )
     }
   }
