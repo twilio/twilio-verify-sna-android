@@ -1,23 +1,10 @@
 package com.twilio.login_experiment
 
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
-import android.view.View
 import android.widget.Button
-import android.widget.EditText
-import android.widget.ProgressBar
-import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.browser.customtabs.CustomTabsIntent
-import com.twilio.verify_sna.TwilioVerifySna
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 
 class MainActivity : AppCompatActivity() {
 
@@ -29,5 +16,17 @@ class MainActivity : AppCompatActivity() {
       val intent = Intent(this, LoginWithAuthyActivity::class.java)
       startActivity(intent)
     }
+
+    findViewById<Button>(R.id.loginButton).setOnClickListener {
+      showNotAvailableMessage()
+    }
+
+    findViewById<Button>(R.id.loginWithGoogle).setOnClickListener {
+      showNotAvailableMessage()
+    }
+  }
+
+  private fun showNotAvailableMessage() {
+    Toast.makeText(this, "Not available yet", Toast.LENGTH_SHORT).show()
   }
 }

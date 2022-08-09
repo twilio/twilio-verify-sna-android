@@ -65,6 +65,6 @@ data class Country(
   val code: String
 )
 
-interface CountryOnClickListener{
+interface CountryOnClickListener {
   fun onClick(code: String)
 }

@@ -20,8 +20,9 @@ import android.view.View
 import androidx.fragment.app.DialogFragment
 import androidx.recyclerview.widget.RecyclerView
 
-class CountrySelectorDialogFragment : DialogFragment(R.layout.dialog_country_selector),
-CountryOnClickListener{
+class CountrySelectorDialogFragment :
+  DialogFragment(R.layout.dialog_country_selector),
+  CountryOnClickListener {
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)

@@ -3,6 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
     android:padding="@dimen/dimenLarge"
     >
 
@@ -40,28 +41,40 @@
       app:layout_constraintTop_toBottomOf="@+id/titleText"
       />
 
-<EditText
-    android:id="@+id/countryCodeSpinner"
-    android:layout_width="148dp"
-    android:layout_height="0dp"
-    app:layout_constraintTop_toTopOf="@id/phoneNumberField"
-    app:layout_constraintBottom_toBottomOf="@id/phoneNumberField"
-    app:layout_constraintStart_toStartOf="parent"
-    android:background="@drawable/spinner_border"
-    android:padding="@dimen/dimenSmall"
-    />
+  <androidx.constraintlayout.widget.Guideline
+      android:id="@+id/guideline"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:orientation="vertical"
+      app:layout_constraintGuide_percent="0.3"
+      />
+
+  <TextView
+      android:id="@+id/countryCodeSpinner"
+      android:layout_width="0dp"
+      android:layout_height="0dp"
+      android:background="@drawable/spinner_border"
+      app:layout_constraintBottom_toBottomOf="@id/phoneNumberField"
+      app:layout_constraintEnd_toStartOf="@id/guideline"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toTopOf="@id/phoneNumberField"
+      tools:text="1"
+      style="@style/loginExperimentEditText"
+      />
 
   <EditText
-    android:id="@+id/phoneNumberField"
+      android:id="@+id/phoneNumberField"
       android:layout_width="0dp"
       android:layout_height="wrap_content"
+      android:layout_marginStart="@dimen/dimenSmall"
+      android:layout_marginTop="@dimen/dimenNormal"
+      android:inputType="phone"
+      app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toEndOf="@id/countryCodeSpinner"
       app:layout_constraintTop_toBottomOf="@id/descriptionText"
-      app:layout_constraintEnd_toEndOf="parent"
-      android:layout_marginTop="@dimen/dimenNormal"
-      android:layout_marginStart="@dimen/dimenSmall"
+      tools:text="1"
       style="@style/loginExperimentEditText"
-    />
+      />
 
   <Button
       android:id="@+id/phoneNumberLoginButton"

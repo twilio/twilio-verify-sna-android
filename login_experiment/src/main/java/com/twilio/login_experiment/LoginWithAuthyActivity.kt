@@ -6,6 +6,7 @@ import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ProgressBar
+import android.widget.TextView
 import android.widget.Toast
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.fragment.app.FragmentActivity
@@ -25,7 +26,7 @@ class LoginWithAuthyActivity : FragmentActivity(), CountryOnClickListener {
   private lateinit var twilioVerifySna: TwilioVerifySna
   private lateinit var button: Button
   private lateinit var progressBar: ProgressBar
-  private lateinit var countryCodeField: EditText
+  private lateinit var countryCodeField: TextView
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -77,7 +78,7 @@ class LoginWithAuthyActivity : FragmentActivity(), CountryOnClickListener {
           countryCode = countryCode,
           phoneNumber = phoneNumber,
           associationKey = requestSnaResponse.correlationId,
-          redirectUrl = "loginexperiment://loginexperiment.twilio.com"
+          redirectUrl = "loginexperiment://open"
         )
       } catch (exception: Exception) {
         Toast.makeText(

@@ -1,8 +1,10 @@
 package com.twilio.login_experiment
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
@@ -25,6 +27,7 @@ class DeeplinkResultActivity : AppCompatActivity() {
   private lateinit var transfer: Button
   private lateinit var products: Button
   private lateinit var progressBar: ProgressBar
+  private lateinit var logout: ImageView
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -46,6 +49,11 @@ class DeeplinkResultActivity : AppCompatActivity() {
     code = intent.data?.getQueryParameter("code").toString()
     if (code.isNotEmpty()) {
       invokeGetAccessToken()
+    }
+
+    logout = findViewById(R.id.logoutIcon)
+    logout.setOnClickListener {
+      performLogout()
     }
   }
 
@@ -83,5 +91,11 @@ class DeeplinkResultActivity : AppCompatActivity() {
         stopLoading()
       }
     }
+  }
+
+  private fun performLogout() {
+    val intent = Intent(this, MainActivity::class.java)
+    startActivity(intent)
+    finish()
   }
 }

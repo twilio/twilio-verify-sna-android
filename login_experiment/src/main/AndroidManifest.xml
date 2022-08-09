@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.twilio.login_experiment">
+
+  <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
+  <uses-permission android:name="android.permission.INTERNET" />
 
   <application
       android:allowBackup="true"
@@ -11,6 +15,7 @@
       android:theme="@style/Theme.TwilioVerifySnaAndroid">
     <activity
         android:name=".LoginWithAuthyActivity"
+        android:launchMode="singleTask"
         android:exported="false" />
     <activity
         android:name=".MainActivity"
@@ -25,20 +30,19 @@
         android:name=".DeeplinkResultActivity"
         android:exported="true"
         android:launchMode="singleTop">
-      <intent-filter>
+
+      <intent-filter
+          android:autoVerify="true"
+          tools:targetApi="m" >
         <action android:name="android.intent.action.VIEW" />
 
         <category android:name="android.intent.category.DEFAULT" />
         <category android:name="android.intent.category.BROWSABLE" />
 
         <data
-            android:host="loginexperiment.twilio.com"
-            android:scheme="loginexperiment" />
+            android:scheme="loginexperiment"
+            android:host="open"/>
       </intent-filter>
     </activity>
   </application>
-  <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
-
-  <uses-permission android:name="android.permission.INTERNET" />
-
 </manifest>
