@@ -17,32 +17,131 @@
 package com.twilio.verify_sna
 
 import android.content.Context
+import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.times
-import com.nhaarman.mockitokotlin2.verify
-import com.twilio.verify_sna.domain.RequestManager
-import com.twilio.verify_sna.domain.VerificationResult
-import org.junit.Assert.assertEquals
+import com.nhaarman.mockitokotlin2.whenever
+import com.twilio.verify_sna.common.TwilioVerifySnaException
+import com.twilio.verify_sna.domain.requestmanager.RequestManager
+import com.twilio.verify_sna.networking.NetworkRequestResult
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
+import org.junit.Assert
+import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
+@RunWith(RobolectricTestRunner::class)
 class TwilioVerifySnaTest {
 
   private val context: Context = mock()
   private val requestManager: RequestManager = mock()
+  private lateinit var twilioVerifySna: TwilioVerifySna
 
-  @Test
-  fun `Process an url invokes request manager`() {
-    val url = "http://www.test.com"
-    val twilioVerifySna = TwilioVerifySna.Builder(context)
+  @Before
+  fun setUp() {
+    twilioVerifySna = TwilioVerifySna.Builder(context)
       .requestManager(requestManager)
       .build()
+  }
 
-    val result = twilioVerifySna.processUrl(url)
+  @Test
+  fun `Process invalid Url`() {
+    runBlocking {
+      val url = "invalidurl"
 
-    assertEquals(VerificationResult.Success, result)
+      val processUrlResult = withContext(Dispatchers.IO) {
+        twilioVerifySna.processUrl(url)
+      }
 
-    verify(
-      requestManager, times(1)
-    ).processUrl(url)
+      val actualResult = processUrlResult as? ProcessUrlResult.Fail
+      Assert.assertNotNull(actualResult)
+      Assert.assertTrue(
+        actualResult?.twilioVerifySnaException is TwilioVerifySnaException.InvalidSnaUrlException
+      )
+    }
+  }
+
+  @Test
+  fun `Process an Url returns Success result`() {
+    runBlocking {
+      val networkRequestResult: NetworkRequestResult = mock()
+      val url = "https://www.test.com"
+
+      whenever(
+        requestManager.processUrl(url)
+      ).thenReturn(
+        networkRequestResult
+      )
+
+      val result = withContext(Dispatchers.IO) {
+        twilioVerifySna.processUrl(url)
+      }
+
+      assertThat(result).isEqualTo(ProcessUrlResult.Success(networkRequestResult))
+    }
+  }
+
+  @Test
+  fun `Process an Url throws a verify Sna exception`() {
+    runBlocking {
+      val twilioVerifySnaException: TwilioVerifySnaException = mock()
+      val url = "https://www.test.com"
+
+      whenever(
+        requestManager.processUrl(url)
+      ).then {
+        throw twilioVerifySnaException
+      }
+
+      val processUrlResult = withContext(Dispatchers.IO) {
+        twilioVerifySna.processUrl(url)
+      }
+
+      val actualResult = processUrlResult as? ProcessUrlResult.Fail
+      Assert.assertNotNull(actualResult)
+      assertThat(
+        actualResult?.twilioVerifySnaException
+      ).isEqualTo(twilioVerifySnaException)
+    }
+  }
+
+  @Test
+  fun `Process an Url throws an unexpected exception`() {
+    runBlocking {
+      val exception: Exception = mock()
+      val url = "https://www.test.com"
+
+      whenever(
+        requestManager.processUrl(url)
+      ).then {
+        throw exception
+      }
+      val processUrlResult = withContext(Dispatchers.IO) {
+        twilioVerifySna.processUrl(url)
+      }
+
+      val actualResult = processUrlResult as? ProcessUrlResult.Fail
+      Assert.assertNotNull(actualResult)
+      Assert.assertTrue(
+        actualResult?.twilioVerifySnaException is TwilioVerifySnaException.UnexpectedException
+      )
+    }
+  }
+
+  @Test
+  fun `Process on main thread not permitted`() {
+    runBlocking {
+      val url = "https://www.test.com"
+
+      val processUrlResult = twilioVerifySna.processUrl(url)
+
+      val actualResult = processUrlResult as? ProcessUrlResult.Fail
+      Assert.assertNotNull(actualResult)
+      Assert.assertTrue(
+        actualResult?.twilioVerifySnaException is TwilioVerifySnaException.RunInMainThreadException
+      )
+    }
   }
 }
