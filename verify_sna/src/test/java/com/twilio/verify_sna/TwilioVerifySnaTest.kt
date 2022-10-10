@@ -41,7 +41,7 @@ class TwilioVerifySnaTest {
 
   @Before
   fun setUp() {
-    twilioVerifySna = TwilioVerifySnaBuilder(context)
+    twilioVerifySna = TwilioVerifySna.Builder(context)
       .requestManager(requestManager)
       .build()
   }
