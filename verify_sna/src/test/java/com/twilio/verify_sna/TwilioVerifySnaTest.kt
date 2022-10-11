@@ -18,11 +18,11 @@ package com.twilio.verify_sna
 
 import android.content.Context
 import com.google.common.truth.Truth.assertThat
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.whenever
 import com.twilio.verify_sna.common.TwilioVerifySnaException
 import com.twilio.verify_sna.domain.requestmanager.RequestManager
 import com.twilio.verify_sna.networking.NetworkRequestResult
+import io.mockk.coEvery
+import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
@@ -35,8 +35,8 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class TwilioVerifySnaTest {
 
-  private val context: Context = mock()
-  private val requestManager: RequestManager = mock()
+  private val context: Context = mockk()
+  private val requestManager: RequestManager = mockk()
   private lateinit var twilioVerifySna: TwilioVerifySna
 
   @Before
@@ -58,7 +58,7 @@ class TwilioVerifySnaTest {
       val actualResult = processUrlResult as? ProcessUrlResult.Fail
       Assert.assertNotNull(actualResult)
       Assert.assertTrue(
-        actualResult?.twilioVerifySnaException is TwilioVerifySnaException.InvalidSnaUrlException
+        actualResult?.twilioVerifySnaException is TwilioVerifySnaException.InvalidUrlException
       )
     }
   }
@@ -66,14 +66,10 @@ class TwilioVerifySnaTest {
   @Test
   fun `Process an Url returns Success result`() {
     runBlocking {
-      val networkRequestResult: NetworkRequestResult = mock()
+      val networkRequestResult: NetworkRequestResult = mockk()
       val url = "https://www.test.com"
 
-      whenever(
-        requestManager.processUrl(url)
-      ).thenReturn(
-        networkRequestResult
-      )
+      coEvery { requestManager.processUrl(url) } returns networkRequestResult
 
       val result = withContext(Dispatchers.IO) {
         twilioVerifySna.processUrl(url)
@@ -86,14 +82,10 @@ class TwilioVerifySnaTest {
   @Test
   fun `Process an Url throws a verify Sna exception`() {
     runBlocking {
-      val twilioVerifySnaException: TwilioVerifySnaException = mock()
+      val twilioVerifySnaException: TwilioVerifySnaException = mockk()
       val url = "https://www.test.com"
 
-      whenever(
-        requestManager.processUrl(url)
-      ).then {
-        throw twilioVerifySnaException
-      }
+      coEvery { requestManager.processUrl(url) } throws twilioVerifySnaException
 
       val processUrlResult = withContext(Dispatchers.IO) {
         twilioVerifySna.processUrl(url)
@@ -110,14 +102,11 @@ class TwilioVerifySnaTest {
   @Test
   fun `Process an Url throws an unexpected exception`() {
     runBlocking {
-      val exception: Exception = mock()
+      val exception = Exception()
       val url = "https://www.test.com"
 
-      whenever(
-        requestManager.processUrl(url)
-      ).then {
-        throw exception
-      }
+      coEvery { requestManager.processUrl(url) } throws exception
+
       val processUrlResult = withContext(Dispatchers.IO) {
         twilioVerifySna.processUrl(url)
       }
@@ -141,6 +130,25 @@ class TwilioVerifySnaTest {
       Assert.assertNotNull(actualResult)
       Assert.assertTrue(
         actualResult?.twilioVerifySnaException is TwilioVerifySnaException.RunInMainThreadException
+      )
+    }
+  }
+
+  @Test
+  fun `The request receives a null response`() {
+    runBlocking {
+      val url = "https://www.test.com"
+
+      coEvery { requestManager.processUrl(url) } throws TwilioVerifySnaException.NoResultFromUrl
+
+      val processUrlResult = withContext(Dispatchers.IO) {
+        twilioVerifySna.processUrl(url)
+      }
+
+      val actualResult = processUrlResult as? ProcessUrlResult.Fail
+      Assert.assertNotNull(actualResult)
+      Assert.assertTrue(
+        actualResult?.twilioVerifySnaException is TwilioVerifySnaException.NoResultFromUrl
       )
     }
   }

@@ -30,7 +30,7 @@ class ConcreteTwilioVerifySna(
   override suspend fun processUrl(snaUrl: String): ProcessUrlResult {
     return try {
       if (!Patterns.WEB_URL.matcher(snaUrl).matches()) {
-        throw TwilioVerifySnaException.InvalidSnaUrlException
+        throw TwilioVerifySnaException.InvalidUrlException
       }
       if (Looper.myLooper() == Looper.getMainLooper()) {
         throw TwilioVerifySnaException.RunInMainThreadException

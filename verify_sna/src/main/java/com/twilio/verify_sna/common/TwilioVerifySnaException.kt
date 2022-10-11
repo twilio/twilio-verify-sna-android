@@ -17,32 +17,43 @@
 package com.twilio.verify_sna.common
 
 sealed class TwilioVerifySnaException(
-  message: String,
-  cause: Exception?
-) : Exception(message, cause) {
-  object InvalidSnaUrlException : TwilioVerifySnaException(
-    message = "Invalid SNA URL",
-    cause = null
+  description: String,
+  technicalError: String? = null,
+  cause: Exception? = null
+) : Exception(
+  """
+    $description.
+    TechnicalError: ${technicalError ?: "Undefined"}.
+  """.trimIndent(),
+  cause
+) {
+  object InvalidUrlException : TwilioVerifySnaException(
+    description = "Invalid URL, please check the format.",
+    technicalError = "Unable to convert the URL string to an URL object."
   )
 
   object CellularNetworkNotAvailable : TwilioVerifySnaException(
-    message = "Cellular network not available.",
-    cause = null
+    description = "Cellular network not available.",
+    technicalError = "ConnectivityManager established that a cellular network is not available, running on a simulator or a device with no sim card is no supported."
+  )
+
+  object NoResultFromUrl : TwilioVerifySnaException(
+    description = "Unable to get a valid result from the requested URL.",
+    technicalError = "Unable to get a redirection path or a result path from the URL, probably the SNAURL is corrupted (or maybe expired)."
   )
 
   data class NetworkRequestException(private val exception: Exception) : TwilioVerifySnaException(
-    message = "Network request exception: ${exception.message}.", cause = exception
+    description = "Networking error, cause: ${exception.message}",
+    cause = exception
   )
 
   object RunInMainThreadException : TwilioVerifySnaException(
-    message = "Can't run inside main thread.",
-    cause = null
+    description = "Can't run inside main thread."
   )
 
   data class UnexpectedException(
     private val exception: Exception
   ) : TwilioVerifySnaException(
-    message = "Unexpected error happened: ${exception.message}.",
-    cause = exception
+    description = "Unexpected error happened: ${exception.message}."
   )
 }

@@ -31,14 +31,15 @@ class ConcreteNetworkRequestProvider : NetworkRequestProvider {
 
   override fun performRequest(urlText: String): NetworkRequestResult {
     try {
-      val httpUrlConnection: HttpURLConnection?
       val url = URL(urlText)
-      httpUrlConnection = url.openConnection() as HttpURLConnection
+      val httpUrlConnection = url.openConnection() as HttpURLConnection
       val status = httpUrlConnection.responseCode
       val message = obtainResponseMessage(httpUrlConnection)
       return NetworkRequestResult(status, message).also {
         httpUrlConnection.disconnect()
       }
+    } catch (noResultFromUrl: TwilioVerifySnaException.NoResultFromUrl) {
+      throw noResultFromUrl
     } catch (exception: Exception) {
       throw TwilioVerifySnaException.NetworkRequestException(exception)
     }
@@ -54,6 +55,9 @@ class ConcreteNetworkRequestProvider : NetworkRequestProvider {
     var currentLine: String?
     while (bufferedReader.readLine().also { currentLine = it } != null) {
       message += currentLine
+    }
+    if (message.isEmpty()) {
+      throw TwilioVerifySnaException.NoResultFromUrl
     }
     return message
   }
