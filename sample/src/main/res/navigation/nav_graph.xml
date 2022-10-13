@@ -12,7 +12,16 @@
       tools:layout="@layout/fragment_welcome">
     <action
         android:id="@+id/action_welcomeFragment_to_verifyingFragment"
-        app:destination="@id/verifyingFragment" />
+        app:destination="@id/verifyingFragment" >
+      <argument
+          android:name="phoneNumber"
+          app:argType="string"
+          app:nullable="false" />
+      <argument
+          android:name="backendUrl"
+          app:argType="string"
+          app:nullable="false" />
+    </action>
   </fragment>
   <fragment
       android:id="@+id/verificationFailedFragment"
@@ -24,6 +33,14 @@
       android:name="com.twilio.sample.VerifyingFragment"
       android:label="fragment_verifying"
       tools:layout="@layout/fragment_verifying">
+    <argument
+        android:name="phoneNumber"
+        app:argType="string"
+        app:nullable="false" />
+    <argument
+        android:name="backendUrl"
+        app:argType="string"
+        app:nullable="false" />
     <action
         android:id="@+id/action_verifyingFragment_to_verificationFailedFragment"
         app:destination="@id/verificationFailedFragment"

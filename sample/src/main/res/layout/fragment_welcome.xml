@@ -76,6 +76,7 @@
       style="@style/loginExperimentEditText"
       android:layout_marginTop="12dp"
       android:hint="@string/country"
+      android:text="+1"
       />
 
   <EditText

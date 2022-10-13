@@ -51,7 +51,7 @@
   <TextView
       android:id="@+id/titleText"
       style="@style/TextView.Bold"
-      android:layout_width="wrap_content"
+      android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:text="@string/successful_verification"
       android:textSize="32sp"
@@ -62,6 +62,7 @@
       android:layout_marginTop="12dp"
       android:layout_marginStart="16dp"
       android:layout_marginEnd="16dp"
+      android:singleLine="false"
       />
 
   <TextView

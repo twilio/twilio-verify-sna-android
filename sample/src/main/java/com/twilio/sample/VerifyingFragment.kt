@@ -20,16 +20,32 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.navigation.findNavController
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
+import com.twilio.sample.data.SampleRepository
 import com.twilio.sample.databinding.FragmentVerifyingBinding
+import com.twilio.verify_sna.ProcessUrlResult
+import com.twilio.verify_sna.TwilioVerifySna
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class VerifyingFragment : Fragment() {
 
   private lateinit var binding: FragmentVerifyingBinding
 
+  private val args: VerifyingFragmentArgs by navArgs()
+
+  // Create TwilioVerifySna instance using builder
+  private val twilioVerifySna: TwilioVerifySna by lazy {
+    TwilioVerifySna.Builder(requireContext()).build()
+  }
+
   override fun onCreateView(
-    inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
+    inflater: LayoutInflater,
+    container: ViewGroup?,
+    savedInstanceState: Bundle?
   ): View {
     binding = FragmentVerifyingBinding.inflate(inflater, container, false)
     return binding.root
@@ -39,16 +55,52 @@ class VerifyingFragment : Fragment() {
     binding.backButton.setOnClickListener {
       findNavController().popBackStack()
     }
+    // Start verifying the user after the view setup is done
+    invokeVerifySna()
+  }
 
-    // todo: call verify sna here
-    binding.success.setOnClickListener {
-      val action =
-        VerifyingFragmentDirections.actionVerifyingFragmentToVerificationSuccessfulFragment()
-      view.findNavController().navigate(action)
+  private fun invokeVerifySna() {
+    lifecycleScope.launch {
+      // Switching to a background thread
+      val snaUrl = withContext(Dispatchers.IO) {
+        // Get SNA URL from Backend URL sending the phone number
+        SampleRepository.getSnaUrl(
+          args.backendUrl, "+1${args.phoneNumber}"
+        )
+      }
+      if (snaUrl.isNullOrEmpty()) {
+        onFail()
+        return@launch
+      }
+      // Switching to a background thread
+      val result = withContext(Dispatchers.IO) {
+        // Consume SNA URL using the SDK
+        twilioVerifySna.processUrl(snaUrl)
+      }
+      // Validate the result
+      if (result is ProcessUrlResult.Success) {
+        onSuccess()
+      } else {
+        // The validation gets a result equals to ProcessUrlResult.Fail
+        onFail()
+      }
     }
-    binding.fail.setOnClickListener {
-      val action = VerifyingFragmentDirections.actionVerifyingFragmentToVerificationFailedFragment()
-      view.findNavController().navigate(action)
-    }
+  }
+
+  /**
+   * Redirect to successful validation screen
+   */
+  private fun onSuccess() {
+    val action =
+      VerifyingFragmentDirections.actionVerifyingFragmentToVerificationSuccessfulFragment()
+    findNavController().navigate(action)
+  }
+
+  /**
+   * Redirect to failed validation screen
+   */
+  private fun onFail() {
+    val action = VerifyingFragmentDirections.actionVerifyingFragmentToVerificationFailedFragment()
+    findNavController().navigate(action)
   }
 }
