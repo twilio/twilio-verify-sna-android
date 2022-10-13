@@ -21,4 +21,38 @@
     <item name="android:layout_marginStart">@dimen/marginNormal</item>
     <item name="android:layout_marginEnd">@dimen/marginNormal</item>
   </style>
+
+  <style name="TextView" parent="Widget.MaterialComponents.TextView">
+    <item name="android:textColor">@android:color/black</item>
+    <item name="android:fontFamily">@font/inter_regular</item>
+  </style>
+
+  <style name="TextView.StandardSize">
+    <item name="android:textSize">16sp</item>
+    <item name="android:fontFamily">@font/inter_medium</item>
+  </style>
+
+  <style name="TextView.Bold">
+    <item name="android:fontFamily">@font/inter_bold</item>
+  </style>
+
+  <style name="TextView.SmallSize">
+    <item name="android:textSize">14sp</item>
+  </style>
+
+  <style name="TextView.SmallSize.Bold">
+    <item name="android:textStyle">bold</item>
+    <item name="android:fontFamily">@font/inter_bold</item>
+  </style>
+
+  <style name="loginExperimentEditText">
+    <item name="android:background">@drawable/edit_text_border</item>
+    <item name="android:paddingTop">8dp</item>
+    <item name="android:paddingBottom">8dp</item>
+    <item name="android:paddingStart">4dp</item>
+    <item name="android:paddingEnd">4dp</item>
+    <item name="android:textAlignment">center</item>
+    <item name="android:textSize">18sp</item>
+    <item name="android:textColor">@color/black</item>
+  </style>
 </resources>

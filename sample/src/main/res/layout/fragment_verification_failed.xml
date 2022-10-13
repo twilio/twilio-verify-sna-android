@@ -15,8 +15,55 @@
   ~ limitations under the License.
   -->
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:padding="16dp"
     >
+
+  <TextView
+      android:id="@+id/pill"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:background="@drawable/rounded_pilot_background"
+      android:drawablePadding="4dp"
+      android:padding="3dp"
+      android:text="@string/test_app_pill"
+      android:textColor="@color/deep_purple_500"
+      app:layout_constraintBottom_toTopOf="@id/titleText"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toTopOf="parent"
+      app:layout_constraintVertical_chainStyle="packed"
+      app:drawableStartCompat="@drawable/ic_pilot"
+      style="@style/TextView.SmallSize.Bold"
+      />
+
+
+  <TextView
+      android:id="@+id/titleText"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="12dp"
+      android:text="@string/verification_failed"
+      android:textSize="32sp"
+      app:layout_constraintBottom_toTopOf="@id/descriptionText"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@id/pill"
+      app:layout_constraintVertical_chainStyle="packed"
+      style="@style/TextView.Bold"
+      />
+
+  <TextView
+      android:id="@+id/descriptionText"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="12dp"
+      android:text="@string/verification_failed_description"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@+id/titleText"
+      app:layout_constraintVertical_chainStyle="packed"
+      style="@style/TextView.StandardSize"
+      />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
