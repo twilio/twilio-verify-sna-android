@@ -13,20 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.twilio.sample
 
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
-import com.twilio.sample.databinding.ActivityMainBinding
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.fragment.app.Fragment
+import com.twilio.sample.databinding.FragmentVerifyingBinding
 
-class MainActivity : AppCompatActivity() {
+class VerifyingFragment : Fragment() {
 
-  private lateinit var binding: ActivityMainBinding
+  private lateinit var binding: FragmentVerifyingBinding
 
-  override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
-    binding = ActivityMainBinding.inflate(layoutInflater)
-    setContentView(binding.root)
+  override fun onCreateView(
+    inflater: LayoutInflater, container: ViewGroup?,
+    savedInstanceState: Bundle?
+  ): View {
+    binding = FragmentVerifyingBinding.inflate(inflater, container, false)
+    return binding.root
   }
 }
