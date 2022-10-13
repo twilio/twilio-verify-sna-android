@@ -20,49 +20,16 @@
     android:layout_height="match_parent"
     >
 
-  <Button
-      android:id="@+id/verifySnaUrlButton"
+  <androidx.fragment.app.FragmentContainerView
+      android:id="@+id/nav_host_fragment"
+      android:name="androidx.navigation.fragment.NavHostFragment"
       android:layout_width="0dp"
-      android:layout_height="wrap_content"
-      android:text="@string/verify"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toBottomOf="@id/snaUrlField"
-      style="@style/formElement"
-      />
-
-  <EditText
-      android:id="@+id/snaUrlField"
-      android:layout_width="0dp"
-      android:layout_height="wrap_content"
-      android:singleLine="true"
-      android:text="@string/sampleSnaUrl"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintStart_toStartOf="parent"
+      android:layout_height="0dp"
+      app:layout_constraintLeft_toLeftOf="parent"
+      app:layout_constraintRight_toRightOf="parent"
       app:layout_constraintTop_toTopOf="parent"
-      style="@style/formElement"
-      />
-
-  <ProgressBar
-      android:id="@+id/progressBar"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:visibility="gone"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toBottomOf="@+id/verifySnaUrlButton"
-      style="@style/formElement"
-      />
-
-  <TextView
-      android:id="@+id/result"
-      android:layout_width="0dp"
-      android:layout_height="wrap_content"
-      android:visibility="gone"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toBottomOf="@+id/verifySnaUrlButton"
-      style="@style/formElement"
-      />
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:defaultNavHost="true"
+      app:navGraph="@navigation/nav_graph" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:padding="16dp"
+    >
+
+  <TextView
+      android:id="@+id/pill"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:background="@drawable/rounded_pilot_background"
+      android:drawablePadding="4dp"
+      android:text="@string/test_app_with_versions_pill"
+      android:textColor="@color/deep_purple_500"
+      app:layout_constraintBottom_toTopOf="@id/titleText"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toTopOf="parent"
+      app:drawableStartCompat="@drawable/ic_pilot"
+      style="@style/TextView.SmallSize.Bold"
+      android:padding="3dp"
+      app:layout_constraintVertical_chainStyle="packed"
+      />
+
+
+  <TextView
+      android:id="@+id/titleText"
+      style="@style/TextView.Bold"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="@string/welcome"
+      android:textSize="32sp"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@id/pill"
+      app:layout_constraintBottom_toTopOf="@id/descriptionText"
+      app:layout_constraintVertical_chainStyle="packed"
+      android:layout_marginTop="12dp"
+      />
+
+  <TextView
+      android:id="@+id/descriptionText"
+      style="@style/TextView.StandardSize"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="@string/sample_app_description"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@+id/titleText"
+      app:layout_constraintBottom_toTopOf="@id/countryCodeSpinner"
+      app:layout_constraintVertical_chainStyle="packed"
+      android:layout_marginTop="12dp"
+      />
+
+  <TextView
+      android:id="@+id/countryCodeSpinner"
+      android:layout_width="120dp"
+      android:layout_height="wrap_content"
+      android:background="@drawable/spinner_border"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@id/descriptionText"
+      app:layout_constraintBottom_toTopOf="@id/backendUrlField"
+      style="@style/loginExperimentEditText"
+      android:layout_marginTop="12dp"
+      android:hint="@string/country"
+      android:text="+1"
+      />
+
+  <EditText
+      android:id="@+id/phoneNumberField"
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      android:layout_marginStart="8dp"
+      android:inputType="phone"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toEndOf="@id/countryCodeSpinner"
+      app:layout_constraintTop_toTopOf="@id/countryCodeSpinner"
+      style="@style/loginExperimentEditText"
+      app:layout_constraintVertical_chainStyle="packed"
+      android:hint="@string/phone_number"
+      android:text="1"
+      />
+
+  <EditText
+      android:id="@+id/backendUrlField"
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="12dp"
+      android:inputType="textUri"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@id/countryCodeSpinner"
+      app:layout_constraintBottom_toTopOf="@id/verifySnaUrlButton"
+      style="@style/loginExperimentEditText"
+      app:layout_constraintVertical_chainStyle="packed"
+      android:hint="@string/backend_url"
+      android:text="1"
+      />
+
+  <Button
+      android:id="@+id/verifySnaUrlButton"
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      android:text="@string/submit"
+      android:textAllCaps="false"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintBottom_toTopOf="@id/footerText"
+      android:layout_marginBottom="10dp"
+      />
+
+  <TextView
+      android:id="@+id/footerText"
+      style="@style/TextView.SmallSize"
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      android:background="@drawable/rounded_ghost_white_background"
+      android:paddingTop="6dp"
+      android:paddingStart="12dp"
+      android:paddingEnd="12dp"
+      android:paddingBottom="6dp"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      android:text="@string/submit_info"
+      />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

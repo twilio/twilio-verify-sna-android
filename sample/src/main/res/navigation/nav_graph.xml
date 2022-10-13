@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/welcomeFragment">
+
+  <fragment
+      android:id="@+id/welcomeFragment"
+      android:name="com.twilio.sample.ui.WelcomeFragment"
+      android:label="fragment_welcome"
+      tools:layout="@layout/fragment_welcome" >
+    <action
+        android:id="@+id/action_welcomeFragment_to_verifyingFragment"
+        app:destination="@id/verifyingFragment"
+        app:popExitAnim="@android:anim/slide_out_right"/>
+  </fragment>
+  <fragment
+      android:id="@+id/verificationFailedFragment"
+      android:name="com.twilio.sample.ui.VerificationFailedFragment"
+      android:label="fragment_verification_failed"
+      tools:layout="@layout/fragment_verification_failed" />
+  <fragment
+      android:id="@+id/verifyingFragment"
+      android:name="com.twilio.sample.ui.VerifyingFragment"
+      android:label="fragment_verifying"
+      tools:layout="@layout/fragment_verifying" >
+    <action
+        android:id="@+id/action_verifyingFragment_to_verificationFailedFragment"
+        app:destination="@id/verificationFailedFragment"
+        app:popUpTo="@id/verifyingFragment"
+        app:popUpToInclusive="true"/>
+    <action
+        android:id="@+id/action_verifyingFragment_to_verificationSuccessfulFragment"
+        app:destination="@id/verificationSuccessfulFragment"
+        app:popUpTo="@id/verifyingFragment"
+        app:popUpToInclusive="true"/>
+  </fragment>
+  <fragment
+      android:id="@+id/verificationSuccessfulFragment"
+      android:name="com.twilio.sample.ui.VerificationSuccessfulFragment"
+      android:label="fragment_verification_successful"
+      tools:layout="@layout/fragment_verification_successful" />
+</navigation>

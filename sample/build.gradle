@@ -17,6 +17,9 @@
 plugins {
   id 'com.android.application'
   id 'org.jetbrains.kotlin.android'
+  id 'androidx.navigation.safeargs'
+  id 'kotlin-kapt'
+  id 'com.google.dagger.hilt.android'
 }
 
 android {
@@ -24,7 +27,7 @@ android {
 
   defaultConfig {
     applicationId "com.twilio.sample"
-    minSdk 21
+    minSdk 23
     targetSdk 32
     versionCode 1
     versionName "1.0"
@@ -54,8 +57,19 @@ dependencies {
   implementation 'androidx.core:core-ktx:1.8.0'
   implementation 'com.google.android.material:material:1.6.1'
   implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
-  implementation 'androidx.navigation:navigation-ui-ktx:2.5.0'
   testImplementation 'junit:junit:4.13.2'
   androidTestImplementation 'androidx.test.ext:junit:1.1.3'
   implementation project(path: ':verify_sna')
+
+  def nav_version = "2.5.2"
+  implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
+  implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
+
+  def hilt_version = "2.44"
+  implementation "com.google.dagger:hilt-android:$hilt_version"
+  kapt "com.google.dagger:hilt-compiler:$hilt_version"
+}
+
+kapt {
+  correctErrorTypes true
 }
