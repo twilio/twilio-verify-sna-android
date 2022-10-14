@@ -27,6 +27,9 @@ import androidx.navigation.fragment.findNavController
 import com.twilio.sample.databinding.FragmentWelcomeBinding
 import java.lang.reflect.Method
 
+private const val PHONE_NUMBER_KEY = "phoneNumber"
+private const val BACKEND_URL_KEY = "backendUrl"
+
 class WelcomeFragment : Fragment() {
 
   private lateinit var binding: FragmentWelcomeBinding
@@ -42,9 +45,16 @@ class WelcomeFragment : Fragment() {
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
+    readValuesFromPreferences()
     binding.verifySnaUrlButton.setOnClickListener {
       submit()
     }
+  }
+
+  private fun readValuesFromPreferences() {
+    val preferences = requireActivity().getPreferences(Context.MODE_PRIVATE) ?: return
+    binding.phoneNumberField.setText(preferences.getString(PHONE_NUMBER_KEY, ""))
+    binding.backendUrlField.setText(preferences.getString(BACKEND_URL_KEY, ""))
   }
 
   private fun submit() {
@@ -55,6 +65,8 @@ class WelcomeFragment : Fragment() {
       showErrorMessage(R.string.missing_field_error)
       return
     }
+    // save in cache the phone number and backend URL
+    saveInPreferences(phoneNumber, backendUrl)
     if (!hasCellularCoverage()) {
       showErrorMessage(R.string.cellular_network_required)
       return
@@ -94,6 +106,15 @@ class WelcomeFragment : Fragment() {
     } catch (exception: Exception) {
       exception.printStackTrace()
       false
+    }
+  }
+
+  private fun saveInPreferences(phoneNumber: String, backendUrl: String) {
+    val preferences = requireActivity().getPreferences(Context.MODE_PRIVATE) ?: return
+    with(preferences.edit()) {
+      putString(PHONE_NUMBER_KEY, phoneNumber)
+      putString(BACKEND_URL_KEY, backendUrl)
+      apply()
     }
   }
 }

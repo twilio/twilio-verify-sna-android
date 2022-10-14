@@ -64,9 +64,14 @@ class VerifyingFragment : Fragment() {
       // Switching to a background thread
       val snaUrl = withContext(Dispatchers.IO) {
         // Get SNA URL from Backend URL sending the phone number
-        SampleRepository.getSnaUrl(
-          args.backendUrl, "+1${args.phoneNumber}"
-        )
+        try {
+          SampleRepository.getSnaUrl(
+            args.backendUrl, "+1${args.phoneNumber}"
+          )
+        } catch (e: Exception) {
+          e.printStackTrace()
+          null
+        }
       }
       if (snaUrl.isNullOrEmpty()) {
         onFail()
