@@ -28,7 +28,9 @@ class VerificationSuccessfulFragment : Fragment() {
   private lateinit var binding: FragmentVerificationSuccessfulBinding
 
   override fun onCreateView(
-    inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
+    inflater: LayoutInflater,
+    container: ViewGroup?,
+    savedInstanceState: Bundle?
   ): View {
     binding = FragmentVerificationSuccessfulBinding.inflate(inflater, container, false)
     return binding.root
