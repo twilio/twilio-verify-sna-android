@@ -21,7 +21,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
-import com.twilio.sample.databinding.FragmentVerificationSuccessfulBinding
+import com.twilio.verify_sna.sample.databinding.FragmentVerificationSuccessfulBinding
 
 class VerificationSuccessfulFragment : Fragment() {
 

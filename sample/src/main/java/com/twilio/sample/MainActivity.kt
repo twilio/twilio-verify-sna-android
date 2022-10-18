@@ -19,7 +19,7 @@ package com.twilio.sample
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
-import com.twilio.sample.databinding.ActivityMainBinding
+import com.twilio.verify_sna.sample.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
 
