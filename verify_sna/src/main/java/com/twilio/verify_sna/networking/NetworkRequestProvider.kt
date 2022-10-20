@@ -56,9 +56,6 @@ class ConcreteNetworkRequestProvider : NetworkRequestProvider {
     while (bufferedReader.readLine().also { currentLine = it } != null) {
       message += currentLine
     }
-    if (message.isEmpty()) {
-      throw TwilioVerifySnaException.NoResultFromUrl
-    }
     return message
   }
 }

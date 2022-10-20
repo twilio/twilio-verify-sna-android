@@ -66,7 +66,9 @@ class TwilioVerifySnaTest {
   @Test
   fun `Process an Url returns Success result`() {
     runBlocking {
-      val networkRequestResult: NetworkRequestResult = mockk()
+      val networkRequestResult = NetworkRequestResult(
+        200, "ErrorCode=0&ErrorDescription=Success&Carrier=VZW"
+      )
       val url = "https://www.test.com"
 
       coEvery { requestManager.processUrl(url) } returns networkRequestResult
@@ -135,11 +137,32 @@ class TwilioVerifySnaTest {
   }
 
   @Test
-  fun `The request receives a null response`() {
+  fun `The request receives an empty response`() {
     runBlocking {
       val url = "https://www.test.com"
 
-      coEvery { requestManager.processUrl(url) } throws TwilioVerifySnaException.NoResultFromUrl
+      coEvery { requestManager.processUrl(url) } throws TwilioVerifySnaException.NoResultFromUrl("")
+
+      val processUrlResult = withContext(Dispatchers.IO) {
+        twilioVerifySna.processUrl(url)
+      }
+
+      val actualResult = processUrlResult as? ProcessUrlResult.Fail
+      Assert.assertNotNull(actualResult)
+      Assert.assertTrue(
+        actualResult?.twilioVerifySnaException is TwilioVerifySnaException.NoResultFromUrl
+      )
+    }
+  }
+
+  @Test
+  fun `The request gets invalid response`() {
+    runBlocking {
+      val url = "https://www.test.com"
+
+      coEvery { requestManager.processUrl(url) } returns NetworkRequestResult(
+        200, "ErrorCode=10&ErrorDescription=Failed&Carrier=VZW"
+      )
 
       val processUrlResult = withContext(Dispatchers.IO) {
         twilioVerifySna.processUrl(url)

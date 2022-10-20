@@ -59,37 +59,74 @@ class VerifyingFragment : Fragment() {
     invokeVerifySna()
   }
 
+  /**
+   * The function with perform the following tasks in order:
+   * 1. Get the SNA URL using the backend URL provided.
+   * 2. Invoke the SNA SDK to ask for verifying the phone number provided.
+   * 3. Check with the backend URL provided if verification was successful.
+   */
   private fun invokeVerifySna() {
     lifecycleScope.launch {
-      // Switching to a background thread
-      val snaUrl = withContext(Dispatchers.IO) {
-        // Get SNA URL from Backend URL sending the phone number
-        try {
-          SampleRepository.getSnaUrl(
-            args.backendUrl, "+1${args.phoneNumber}"
-          )
-        } catch (e: Exception) {
-          e.printStackTrace()
-          null
-        }
-      }
+      val snaUrl = getSnaUrl(args.backendUrl, args.phoneNumber)
       if (snaUrl.isNullOrEmpty()) {
         onFail()
         return@launch
       }
-      // Switching to a background thread
-      val result = withContext(Dispatchers.IO) {
-        // Consume SNA URL using the SDK
-        twilioVerifySna.processUrl(snaUrl)
-      }
+      val result = invokeSnaSdk(snaUrl)
       // Validate the result
-      if (result is ProcessUrlResult.Success) {
+      if (result !is ProcessUrlResult.Success) {
+        // The validation gets a result equals to ProcessUrlResult.Fail
+        onFail()
+        return@launch
+      }
+      val verificationStatus = checkVerificationStatus()
+      if (verificationStatus) {
+        // The phone number was verified
         onSuccess()
       } else {
-        // The validation gets a result equals to ProcessUrlResult.Fail
         onFail()
       }
     }
+  }
+
+  private suspend fun getSnaUrl(backendUrl: String, phoneNumber: String): String? {
+    // Switching to a background thread
+    val snaUrl = withContext(Dispatchers.IO) {
+      try {
+        // Get SNA URL from Backend URL sending the phone number
+        SampleRepository.getSnaUrl(
+          backendUrl, phoneNumber
+        )
+      } catch (e: Exception) {
+        // An exception was thrown getting the SNA URL
+        null
+      }
+    }
+    return snaUrl
+  }
+
+  private suspend fun invokeSnaSdk(snaUrl: String): ProcessUrlResult {
+    // Switching to a background thread
+    val result = withContext(Dispatchers.IO) {
+      // Consume SNA URL using the SDK
+      twilioVerifySna.processUrl(snaUrl)
+    }
+    return result
+  }
+
+  private suspend fun checkVerificationStatus(): Boolean {
+    // Switching to a background thread
+    val verificationStatus = withContext(Dispatchers.IO) {
+      try {
+        SampleRepository.checkVerification(
+          args.backendUrl, args.phoneNumber
+        )
+      } catch (e: Exception) {
+        // An exception was thrown checking the verification status}
+        false
+      }
+    }
+    return verificationStatus
   }
 
   /**
