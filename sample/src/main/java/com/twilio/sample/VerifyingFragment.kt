@@ -79,8 +79,8 @@ class VerifyingFragment : Fragment() {
         onFail()
         return@launch
       }
-      val verificationStatus = checkVerificationStatus()
-      if (verificationStatus) {
+      val verificationResult = checkVerification()
+      if (verificationResult) {
         // The phone number was verified
         onSuccess()
       } else {
@@ -114,9 +114,9 @@ class VerifyingFragment : Fragment() {
     return result
   }
 
-  private suspend fun checkVerificationStatus(): Boolean {
+  private suspend fun checkVerification(): Boolean {
     // Switching to a background thread
-    val verificationStatus = withContext(Dispatchers.IO) {
+    val verificationResult = withContext(Dispatchers.IO) {
       try {
         SampleRepository.checkVerification(
           args.backendUrl, args.phoneNumber
@@ -126,7 +126,7 @@ class VerifyingFragment : Fragment() {
         false
       }
     }
-    return verificationStatus
+    return verificationResult
   }
 
   /**
