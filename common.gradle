@@ -1,0 +1,23 @@
+/**
+ * These are only needed if we are publishing artifacts so we conditionally
+ * set them based on properties
+ */
+ext.artifactoryUsername = (project.hasProperty('artifactory.username') ?
+        project.property("artifactory.username") : '')
+ext.artifactoryPassword = (project.hasProperty('artifactory.password') ?
+        project.property("artifactory.password") : '')
+ext.artifactoryRepository = (project.hasProperty('artifactory.repository') ?
+        project.property("artifactory.repository") : '')
+
+ext.generateVersionName = {
+    def version = "${versionMajor}.${versionMinor}.${versionPatch}"
+    println "Version name: " + version
+    return version
+}
+
+ext.generateVersionCode = {
+    def version = "${versionMajor}${versionMinor}${versionPatch}"
+    def code = version.toString() as int
+    println "Version code: " + code
+    return code
+}

@@ -16,11 +16,13 @@
 
 buildscript {
   repositories {
+    mavenCentral()
     google()
   }
   dependencies {
     def nav_version = "2.5.2"
     classpath "androidx.navigation:navigation-safe-args-gradle-plugin:$nav_version"
+    classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4.28.2"
   }
 }
 
@@ -34,8 +36,32 @@ plugins {
 
 allprojects {
   apply plugin: "org.jlleitschuh.gradle.ktlint"
+  apply from: "$rootProject.projectDir/common.gradle"
+  repositories {
+    mavenCentral()
+    google()
+  }
 }
 
 task clean(type: Delete) {
   delete rootProject.buildDir
+}
+
+task artifactoryLibraryReleaseUpload(type: GradleBuild) {
+  description = 'Publish Verify SNA SDK to internal artifactory'
+  group = 'Publishing'
+  tasks = [':verify_sna:assembleRelease', ':verify_sna:artifactoryPublish']
+  startParameter.projectProperties += gradle.startParameter.projectProperties + [
+      'artifactory.username': getProjectProperty("ARTIFACTORY_USER"),
+      'artifactory.password':getProjectProperty("ARTIFACTORY_PASSWORD"),
+      'artifactory.repository': 'internal-releases'
+  ]
+}
+
+/*
+ * Check for the property in the project followed by the property in the environment
+ */
+String getProjectProperty(prop) {
+  String value = project.hasProperty(prop) ? project.property(prop) : System.getenv(prop)
+  return value != null ? value : ""
 }
