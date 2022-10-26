@@ -6,7 +6,7 @@ data class NetworkRequestResult(
    */
   val status: Int,
   /**
-   * Property used for debug only
+   * Contains the result message of the verification
    */
   val message: String?
 )

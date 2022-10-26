@@ -22,8 +22,8 @@ sealed class TwilioVerifySnaException(
   cause: Exception? = null
 ) : Exception(
   """
-    $description.
-    TechnicalError: ${technicalError ?: "Undefined"}.
+    $description
+    TechnicalError: ${technicalError ?: "Undefined"}
   """.trimIndent(),
   cause
 ) {
@@ -37,8 +37,8 @@ sealed class TwilioVerifySnaException(
     technicalError = "ConnectivityManager established that a cellular network is not available, running on a simulator or a device with no sim card is no supported."
   )
 
-  object NoResultFromUrl : TwilioVerifySnaException(
-    description = "Unable to get a valid result from the requested URL.",
+  data class NoResultFromUrl(private val result: String) : TwilioVerifySnaException(
+    description = "Unable to get a valid result from the requested URL ($result).",
     technicalError = "Unable to get a redirection path or a result path from the URL, probably the SNAURL is corrupted (or maybe expired)."
   )
 

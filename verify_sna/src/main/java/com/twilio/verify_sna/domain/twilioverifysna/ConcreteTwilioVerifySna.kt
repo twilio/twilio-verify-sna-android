@@ -23,6 +23,11 @@ import com.twilio.verify_sna.TwilioVerifySna
 import com.twilio.verify_sna.common.TwilioVerifySnaException
 import com.twilio.verify_sna.domain.requestmanager.RequestManager
 
+/**
+ * Constant used for validating the SNA URL results, this may change if the provider changes the implementation.
+ */
+private const val SUCCESS_PATH = "ErrorCode=0&ErrorDescription=Success"
+
 class ConcreteTwilioVerifySna(
   private val requestManager: RequestManager
 ) : TwilioVerifySna {
@@ -36,11 +41,19 @@ class ConcreteTwilioVerifySna(
         throw TwilioVerifySnaException.RunInMainThreadException
       }
       val snaResponse = requestManager.processUrl(snaUrl)
-      ProcessUrlResult.Success(snaResponse)
+      if (isMessageValid(snaResponse.message)) {
+        return ProcessUrlResult.Success(snaResponse)
+      }
+      throw TwilioVerifySnaException.NoResultFromUrl(snaResponse.message.toString())
     } catch (twilioVerifySnaException: TwilioVerifySnaException) {
       ProcessUrlResult.Fail(twilioVerifySnaException)
     } catch (exception: Exception) {
       ProcessUrlResult.Fail(TwilioVerifySnaException.UnexpectedException(exception))
     }
+  }
+
+  private fun isMessageValid(message: String?): Boolean {
+    message ?: return false
+    return message.contains(SUCCESS_PATH)
   }
 }
