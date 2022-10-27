@@ -49,13 +49,11 @@ android {
 }
 
 task sourcesJar(type: Jar) {
-  // Not including a from property to point to our source dirs will cause an empty sources jar
-  // to be created, which is what we want since this SDK is closed source at the moment
   classifier = 'sources'
 }
 
 task javadoc(type: Javadoc) {
-  // Excluding all files that are in our internal package
+  // Exclude files that are in the internal package
   exclude "**/internal/**"
   source = android.sourceSets.main.java.srcDirs
   classpath += project.files(android.getBootClasspath().join(File.pathSeparator))

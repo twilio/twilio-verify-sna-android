@@ -1,6 +1,5 @@
 /**
- * These are only needed if we are publishing artifacts so we conditionally
- * set them based on properties
+ * Properties for publishing artifacts
  */
 ext.artifactoryUsername = (project.hasProperty('artifactory.username') ?
         project.property("artifactory.username") : '')
