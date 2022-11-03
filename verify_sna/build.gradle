@@ -19,6 +19,9 @@ plugins {
   id 'org.jetbrains.kotlin.android'
 }
 
+apply plugin: 'com.jfrog.artifactory'
+apply plugin: 'maven-publish'
+
 android {
   compileSdk 32
 
@@ -42,6 +45,62 @@ android {
   }
   kotlinOptions {
     jvmTarget = '1.8'
+  }
+}
+
+task sourcesJar(type: Jar) {
+  classifier = 'sources'
+}
+
+task javadoc(type: Javadoc) {
+  // Exclude files that are in the internal package
+  exclude "**/internal/**"
+  source = android.sourceSets.main.java.srcDirs
+  classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+  failOnError false
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+  classifier = 'javadoc'
+  from javadoc.destinationDir
+}
+
+publishing {
+  publications {
+    verifySnaAndroid(MavenPublication) {
+      groupId = 'com.twilio'
+      artifactId = 'twilio-verify-sna-android'
+      version = generateVersionName()
+      artifact("$buildDir/outputs/aar/${project.getName()}-release.aar")
+      artifact javadocJar
+      artifact sourcesJar
+      pom.withXml {
+        def dependenciesNode = asNode().appendNode('dependencies')
+        configurations.implementation.allDependencies.each {
+          def dependencyNode = dependenciesNode.appendNode('dependency')
+          dependencyNode.appendNode('groupId', it.group)
+          dependencyNode.appendNode('artifactId', it.name)
+          dependencyNode.appendNode('version', it.version)
+          dependencyNode.appendNode('scope', 'compile')
+        }
+      }
+    }
+  }
+}
+
+artifactory {
+  contextUrl = "https://twilio.jfrog.io/artifactory"
+
+  publish {
+    repository {
+      repoKey = artifactoryRepository
+      username = artifactoryUsername
+      password = artifactoryPassword
+    }
+    defaults {
+      publications ('verifySnaAndroid')
+      publishArtifacts = true
+    }
   }
 }
 
