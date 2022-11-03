@@ -54,7 +54,7 @@ task artifactoryLibraryReleaseUpload(type: GradleBuild) {
   startParameter.projectProperties += gradle.startParameter.projectProperties + [
       'artifactory.username': getProjectProperty("ARTIFACTORY_USER"),
       'artifactory.password':getProjectProperty("ARTIFACTORY_PASSWORD"),
-      'artifactory.repository': 'internal-releases'
+      'artifactory.repository': 'releases'
   ]
 }
 
