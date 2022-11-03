@@ -13,7 +13,6 @@
 - [Running the Sample Backend](#SampleBackend)
 - [Using the Sample App](#UsingSampleApp)
 - [Errors](#Errors)
-- [Validate SNA URL](#ValidateSNAURL)
 - [Contributing](#Contributing)
 - [License](#License)
 
@@ -45,30 +44,34 @@ Offical documentation will be added via Twilio docs once this project gets relea
 
 <a name='Installation'></a>
 ## Installation
-During the current phase of this project, only installation via Twilio Maven is supported.
+**Important note:**
+We are working on having the Twilio Verify SNA SDK artifact available in a repository manager.
 
-### Gradle
-1. Add Twilio Maven Repository in project level Gradle:
+Currently, it's possible to include the aar of the SDK including it as external package following the next steps:
+1. Clone the repo and open it in Android Studio.
+2. Generate the SDK aar file by building the project. The built file is located in:
+```
+/verify_sna/build/outputs/aar/
+```
+3. Put the aar file in `libs` folder of your app project (create the folder if it doesn't exist).
+4. On your app, in the project-level `build.gradle` file:
 ```
 allprojects {
     // ...
   repositories {
     // ...
-    mavenCentral()
-    maven {
-      url "https://twilio.jfrog.io/artifactory/internal-releases"
-      credentials {
-        username "YOUR_ARTIFACTORY_USER"
-        password "YOUR_ARTIFACTORY_PASSWORD"
-      }
+    flatDir {
+        dirs 'libs'
     }
   }
 }
 ```
-
-2. Add Verify SNA dependency implementation in module level Gradle:
+5. In the app-level `build.gradle` file add:
 ```
-implementation "com.twilio:twilio-verify-sna-android:X.Y.Z"
+dependencies {
+    // ...
+    implementation (name:'aar-name', ext:'aar')
+}
 ```
 
 <a name='SampleApp'></a>
@@ -120,11 +123,9 @@ The app will ask the network carrier if the provided phone number is the same us
 | RunInMainThreadException    | The SDK detected it was running in the main thread.  | The SDK is performing long-time tasks that can freeze or stop the app, it's required to run the SDK in a background thread.      |
 | UnexpectedException         | An unknown error was thrown.                         | Check the inner exception for more details.                                                                                      |
 
-<a name='ValidateSNAURL'></a>
-## Validate SNA URL
-
 <a name='Contributing'></a>
 ## Contributing
+This project welcomes contributions. Please check out our [Contributing guide](./CONTRIBUTING.md) to learn more on how to get started.
 
 <a name='License'></a>
 ## License
