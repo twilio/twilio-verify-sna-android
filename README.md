@@ -45,7 +45,8 @@ Offical documentation will be added via Twilio docs once this project gets relea
 <a name='Installation'></a>
 ## Installation
 **Important note:**
-We are working on having the Twilio Verify SNA SDK artifact available in a repository manager.
+
+We are working on having the Twilio Verify SNA SDK artifact available in a repository manager soon.
 
 Currently, it's possible to include the aar of the SDK including it as external package following the next steps:
 1. Clone the repo and open it in Android Studio.
