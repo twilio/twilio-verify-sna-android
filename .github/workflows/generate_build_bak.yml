@@ -1,17 +1,15 @@
 name: Generate Build
 
 on:
-  pull_request_review:
-    types:
-      - submitted
+  issue_comment:
+    types: [created]
 
 jobs:
   build:
-    if: startsWith(github.event.review.body, 'build')
     runs-on: ubuntu-latest
     steps:
       - name: echo comment
-        run: echo ${{github.event.review.body}}
+        run: echo ${{github.event.comment.body}}
 
       - name: Check out repository code
         uses: actions/checkout@v3
