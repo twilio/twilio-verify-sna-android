@@ -1,6 +1,8 @@
-name: Generate Build
+name: Generate Build bak
 
 on:
+  pull_request:
+    types: [opened]
   issue_comment:
     types: [created]
 
@@ -10,20 +12,3 @@ jobs:
     steps:
       - name: echo comment
         run: echo ${{github.event.comment.body}}
-
-      - name: Check out repository code
-        uses: actions/checkout@v3
-      - name: Setup Java
-        uses: actions/setup-java@v3
-        with:
-          distribution: temurin
-          java-version: 11
-      - name: Setup Gradle
-        uses: gradle/gradle-build-action@v2
-      - name: Run build with Gradle Wrapper
-        run: ./gradlew build
-      - name: Generate Artifact
-        run: ./gradlew artifactoryLibraryReleaseUpload
-        env:
-          ARTIFACTORY_USER: ${{ secrets.ARTIFACTORY_USER }}
-          ARTIFACTORY_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
