@@ -1,4 +1,4 @@
-name: Testing
+name: testing
 
 on:
   issue_comment
@@ -7,5 +7,5 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: echo comment
+      - name: echo-comment
         run: echo ${{github.event.issue.comment.body}}
