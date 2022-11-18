@@ -1,18 +1,14 @@
-name: Generate Build
+name: Generate build
 
 on:
-  pull_request_review:
-    types:
-      - submitted
+  push:
+    branches:
+      - 'main'
 
 jobs:
   build:
-    if: startsWith(github.event.review.body, 'build')
     runs-on: ubuntu-latest
     steps:
-      - name: echo comment
-        run: echo ${{github.event.review.body}}
-
       - name: Check out repository code
         uses: actions/checkout@v3
       - name: Setup Java
