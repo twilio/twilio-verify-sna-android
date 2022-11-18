@@ -1,0 +1,14 @@
+name: Testing
+
+on:
+  pull_request:
+    types: [opened]
+  issue_comment:
+    types: [created]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: echo comment
+        run: echo ${{github.event.comment.body}}
