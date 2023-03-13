@@ -16,6 +16,7 @@
 
 package com.twilio.verify_sna.networking
 
+import android.net.Network
 import com.twilio.verify_sna.common.TwilioVerifySnaException
 import java.io.BufferedReader
 import java.io.InputStreamReader
@@ -24,15 +25,15 @@ import java.net.URL
 
 interface NetworkRequestProvider {
 
-  fun performRequest(urlText: String): NetworkRequestResult
+  fun performRequest(urlText: String, network: Network): NetworkRequestResult
 }
 
 class ConcreteNetworkRequestProvider : NetworkRequestProvider {
 
-  override fun performRequest(urlText: String): NetworkRequestResult {
+  override fun performRequest(urlText: String, network: Network): NetworkRequestResult {
     try {
       val url = URL(urlText)
-      val httpUrlConnection = url.openConnection() as HttpURLConnection
+      val httpUrlConnection = network.openConnection(url) as HttpURLConnection
       httpUrlConnection.requestMethod = "POST"
       val status = httpUrlConnection.responseCode
       val message = obtainResponseMessage(httpUrlConnection)
