@@ -88,7 +88,7 @@ class ConcreteRequestManager(
       object : NetworkCallback() {
         override fun onAvailable(network: Network) {
           try {
-            val networkRequestResult = networkRequestProvider.performRequest(url)
+            val networkRequestResult = networkRequestProvider.performRequest(url, network)
             continuation.resume(networkRequestResult)
           } catch (networkRequestException: TwilioVerifySnaException.NetworkRequestException) {
             continuation.resumeWithException(
