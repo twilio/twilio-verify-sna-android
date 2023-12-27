@@ -18,6 +18,7 @@ package com.twilio.sample
 import android.content.Context
 import android.net.ConnectivityManager
 import android.os.Bundle
+import android.telephony.TelephonyManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -99,6 +100,11 @@ class WelcomeFragment : Fragment() {
    * Taken from https://stackoverflow.com/a/8243305
    */
   private fun isMobileDataEnabled(cm: ConnectivityManager): Boolean {
+    val telephonyManager = requireActivity().getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
+    if (telephonyManager.simState != TelephonyManager.SIM_STATE_READY) {
+      return false
+    }
+
     return try {
       val c = Class.forName(cm.javaClass.name)
       val m: Method = c.getDeclaredMethod("getMobileDataEnabled")
