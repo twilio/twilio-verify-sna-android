@@ -74,7 +74,7 @@ class WelcomeFragment : Fragment() {
       return
     }
     val action = WelcomeFragmentDirections.actionWelcomeFragmentToVerifyingFragment(
-      "$countryCode$phoneNumber", backendUrl
+      "+$countryCode$phoneNumber", backendUrl
     )
     findNavController().navigate(action)
   }
