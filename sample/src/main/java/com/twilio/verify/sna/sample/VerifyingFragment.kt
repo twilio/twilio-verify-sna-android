@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.twilio.sample
+package com.twilio.verify.sna.sample
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -23,7 +23,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import com.twilio.sample.data.SampleRepository
+import com.twilio.verify.sna.sample.data.SampleRepository
 import com.twilio.verify_sna.ProcessUrlResult
 import com.twilio.verify_sna.TwilioVerifySna
 import com.twilio.verify_sna.sample.databinding.FragmentVerifyingBinding
@@ -133,8 +133,8 @@ class VerifyingFragment : Fragment() {
    * Redirect to successful validation screen
    */
   private fun onSuccess() {
-    val action =
-      VerifyingFragmentDirections.actionVerifyingFragmentToVerificationSuccessfulFragment()
+    val action = VerifyingFragmentDirections
+      .actionVerifyingFragmentToVerificationSuccessfulFragment()
     findNavController().navigate(action)
   }
 
@@ -142,7 +142,8 @@ class VerifyingFragment : Fragment() {
    * Redirect to failed validation screen
    */
   private fun onFail() {
-    val action = VerifyingFragmentDirections.actionVerifyingFragmentToVerificationFailedFragment()
+    val action = VerifyingFragmentDirections
+      .actionVerifyingFragmentToVerificationFailedFragment()
     findNavController().navigate(action)
   }
 }

@@ -24,7 +24,7 @@ android {
   compileSdk 32
 
   defaultConfig {
-    applicationId "com.twilio.sample"
+    applicationId "com.twilio.verify.sna.sample"
     minSdk 23
     targetSdk 32
     versionCode generateVersionCode()

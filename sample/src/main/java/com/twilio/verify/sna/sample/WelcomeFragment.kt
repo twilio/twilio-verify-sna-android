@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.twilio.sample
+package com.twilio.verify.sna.sample
 
 import android.content.Context
 import android.net.ConnectivityManager
@@ -73,9 +73,10 @@ class WelcomeFragment : Fragment() {
       showErrorMessage(R.string.cellular_network_required)
       return
     }
-    val action = WelcomeFragmentDirections.actionWelcomeFragmentToVerifyingFragment(
-      "+$countryCode$phoneNumber", backendUrl
-    )
+    val action = WelcomeFragmentDirections
+      .actionWelcomeFragmentToVerifyingFragment(
+        "+$countryCode$phoneNumber", backendUrl
+      )
     findNavController().navigate(action)
   }
 

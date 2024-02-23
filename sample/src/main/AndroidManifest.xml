@@ -29,7 +29,7 @@
       android:supportsRtl="true"
       android:theme="@style/Theme.TwilioVerifySnaAndroid">
     <activity
-        android:name="com.twilio.sample.MainActivity"
+        android:name="com.twilio.verify.sna.sample.MainActivity"
         android:exported="true"
         android:theme="@style/Theme.TwilioVerifySnaAndroid">
       <intent-filter>

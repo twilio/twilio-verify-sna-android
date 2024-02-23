@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.twilio.sample
+package com.twilio.verify.sna.sample
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
