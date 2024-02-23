@@ -25,8 +25,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
-import com.twilio.verify_sna.sample.R
-import com.twilio.verify_sna.sample.databinding.FragmentWelcomeBinding
+import com.twilio.verify.sna.sample.databinding.FragmentWelcomeBinding
 import java.lang.reflect.Method
 
 private const val PHONE_NUMBER_KEY = "phoneNumber"

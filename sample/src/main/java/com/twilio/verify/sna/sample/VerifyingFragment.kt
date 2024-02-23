@@ -24,9 +24,9 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.twilio.verify.sna.sample.data.SampleRepository
+import com.twilio.verify.sna.sample.databinding.FragmentVerifyingBinding
 import com.twilio.verify_sna.ProcessUrlResult
 import com.twilio.verify_sna.TwilioVerifySna
-import com.twilio.verify_sna.sample.databinding.FragmentVerifyingBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
