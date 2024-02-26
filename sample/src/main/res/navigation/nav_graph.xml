@@ -22,7 +22,7 @@
 
   <fragment
       android:id="@+id/welcomeFragment"
-      android:name="com.twilio.sample.WelcomeFragment"
+      android:name="com.twilio.verify.sna.sample.WelcomeFragment"
       android:label="fragment_welcome"
       tools:layout="@layout/fragment_welcome">
     <action
@@ -40,12 +40,12 @@
   </fragment>
   <fragment
       android:id="@+id/verificationFailedFragment"
-      android:name="com.twilio.sample.VerificationFailedFragment"
+      android:name="com.twilio.verify.sna.sample.VerificationFailedFragment"
       android:label="fragment_verification_failed"
       tools:layout="@layout/fragment_verification_failed" />
   <fragment
       android:id="@+id/verifyingFragment"
-      android:name="com.twilio.sample.VerifyingFragment"
+      android:name="com.twilio.verify.sna.sample.VerifyingFragment"
       android:label="fragment_verifying"
       tools:layout="@layout/fragment_verifying">
     <argument
@@ -69,7 +69,7 @@
   </fragment>
   <fragment
       android:id="@+id/verificationSuccessfulFragment"
-      android:name="com.twilio.sample.VerificationSuccessfulFragment"
+      android:name="com.twilio.verify.sna.sample.VerificationSuccessfulFragment"
       android:label="fragment_verification_successful"
       tools:layout="@layout/fragment_verification_successful" />
 </navigation>

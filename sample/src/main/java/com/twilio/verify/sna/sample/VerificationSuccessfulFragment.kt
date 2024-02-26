@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.twilio.sample
+package com.twilio.verify.sna.sample
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -21,18 +21,18 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
-import com.twilio.verify_sna.sample.databinding.FragmentVerificationFailedBinding
+import com.twilio.verify.sna.sample.databinding.FragmentVerificationSuccessfulBinding
 
-class VerificationFailedFragment : Fragment() {
+class VerificationSuccessfulFragment : Fragment() {
 
-  private lateinit var binding: FragmentVerificationFailedBinding
+  private lateinit var binding: FragmentVerificationSuccessfulBinding
 
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
     savedInstanceState: Bundle?
   ): View {
-    binding = FragmentVerificationFailedBinding.inflate(inflater, container, false)
+    binding = FragmentVerificationSuccessfulBinding.inflate(inflater, container, false)
     return binding.root
   }
 

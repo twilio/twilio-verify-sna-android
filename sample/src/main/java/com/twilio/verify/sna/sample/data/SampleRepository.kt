@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.twilio.sample.data
+package com.twilio.verify.sna.sample.data
 
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory

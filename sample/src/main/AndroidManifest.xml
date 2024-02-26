@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Copyright (c) 2022 Twilio Inc.
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,11 +14,11 @@
   ~ limitations under the License.
   -->
 
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.twilio.verify.sna.sample">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.twilio.verify.sna.sample">
 
-  <uses-permission android:name="android.permission.INTERNET"/>
-  <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE"/>
+  <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
+
+  <uses-permission android:name="android.permission.INTERNET" />
 
   <application
       android:allowBackup="true"
@@ -29,7 +28,7 @@
       android:supportsRtl="true"
       android:theme="@style/Theme.TwilioVerifySnaAndroid">
     <activity
-        android:name="com.twilio.sample.MainActivity"
+        android:name="com.twilio.verify.sna.sample.MainActivity"
         android:exported="true"
         android:theme="@style/Theme.TwilioVerifySnaAndroid">
       <intent-filter>
@@ -38,5 +37,4 @@
       </intent-filter>
     </activity>
   </application>
-
 </manifest>

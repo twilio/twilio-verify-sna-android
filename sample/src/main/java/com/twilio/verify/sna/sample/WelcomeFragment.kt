@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.twilio.sample
+package com.twilio.verify.sna.sample
 
 import android.content.Context
 import android.net.ConnectivityManager
@@ -25,8 +25,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
-import com.twilio.verify_sna.sample.R
-import com.twilio.verify_sna.sample.databinding.FragmentWelcomeBinding
+import com.twilio.verify.sna.sample.databinding.FragmentWelcomeBinding
 import java.lang.reflect.Method
 
 private const val PHONE_NUMBER_KEY = "phoneNumber"
@@ -73,9 +72,10 @@ class WelcomeFragment : Fragment() {
       showErrorMessage(R.string.cellular_network_required)
       return
     }
-    val action = WelcomeFragmentDirections.actionWelcomeFragmentToVerifyingFragment(
-      "+$countryCode$phoneNumber", backendUrl
-    )
+    val action = WelcomeFragmentDirections
+      .actionWelcomeFragmentToVerifyingFragment(
+        "+$countryCode$phoneNumber", backendUrl
+      )
     findNavController().navigate(action)
   }
 
