@@ -105,7 +105,7 @@ class ConcreteRequestManager(
       }
 
       override fun onUnavailable() {
-        // todo
+        println("***onUnavailable***")
       }
     }
     connectivityManager.requestNetwork(
