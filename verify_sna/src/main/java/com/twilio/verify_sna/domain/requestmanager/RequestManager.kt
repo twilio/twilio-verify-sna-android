@@ -19,11 +19,14 @@ package com.twilio.verify_sna.domain.requestmanager
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.ConnectivityManager.NetworkCallback
+import android.net.LinkProperties
 import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
 import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
+import android.os.Handler
+import android.os.Looper
 import com.twilio.verify_sna.common.TwilioVerifySnaException
 import com.twilio.verify_sna.networking.NetworkRequestProvider
 import com.twilio.verify_sna.networking.NetworkRequestResult
@@ -36,12 +39,16 @@ import kotlin.coroutines.suspendCoroutine
 interface RequestManager {
 
   suspend fun processUrl(url: String): NetworkRequestResult
+
+  var logger: (String) -> Unit
 }
 
 class ConcreteRequestManager(
   private val context: Context,
   private val networkRequestProvider: NetworkRequestProvider
 ) : RequestManager {
+
+  override var logger: (String) -> Unit = { }
 
   override suspend fun processUrl(url: String): NetworkRequestResult {
     return suspendCoroutine { continuation ->
@@ -76,6 +83,25 @@ class ConcreteRequestManager(
     }
   }
 
+  private fun performRequest(
+    url: String,
+    network: Network,
+    continuation: Continuation<NetworkRequestResult>,
+    connectivityManager: ConnectivityManager,
+    networkCallback: NetworkCallback
+  ) {
+    try {
+      val networkRequestResult = networkRequestProvider.performRequest(url, network)
+      continuation.resume(networkRequestResult)
+    } catch (networkRequestException: TwilioVerifySnaException.NetworkRequestException) {
+      continuation.resumeWithException(
+        networkRequestException
+      )
+    } finally {
+      connectivityManager.unregisterNetworkCallback(networkCallback)
+    }
+  }
+
   private fun establishCellularConnection(
     connectivityManager: ConnectivityManager,
     url: String,
@@ -86,31 +112,68 @@ class ConcreteRequestManager(
       .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
       .addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED)
 
-    if (VERSION.SDK_INT >= VERSION_CODES.M) {
-      networkRequestBuilder.addCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
-    }
     val networkRequest = networkRequestBuilder.build()
     val networkCallback = object : NetworkCallback() {
       override fun onAvailable(network: Network) {
-        try {
-          val networkRequestResult = networkRequestProvider.performRequest(url, network)
-          continuation.resume(networkRequestResult)
-        } catch (networkRequestException: TwilioVerifySnaException.NetworkRequestException) {
-          continuation.resumeWithException(
-            networkRequestException
-          )
-        } finally {
-          connectivityManager.unregisterNetworkCallback(this)
+        super.onAvailable(network)
+        if (VERSION.SDK_INT < VERSION_CODES.M) {
+          performRequest(url, network, continuation, connectivityManager, this)
+        }
+      }
+
+      override fun onCapabilitiesChanged(
+        network: Network,
+        networkCapabilities: NetworkCapabilities
+      ) {
+        super.onCapabilitiesChanged(network, networkCapabilities)
+        if (VERSION.SDK_INT >= VERSION_CODES.M) {
+          if (networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)) {
+            performRequest(url, network, continuation, connectivityManager, this)
+          }
         }
       }
 
       override fun onUnavailable() {
-        println("***onUnavailable***")
+        super.onUnavailable()
+        logger("Network onUnavailable")
+      }
+
+      override fun onLosing(network: Network, maxMsToLive: Int) {
+        super.onLosing(network, maxMsToLive)
+        logger("Network onLosing")
+      }
+
+      override fun onLost(network: Network) {
+        super.onLost(network)
+        logger("Network onLost")
+      }
+
+      override fun onLinkPropertiesChanged(network: Network, linkProperties: LinkProperties) {
+        super.onLinkPropertiesChanged(network, linkProperties)
+        logger("Network onLinkPropertiesChanged")
+        logger("with network: " + network)
+        logger("with linkProperties: " + linkProperties)
+      }
+
+      override fun onBlockedStatusChanged(network: Network, blocked: Boolean) {
+        super.onBlockedStatusChanged(network, blocked)
+        logger("Network onBlockedStatusChanged")
       }
     }
-    connectivityManager.requestNetwork(
-      networkRequest,
-      networkCallback
-    )
+
+    try {
+      connectivityManager.requestNetwork(
+        networkRequest,
+        networkCallback
+      )
+    } catch (e: Exception) {
+      logger("Error requesting network in first try: " + e.message)
+      Handler(Looper.getMainLooper()).postDelayed({
+        connectivityManager.requestNetwork(
+          networkRequest,
+          networkCallback
+        )
+      }, 3_000)
+    }
   }
 }
