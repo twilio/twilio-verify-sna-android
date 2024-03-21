@@ -126,9 +126,12 @@ class ConcreteRequestManager(
         networkCapabilities: NetworkCapabilities
       ) {
         super.onCapabilitiesChanged(network, networkCapabilities)
+        logger("Network onCapabilitiesChanged")
         if (VERSION.SDK_INT >= VERSION_CODES.M) {
           if (networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)) {
             performRequest(url, network, continuation, connectivityManager, this)
+          } else {
+            logger("No NetworkCapabilities.NET_CAPABILITY_VALIDATED found")
           }
         }
       }
@@ -173,7 +176,7 @@ class ConcreteRequestManager(
           networkRequest,
           networkCallback
         )
-      }, 3_000)
+      }, 500)
     }
   }
 }
