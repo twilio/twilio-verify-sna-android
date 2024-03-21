@@ -22,6 +22,8 @@ import android.net.ConnectivityManager.NetworkCallback
 import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
+import android.os.Build.VERSION
+import android.os.Build.VERSION_CODES
 import com.twilio.verify_sna.common.TwilioVerifySnaException
 import com.twilio.verify_sna.networking.NetworkRequestProvider
 import com.twilio.verify_sna.networking.NetworkRequestResult
@@ -79,26 +81,36 @@ class ConcreteRequestManager(
     url: String,
     continuation: Continuation<NetworkRequestResult>
   ) {
-    val networkRequest = NetworkRequest.Builder()
+    val networkRequestBuilder = NetworkRequest.Builder()
       .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
       .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-      .build()
-    connectivityManager.requestNetwork(
-      networkRequest,
-      object : NetworkCallback() {
-        override fun onAvailable(network: Network) {
-          try {
-            val networkRequestResult = networkRequestProvider.performRequest(url, network)
-            continuation.resume(networkRequestResult)
-          } catch (networkRequestException: TwilioVerifySnaException.NetworkRequestException) {
-            continuation.resumeWithException(
-              networkRequestException
-            )
-          } finally {
-            connectivityManager.unregisterNetworkCallback(this)
-          }
+      .addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED)
+
+    if (VERSION.SDK_INT >= VERSION_CODES.M) {
+      networkRequestBuilder.addCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
+    }
+    val networkRequest = networkRequestBuilder.build()
+    val networkCallback = object : NetworkCallback() {
+      override fun onAvailable(network: Network) {
+        try {
+          val networkRequestResult = networkRequestProvider.performRequest(url, network)
+          continuation.resume(networkRequestResult)
+        } catch (networkRequestException: TwilioVerifySnaException.NetworkRequestException) {
+          continuation.resumeWithException(
+            networkRequestException
+          )
+        } finally {
+          connectivityManager.unregisterNetworkCallback(this)
         }
       }
+
+      override fun onUnavailable() {
+        // todo
+      }
+    }
+    connectivityManager.requestNetwork(
+      networkRequest,
+      networkCallback
     )
   }
 }
