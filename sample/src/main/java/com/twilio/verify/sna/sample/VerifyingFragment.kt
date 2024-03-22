@@ -162,6 +162,5 @@ class VerifyingFragment : Fragment() {
     } else {
       "$logValue\n$message"
     }
-    println(logValue)
   }
 }
