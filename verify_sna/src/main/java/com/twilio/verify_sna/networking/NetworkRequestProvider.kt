@@ -34,7 +34,7 @@ class ConcreteNetworkRequestProvider : NetworkRequestProvider {
     try {
       val url = URL(urlText)
       val httpUrlConnection = network.openConnection(url) as HttpURLConnection
-      httpUrlConnection.requestMethod = "POST"
+      httpUrlConnection.requestMethod = "GET"
       val status = httpUrlConnection.responseCode
       val message = obtainResponseMessage(httpUrlConnection)
       return NetworkRequestResult(status, message).also {

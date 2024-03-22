@@ -134,6 +134,7 @@ class VerifyingFragment : Fragment() {
         false
       }
     }
+    log("Check verification result: $verificationResult")
     return verificationResult
   }
 
