@@ -18,10 +18,14 @@ package com.twilio.verify_sna.networking
 
 import android.net.Network
 import com.twilio.verify_sna.common.TwilioVerifySnaException
-import java.io.BufferedReader
-import java.io.InputStreamReader
-import java.net.HttpURLConnection
-import java.net.URL
+import okhttp3.Call
+import okhttp3.Callback
+import okhttp3.OkHttpClient
+import okhttp3.Protocol
+import okhttp3.Request
+import okhttp3.Response
+import java.io.IOException
+import java.lang.Exception
 
 interface NetworkRequestProvider {
 
@@ -29,35 +33,22 @@ interface NetworkRequestProvider {
 }
 
 class ConcreteNetworkRequestProvider : NetworkRequestProvider {
-
-  override fun performRequest(urlText: String, network: Network): NetworkRequestResult {
-    try {
-      val url = URL(urlText)
-      val httpUrlConnection = network.openConnection(url) as HttpURLConnection
-      httpUrlConnection.requestMethod = "GET"
-      val status = httpUrlConnection.responseCode
-      val message = obtainResponseMessage(httpUrlConnection)
-      return NetworkRequestResult(status, message).also {
-        httpUrlConnection.disconnect()
-      }
-    } catch (noResultFromUrl: TwilioVerifySnaException.NoResultFromUrl) {
-      throw noResultFromUrl
-    } catch (exception: Exception) {
-      throw TwilioVerifySnaException.NetworkRequestException(exception)
+  override fun performRequest(
+    urlText: String,
+    network: Network
+  ): NetworkRequestResult {
+    val okHttpClient = OkHttpClient.Builder().socketFactory(network.socketFactory).protocols(
+      listOf(
+        Protocol.HTTP_1_1
+      )
+    ).build()
+    val request = Request.Builder().url(urlText).build()
+    val response = okHttpClient.newCall(request).execute()
+    if (response.isSuccessful) {
+      val status = response.code
+      val message = response.body?.string()
+      return NetworkRequestResult(status, message)
     }
-  }
-
-  /**
-   * Get String conversion of response, used for debug only.
-   * TODO: deserialize the response with an object
-   */
-  private fun obtainResponseMessage(httpURLConnection: HttpURLConnection): String {
-    val bufferedReader = BufferedReader(InputStreamReader(httpURLConnection.inputStream))
-    var message = ""
-    var currentLine: String?
-    while (bufferedReader.readLine().also { currentLine = it } != null) {
-      message += currentLine
-    }
-    return message
+    throw TwilioVerifySnaException.NetworkRequestException(Exception("SNA_URL wasn't successful"))
   }
 }
