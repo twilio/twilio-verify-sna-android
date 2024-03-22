@@ -18,13 +18,9 @@ package com.twilio.verify_sna.networking
 
 import android.net.Network
 import com.twilio.verify_sna.common.TwilioVerifySnaException
-import okhttp3.Call
-import okhttp3.Callback
 import okhttp3.OkHttpClient
 import okhttp3.Protocol
 import okhttp3.Request
-import okhttp3.Response
-import java.io.IOException
 import java.lang.Exception
 
 interface NetworkRequestProvider {

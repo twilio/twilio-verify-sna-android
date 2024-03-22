@@ -24,7 +24,6 @@ import retrofit2.http.FormUrlEncoded
 import retrofit2.http.POST
 import retrofit2.http.Url
 
-
 /**
  * Static repository to consume the provided URL
  */
