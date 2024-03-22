@@ -45,6 +45,10 @@ interface TwilioVerifySna {
       requestManager: RequestManager
     ) = apply { this.requestManager = requestManager }
 
+    fun logger(logger: (String) -> Unit) = apply {
+      requestManager.logger = logger
+    }
+
     /**
      * Builds an instance of TwilioVerifySna
      */
