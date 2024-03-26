@@ -19,11 +19,14 @@ package com.twilio.verify_sna.domain.requestmanager
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.ConnectivityManager.NetworkCallback
+import android.net.LinkProperties
 import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
 import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
+import android.os.Handler
+import android.os.Looper
 import com.twilio.verify_sna.common.TwilioVerifySnaException
 import com.twilio.verify_sna.networking.NetworkRequestProvider
 import com.twilio.verify_sna.networking.NetworkRequestResult
@@ -142,6 +145,33 @@ class ConcreteRequestManager(
           }
         }
       }
+
+      override fun onUnavailable() {
+        super.onUnavailable()
+        logger("Network onUnavailable")
+      }
+
+      override fun onLosing(network: Network, maxMsToLive: Int) {
+        super.onLosing(network, maxMsToLive)
+        logger("Network onLosing")
+      }
+
+      override fun onLost(network: Network) {
+        super.onLost(network)
+        logger("Network onLost")
+      }
+
+      override fun onLinkPropertiesChanged(network: Network, linkProperties: LinkProperties) {
+        super.onLinkPropertiesChanged(network, linkProperties)
+        logger("Network onLinkPropertiesChanged")
+        logger("with network: " + network)
+        logger("with linkProperties: " + linkProperties)
+      }
+
+      override fun onBlockedStatusChanged(network: Network, blocked: Boolean) {
+        super.onBlockedStatusChanged(network, blocked)
+        logger("Network onBlockedStatusChanged")
+      }
     }
 
     try {
@@ -151,6 +181,12 @@ class ConcreteRequestManager(
       )
     } catch (e: Exception) {
       logger("Error requesting network in first try: " + e.message)
+      Handler(Looper.getMainLooper()).postDelayed({
+        connectivityManager.requestNetwork(
+          networkRequest,
+          networkCallback
+        )
+      }, 500)
     }
   }
 }
