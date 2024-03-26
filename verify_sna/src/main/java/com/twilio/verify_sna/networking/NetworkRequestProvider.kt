@@ -21,7 +21,6 @@ import com.twilio.verify_sna.common.TwilioVerifySnaException
 import okhttp3.OkHttpClient
 import okhttp3.Protocol
 import okhttp3.Request
-import java.util.concurrent.TimeUnit
 
 interface NetworkRequestProvider {
 
@@ -34,10 +33,6 @@ class ConcreteNetworkRequestProvider : NetworkRequestProvider {
     network: Network
   ): NetworkRequestResult {
     val okHttpClient = OkHttpClient.Builder()
-      .connectTimeout(10, TimeUnit.SECONDS)
-      .writeTimeout(10, TimeUnit.SECONDS)
-      .readTimeout(10, TimeUnit.SECONDS)
-      .retryOnConnectionFailure(false)
       .socketFactory(network.socketFactory)
       .protocols(
         listOf(
