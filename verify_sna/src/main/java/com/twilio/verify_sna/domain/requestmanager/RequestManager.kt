@@ -94,6 +94,10 @@ class ConcreteRequestManager(
       continuation.resumeWithException(
         networkRequestException
       )
+    } catch (e: Exception) {
+      continuation.resumeWithException(
+        TwilioVerifySnaException.NetworkRequestException(e)
+      )
     } finally {
       connectivityManager.unregisterNetworkCallback(networkCallback)
     }
@@ -129,6 +133,12 @@ class ConcreteRequestManager(
             performRequest(url, network, continuation, connectivityManager, this)
           } else {
             logger("No NetworkCapabilities.NET_CAPABILITY_VALIDATED found")
+            connectivityManager.unregisterNetworkCallback(this)
+            continuation.resumeWithException(
+              TwilioVerifySnaException.NetworkRequestException(
+                Exception("No NetworkCapabilities.NET_CAPABILITY_VALIDATED found"),
+              )
+            )
           }
         }
       }
