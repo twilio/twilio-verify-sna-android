@@ -25,6 +25,8 @@ import android.net.NetworkCapabilities
 import android.net.NetworkRequest
 import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
+import android.os.Handler
+import android.os.Looper
 import com.twilio.verify_sna.common.TwilioVerifySnaException
 import com.twilio.verify_sna.networking.NetworkRequestProvider
 import com.twilio.verify_sna.networking.NetworkRequestResult
@@ -179,10 +181,12 @@ class ConcreteRequestManager(
       )
     } catch (e: Exception) {
       logger("Error requesting network in first try: " + e.message)
-      connectivityManager.requestNetwork(
-        networkRequest,
-        networkCallback
-      )
+      Handler(Looper.getMainLooper()).postDelayed({
+        connectivityManager.requestNetwork(
+          networkRequest,
+          networkCallback
+        )
+      }, 500)
     }
   }
 }
