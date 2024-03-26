@@ -18,7 +18,7 @@
   <string name="submit">Submit</string>
   <string name="welcome">Welcome!</string>
   <string name="test_app_pill">Test app</string>
-  <string name="test_app_with_versions_pill">Test app | SDK: 0.0.1 | SAMPLE: 0.0.3</string>
+  <string name="test_app_with_versions_pill">Test app | SDK: %s | SAMPLE: %s</string>
   <string name="sample_app_description">To get started, let\'s verify your phone number</string>
   <string name="submit_info">Once you provide the information, you can continue with the verification.</string>
   <string name="phone_number">Phone number</string>

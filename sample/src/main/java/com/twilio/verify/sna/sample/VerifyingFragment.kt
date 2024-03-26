@@ -37,9 +37,14 @@ class VerifyingFragment : Fragment() {
 
   private val args: VerifyingFragmentArgs by navArgs()
 
+  private var logValue: String = ""
+
   // Create TwilioVerifySna instance using builder
   private val twilioVerifySna: TwilioVerifySna by lazy {
-    TwilioVerifySna.Builder(requireContext()).build()
+    TwilioVerifySna
+      .Builder(requireContext())
+      .logger { message -> log(message) }
+      .build()
   }
 
   override fun onCreateView(
@@ -56,7 +61,13 @@ class VerifyingFragment : Fragment() {
       findNavController().popBackStack()
     }
     // Start verifying the user after the view setup is done
-    invokeVerifySna()
+    try {
+      invokeVerifySna()
+    } catch (e: Exception) {
+      log("Failed call invokeVerifySna(): ${e.message}")
+      log("with stack trace: ${e.stackTraceToString()}")
+      onFail()
+    }
   }
 
   /**
@@ -74,8 +85,9 @@ class VerifyingFragment : Fragment() {
       }
       val result = invokeSnaSdk(snaUrl)
       // Validate the result
-      if (result !is ProcessUrlResult.Success) {
+      if (result is ProcessUrlResult.Fail) {
         // The validation gets a result equals to ProcessUrlResult.Fail
+        log("Failed to process SNA URL: ${result.twilioVerifySnaException.message}")
         onFail()
         return@launch
       }
@@ -99,6 +111,7 @@ class VerifyingFragment : Fragment() {
         )
       } catch (e: Exception) {
         // An exception was thrown getting the SNA URL
+        log("Failed to get SNA URL from backend: " + e.message)
         null
       }
     }
@@ -122,10 +135,12 @@ class VerifyingFragment : Fragment() {
           args.backendUrl, args.phoneNumber
         )
       } catch (e: Exception) {
-        // An exception was thrown checking the verification status}
+        // An exception was thrown checking the verification status
+        log("Failed to check verification: " + e.message)
         false
       }
     }
+    log("Check verification result: $verificationResult")
     return verificationResult
   }
 
@@ -143,7 +158,15 @@ class VerifyingFragment : Fragment() {
    */
   private fun onFail() {
     val action = VerifyingFragmentDirections
-      .actionVerifyingFragmentToVerificationFailedFragment()
+      .actionVerifyingFragmentToVerificationFailedFragment(logValue)
     findNavController().navigate(action)
+  }
+
+  private fun log(message: String) {
+    logValue = if (logValue.isEmpty()) {
+      message
+    } else {
+      "$logValue\n$message"
+    }
   }
 }

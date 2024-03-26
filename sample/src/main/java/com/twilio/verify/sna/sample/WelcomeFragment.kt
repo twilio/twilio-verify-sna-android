@@ -41,6 +41,11 @@ class WelcomeFragment : Fragment() {
     savedInstanceState: Bundle?
   ): View {
     binding = FragmentWelcomeBinding.inflate(inflater, container, false)
+    binding.pill.text = getString(
+      R.string.test_app_with_versions_pill,
+      BuildConfig.VERSION_NAME,
+      BuildConfig.VERSION_NAME
+    )
     return binding.root
   }
 

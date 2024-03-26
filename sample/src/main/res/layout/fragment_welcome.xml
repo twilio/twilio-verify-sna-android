@@ -18,6 +18,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:padding="16dp"
     >
 
@@ -27,7 +28,7 @@
       android:layout_height="wrap_content"
       android:background="@drawable/rounded_pilot_background"
       android:drawablePadding="4dp"
-      android:text="@string/test_app_with_versions_pill"
+      tools:text="@string/test_app_with_versions_pill"
       android:textColor="@color/deep_purple_500"
       app:layout_constraintBottom_toTopOf="@id/titleText"
       app:layout_constraintStart_toStartOf="parent"
