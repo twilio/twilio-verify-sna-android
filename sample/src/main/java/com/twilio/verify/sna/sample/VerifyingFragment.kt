@@ -61,7 +61,13 @@ class VerifyingFragment : Fragment() {
       findNavController().popBackStack()
     }
     // Start verifying the user after the view setup is done
-    invokeVerifySna()
+    try {
+      invokeVerifySna()
+    } catch (e: Exception) {
+      log("Failed call invokeVerifySna(): ${e.message}")
+      log("with stack trace: ${e.stackTraceToString()}")
+      onFail()
+    }
   }
 
   /**
@@ -157,7 +163,7 @@ class VerifyingFragment : Fragment() {
   }
 
   private fun log(message: String) {
-    logValue = if (logValue.isNullOrEmpty()) {
+    logValue = if (logValue.isEmpty()) {
       message
     } else {
       "$logValue\n$message"
