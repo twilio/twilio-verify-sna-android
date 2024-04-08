@@ -15,23 +15,17 @@
  */
 package com.twilio.verify.sna.sample
 
-import android.content.ClipData
-import android.content.ClipboardManager
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.fragment.navArgs
 import com.twilio.verify.sna.sample.databinding.FragmentVerificationFailedBinding
 
 class VerificationFailedFragment : Fragment() {
 
   private lateinit var binding: FragmentVerificationFailedBinding
-
-  private val args: VerificationFailedFragmentArgs by navArgs()
 
   override fun onCreateView(
     inflater: LayoutInflater,
@@ -45,13 +39,6 @@ class VerificationFailedFragment : Fragment() {
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     binding.backButton.setOnClickListener {
       findNavController().popBackStack()
-    }
-    binding.output.setText(args.logValue)
-    binding.output.setOnClickListener {
-      val clipboard: ClipboardManager =
-        getSystemService(requireContext(), ClipboardManager::class.java) as ClipboardManager
-      val clip = ClipData.newPlainText("", args.logValue)
-      clipboard.setPrimaryClip(clip)
     }
   }
 }

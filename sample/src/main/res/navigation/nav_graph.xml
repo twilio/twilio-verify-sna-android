@@ -42,12 +42,7 @@
       android:id="@+id/verificationFailedFragment"
       android:name="com.twilio.verify.sna.sample.VerificationFailedFragment"
       android:label="fragment_verification_failed"
-      tools:layout="@layout/fragment_verification_failed" >
-    <argument
-        android:name="logValue"
-        app:argType="string"
-        app:nullable="false" />
-  </fragment>
+      tools:layout="@layout/fragment_verification_failed" />
   <fragment
       android:id="@+id/verifyingFragment"
       android:name="com.twilio.verify.sna.sample.VerifyingFragment"
@@ -65,12 +60,7 @@
         android:id="@+id/action_verifyingFragment_to_verificationFailedFragment"
         app:destination="@id/verificationFailedFragment"
         app:popUpTo="@id/verifyingFragment"
-        app:popUpToInclusive="true" >
-      <argument
-          android:name="logValue"
-          app:argType="string"
-          app:nullable="false" />
-    </action>
+        app:popUpToInclusive="true" />
     <action
         android:id="@+id/action_verifyingFragment_to_verificationSuccessfulFragment"
         app:destination="@id/verificationSuccessfulFragment"
