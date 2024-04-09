@@ -129,12 +129,16 @@ class ConcreteRequestManager(
           if (networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)) {
             performRequest(url, network, continuation, connectivityManager, this)
           } else {
-            connectivityManager.unregisterNetworkCallback(this)
-            continuation.resumeWithException(
-              TwilioVerifySnaException.NetworkRequestException(
-                Exception("No NetworkCapabilities.NET_CAPABILITY_VALIDATED found"),
+            try {
+              network.getByName("google.com").toString().isNotEmpty()
+            } catch (e: Exception) {
+              connectivityManager.unregisterNetworkCallback(this)
+              continuation.resumeWithException(
+                TwilioVerifySnaException.NetworkRequestException(
+                  Exception("Network is not capable of connecting to internet"),
+                )
               )
-            )
+            }
           }
         }
       }
