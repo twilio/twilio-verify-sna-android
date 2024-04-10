@@ -129,12 +129,12 @@ class ConcreteRequestManager(
           if (networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)) {
             performRequest(url, network, continuation, connectivityManager, this)
           } else {
-            isNetworkCapableToConnect(network)
+            checkNetworkConnectivity(network)
           }
         }
       }
 
-      private fun isNetworkCapableToConnect(network: Network) {
+      private fun checkNetworkConnectivity(network: Network) {
         try {
           network.getByName("google.com").toString().isNotEmpty()
         } catch (e: Exception) {
