@@ -39,7 +39,9 @@ class VerifyingFragment : Fragment() {
 
   // Create TwilioVerifySna instance using builder
   private val twilioVerifySna: TwilioVerifySna by lazy {
-    TwilioVerifySna.Builder(requireContext()).build()
+    TwilioVerifySna
+      .Builder(requireContext())
+      .build()
   }
 
   override fun onCreateView(
@@ -74,7 +76,7 @@ class VerifyingFragment : Fragment() {
       }
       val result = invokeSnaSdk(snaUrl)
       // Validate the result
-      if (result !is ProcessUrlResult.Success) {
+      if (result is ProcessUrlResult.Fail) {
         // The validation gets a result equals to ProcessUrlResult.Fail
         onFail()
         return@launch
@@ -122,7 +124,7 @@ class VerifyingFragment : Fragment() {
           args.backendUrl, args.phoneNumber
         )
       } catch (e: Exception) {
-        // An exception was thrown checking the verification status}
+        // An exception was thrown checking the verification status
         false
       }
     }

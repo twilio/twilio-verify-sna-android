@@ -22,6 +22,10 @@ import android.net.ConnectivityManager.NetworkCallback
 import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
+import android.os.Build.VERSION
+import android.os.Build.VERSION_CODES
+import android.os.Handler
+import android.os.Looper
 import com.twilio.verify_sna.common.TwilioVerifySnaException
 import com.twilio.verify_sna.networking.NetworkRequestProvider
 import com.twilio.verify_sna.networking.NetworkRequestResult
@@ -74,31 +78,88 @@ class ConcreteRequestManager(
     }
   }
 
+  private fun performRequest(
+    url: String,
+    network: Network,
+    continuation: Continuation<NetworkRequestResult>,
+    connectivityManager: ConnectivityManager,
+    networkCallback: NetworkCallback
+  ) {
+    try {
+      val networkRequestResult = networkRequestProvider.performRequest(url, network)
+      continuation.resume(networkRequestResult)
+    } catch (networkRequestException: TwilioVerifySnaException.NetworkRequestException) {
+      continuation.resumeWithException(
+        networkRequestException
+      )
+    } catch (e: Exception) {
+      continuation.resumeWithException(
+        TwilioVerifySnaException.NetworkRequestException(e)
+      )
+    } finally {
+      connectivityManager.unregisterNetworkCallback(networkCallback)
+    }
+  }
+
   private fun establishCellularConnection(
     connectivityManager: ConnectivityManager,
     url: String,
     continuation: Continuation<NetworkRequestResult>
   ) {
-    val networkRequest = NetworkRequest.Builder()
+    val networkRequestBuilder = NetworkRequest.Builder()
       .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
       .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-      .build()
-    connectivityManager.requestNetwork(
-      networkRequest,
-      object : NetworkCallback() {
-        override fun onAvailable(network: Network) {
-          try {
-            val networkRequestResult = networkRequestProvider.performRequest(url, network)
-            continuation.resume(networkRequestResult)
-          } catch (networkRequestException: TwilioVerifySnaException.NetworkRequestException) {
-            continuation.resumeWithException(
-              networkRequestException
-            )
-          } finally {
-            connectivityManager.unregisterNetworkCallback(this)
+      .addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED)
+
+    val networkRequest = networkRequestBuilder.build()
+    val networkCallback = object : NetworkCallback() {
+      override fun onAvailable(network: Network) {
+        super.onAvailable(network)
+        if (VERSION.SDK_INT < VERSION_CODES.M) {
+          performRequest(url, network, continuation, connectivityManager, this)
+        }
+      }
+
+      override fun onCapabilitiesChanged(
+        network: Network,
+        networkCapabilities: NetworkCapabilities
+      ) {
+        super.onCapabilitiesChanged(network, networkCapabilities)
+        if (VERSION.SDK_INT >= VERSION_CODES.M) {
+          if (networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)) {
+            performRequest(url, network, continuation, connectivityManager, this)
+          } else {
+            checkNetworkConnectivity(network)
           }
         }
       }
-    )
+
+      private fun checkNetworkConnectivity(network: Network) {
+        try {
+          network.getByName("google.com").toString().isNotEmpty()
+        } catch (e: Exception) {
+          connectivityManager.unregisterNetworkCallback(this)
+          continuation.resumeWithException(
+            TwilioVerifySnaException.NetworkRequestException(
+              Exception("Network is not capable of connecting to internet"),
+            )
+          )
+        }
+      }
+    }
+
+    try {
+      connectivityManager.requestNetwork(
+        networkRequest,
+        networkCallback
+      )
+    } catch (e: Exception) {
+      Handler(Looper.getMainLooper()).postDelayed({
+        connectivityManager.requestNetwork(
+          networkRequest,
+          networkCallback
+        )
+      }, 500)
+    }
   }
 }
