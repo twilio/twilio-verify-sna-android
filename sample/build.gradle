@@ -21,12 +21,12 @@ plugins {
 }
 
 android {
-  compileSdk 32
+  compileSdk 35
 
   defaultConfig {
     applicationId "com.twilio.verify.sna.sample"
     minSdk 23
-    targetSdk 32
+    targetSdk 35
     versionCode generateVersionCode()
     versionName generateVersionName()
 
@@ -49,6 +49,7 @@ android {
   buildFeatures {
     viewBinding true
   }
+  namespace 'com.twilio.verify.sna.sample'
 }
 
 dependencies {
