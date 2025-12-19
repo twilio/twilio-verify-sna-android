@@ -23,6 +23,7 @@ apply plugin: 'com.jfrog.artifactory'
 apply plugin: 'maven-publish'
 
 android {
+  namespace 'com.twilio.verify_sna'
   compileSdk 32
 
   defaultConfig {
@@ -49,7 +50,7 @@ android {
 }
 
 task sourcesJar(type: Jar) {
-  classifier = 'sources'
+  archiveClassifier = 'sources'
 }
 
 task javadoc(type: Javadoc) {
@@ -61,7 +62,7 @@ task javadoc(type: Javadoc) {
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
-  classifier = 'javadoc'
+  archiveClassifier = 'javadoc'
   from javadoc.destinationDir
 }
 

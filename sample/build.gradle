@@ -21,6 +21,7 @@ plugins {
 }
 
 android {
+  namespace 'com.twilio.verify.sna.sample'
   compileSdk 32
 
   defaultConfig {
@@ -48,6 +49,7 @@ android {
   }
   buildFeatures {
     viewBinding true
+    buildConfig = true
   }
 }
 
