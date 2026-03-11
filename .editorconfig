@@ -1,3 +1,8 @@
 [*.{kt,kts}]
 # possible values: number (e.g. 2), "unset" (makes ktlint ignore indentation completely)
 indent_size=2
+
+[*.{kt,kts}]
+ktlint_standard_trailing-comma-on-call-site = disabled
+ktlint_standard_trailing-comma-on-declaration-site = disabled
+ktlint_standard_multiline-expression-wrapping = disabled
