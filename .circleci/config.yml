@@ -7,6 +7,10 @@ references:
   workspace: &workspace
     ~/code
 
+  executor: &executor
+    name: android/android_machine
+    tag: default
+
   ## Docker configuration
   android_config: &android_config
     working_directory: *workspace
@@ -44,6 +48,7 @@ jobs:
   
   ktlint_check:
     <<: *android_config
+    executor: *executor
     steps:
       - checkout
       - *restore_gradle_cache
