@@ -56,6 +56,19 @@ jobs:
           command: ./gradlew ktlintCheck
       - *save_gradle_cache
 
+  size_report:
+    executor: *executor
+    steps:
+      - checkout
+      - *restore_gradle_cache
+      - run:
+          name: Generating Size Report
+          command: ./gradlew :verify_sna:generateSizeReport
+      - *save_gradle_cache
+      - store_artifacts:
+          path: "verify/build/outputs/sizeReport"
+          destination: sizeReport
+
 workflows:
   workflow:
     jobs:
@@ -66,3 +79,6 @@ workflows:
       - unit_tests:
           requires:
             - ktlint_check
+      - size_report:
+          requires:
+            - unit_tests
