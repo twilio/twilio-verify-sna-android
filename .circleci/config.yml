@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  android: circleci/android@1.0.3
+  android: circleci/android@3.1.0
 
 references:
   workspace: &workspace
@@ -19,7 +19,7 @@ references:
 
   ## Cache
   gradle_key: &gradle_key
-    jars-{{ checksum "build.gradle.kts" }}
+    jars-{{ checksum "build.gradle.kts" }}-{{ checksum "verify_sna/build.gradle.kts"}}
 
   restore_gradle_cache: &restore_gradle_cache
     restore_cache:
