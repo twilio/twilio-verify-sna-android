@@ -25,6 +25,18 @@ references:
       paths:
         - ~/.gradle
 
+commands:
+  move_directory:
+    parameters:
+      from:
+        description: Directory to move
+        type: string
+      to:
+        description: Destination directory
+        type: string
+    steps:
+      - run: cp -R <<parameters.from>> <<parameters.to>>
+
 jobs:
   assemble:
     executor: *executor

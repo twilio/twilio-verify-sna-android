@@ -1,12 +1,13 @@
 [versions]
 agp = "8.7.3"
+apkscale = "0.1.9"
 constraintlayout = "2.2.0"
 coreKtx = "1.15.0"
 coreKtxVersion = "1.7.0"
 espressoCore = "3.7.0"
 junit = "4.13.2"
 junitVersion = "1.2.1"
-kotlin = "2.1.0"
+kotlin = "2.1.10"
 kotlinxCoroutinesTest = "1.10.2"
 ktlint = "14.1.0"
 loggingInterceptor = "4.10.0"
@@ -38,6 +39,7 @@ okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
 truth = { module = "com.google.truth:truth", version.ref = "truth" }
+apkscale = { module = "com.twilio:apkscale", version.ref = "apkscale" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
@@ -47,3 +49,4 @@ kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 navigationSafeArgs = { id = "androidx.navigation.safeargs.kotlin", version.ref = "navigationSafeArgs" }
 jfrogFactory = { id = "com.jfrog.artifactory", version.ref = "jfrogFactory" }
 mavenPublish = { id = "maven-publish" }
+apkscale = { id = "com.twilio.apkscale"}
