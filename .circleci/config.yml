@@ -26,7 +26,17 @@ references:
         - ~/.gradle
 
 jobs:
-  build_and_unit_test:
+  assemble:
+    executor: *executor
+    steps:
+      - checkout
+      - *restore_gradle_cache
+      - run:
+          name: Assembling the project
+          command: ./gradlew assemble --no-daemon
+      - *save_gradle_cache
+
+  unit_tests:
     executor: *executor
     steps:
       - checkout
@@ -49,7 +59,10 @@ jobs:
 workflows:
   workflow:
     jobs:
-      - ktlint_check
-      - build_and_unit_test:
+      - assemble
+      - ktlint_check:
+            requires:
+                - assemble
+      - unit_tests:
           requires:
             - ktlint_check
