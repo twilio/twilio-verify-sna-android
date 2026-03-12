@@ -51,10 +51,9 @@ android {
     viewBinding = true
     buildConfig = true
   }
-}
-
-kotlin {
-  jvmToolchain(17)
+  kotlinOptions {
+    jvmTarget = "17"
+  }
 }
 
 dependencies {

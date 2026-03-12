@@ -21,6 +21,7 @@ plugins {
   alias(libs.plugins.kotlinAndroid)
   alias(libs.plugins.jfrogFactory)
   alias(libs.plugins.mavenPublish)
+  alias(libs.plugins.apkscale)
 }
 
 android {
@@ -100,6 +101,37 @@ configure<ArtifactoryPluginConvention> {
       username = findProperty("artifactoryUsername").toString()
       password = findProperty("artifactoryPassword").toString()
     }
+  }
+}
+
+apkscale {
+  abis = setOf("x86", "x86_64", "armeabi-v7a", "arm64-v8a")
+}
+
+task("generateSizeReport") {
+  dependsOn("assembleRelease", "measureSize")
+  description = "Calculate Passkeys Android SDK Size Impact"
+  group = "Reporting"
+
+  doLast {
+    var sizeReport =
+      "### Size impact\n" +
+        "\n" +
+        "| ABI             | APK Size Impact |\n" +
+        "| --------------- | --------------- |\n"
+    val apkscaleOutputFile = file("$buildDir/apkscale/build/outputs/reports/apkscale.json")
+    val jsonSlurper = groovy.json.JsonSlurper()
+    val apkscaleOutput = jsonSlurper.parseText(apkscaleOutputFile.readText()) as List<*>
+    val releaseOutput = apkscaleOutput[0] as Map<*, *>
+    val sizes = releaseOutput["size"] as Map<String, String>
+    sizes.forEach { (arch, sizeImpact) ->
+      sizeReport += "| ${arch.padEnd(16)}| ${sizeImpact.padEnd(16)}|\n"
+    }
+    val sizeReportDir = "$buildDir/outputs/sizeReport"
+    mkdir(sizeReportDir)
+    val targetFile = file("$sizeReportDir/AndroidSDKSizeReport.txt")
+    targetFile.createNewFile()
+    targetFile.writeText(sizeReport)
   }
 }
 

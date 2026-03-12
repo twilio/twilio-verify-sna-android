@@ -66,8 +66,16 @@ jobs:
           command: ./gradlew :verify_sna:generateSizeReport
       - *save_gradle_cache
       - store_artifacts:
-          path: "verify/build/outputs/sizeReport"
+          path: "verify_sna/build/outputs/sizeReport"
           destination: sizeReport
+      - run: mkdir -p builds
+      - move_directory:
+          from: verify_sna/build/outputs/sizeReport/
+          to: builds
+      - persist_to_workspace:
+          root: *workspace
+          paths:
+            - builds
 
 workflows:
   workflow:
