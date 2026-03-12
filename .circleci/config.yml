@@ -5,21 +5,11 @@ orbs:
 
 references:
   workspace: &workspace
-    ~/code
+    .
 
   executor: &executor
     name: android/android_machine
     tag: default
-
-  ## Docker configuration
-  android_config: &android_config
-    working_directory: *workspace
-    docker:
-      - image: circleci/android:api-28
-    environment:
-      - _JAVA_OPTIONS: "-XX:+UseContainerSupport"
-      - JVM_OPTS: -Xmx3200m
-    resource_class: large
 
   ## Cache
   gradle_key: &gradle_key
@@ -37,7 +27,7 @@ references:
 
 jobs:
   build_and_unit_test:
-    <<: *android_config
+    executor: *executor
     steps:
       - checkout
       - *restore_gradle_cache
