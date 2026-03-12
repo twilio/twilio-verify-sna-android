@@ -47,7 +47,6 @@ jobs:
       - *save_gradle_cache
   
   ktlint_check:
-    <<: *android_config
     executor: *executor
     steps:
       - checkout
