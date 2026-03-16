@@ -18,6 +18,7 @@ package com.twilio.verify.sna.sample
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.view.WindowCompat
 import com.twilio.verify.sna.sample.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
@@ -26,6 +27,7 @@ class MainActivity : AppCompatActivity() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
+    WindowCompat.setDecorFitsSystemWindows(window, false)
     binding = ActivityMainBinding.inflate(layoutInflater)
     setContentView(binding.root)
     // Disable Dark mode because is out of sample scope
