@@ -17,7 +17,7 @@
 plugins {
   alias(libs.plugins.androidApplication)
   alias(libs.plugins.kotlinAndroid)
-  alias(libs.plugins.navigationSafeArgs)
+  alias(sampleLibs.plugins.navigationSafeArgs)
 }
 
 android {
@@ -58,17 +58,17 @@ kotlin {
 }
 
 dependencies {
-  implementation(libs.androidx.core.ktx)
-  implementation(libs.material)
-  implementation(libs.androidx.constraintlayout)
+  implementation(sampleLibs.androidx.core.ktx)
+  implementation(sampleLibs.material)
+  implementation(sampleLibs.androidx.constraintlayout)
   testImplementation(libs.junit)
   androidTestImplementation(libs.androidx.junit)
   implementation(project(":verify_sna"))
 
-  implementation(libs.androidx.navigation.fragment.ktx)
-  implementation(libs.androidx.navigation.ui.ktx)
+  implementation(sampleLibs.androidx.navigation.fragment.ktx)
+  implementation(sampleLibs.androidx.navigation.ui.ktx)
 
-  implementation(libs.logging.interceptor)
-  implementation(libs.retrofit)
-  implementation(libs.converter.gson)
+  implementation(sampleLibs.logging.interceptor)
+  implementation(sampleLibs.retrofit)
+  implementation(sampleLibs.converter.gson)
 }
