@@ -110,7 +110,7 @@ apkscale {
 
 task("generateSizeReport") {
   dependsOn("assembleRelease", "measureSize")
-  description = "Calculate Passkeys Android SDK Size Impact"
+  description = "Calculate Verify SNA SDK Size Impact"
   group = "Reporting"
 
   doLast {
