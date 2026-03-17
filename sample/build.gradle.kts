@@ -20,6 +20,9 @@ plugins {
   alias(libs.plugins.navigationSafeArgs)
 }
 
+val verifySnaVersionCode: String by rootProject.extra
+val verifySnaVersionName: String by rootProject.extra
+
 android {
   namespace = "com.twilio.verify.sna.sample"
   compileSdk = 36
@@ -28,8 +31,8 @@ android {
     applicationId = "com.twilio.verify.sna.sample"
     minSdk = 23
     targetSdk = 36
-    versionCode = VersionHelper.generateVersionCode(project)
-    versionName = VersionHelper.generateVersionName(project)
+    versionCode = verifySnaVersionCode.toInt()
+    versionName = verifySnaVersionName
 
     testInstrumentationRunner= "androidx.test.runner.AndroidJUnitRunner"
   }

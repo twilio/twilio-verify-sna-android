@@ -24,6 +24,8 @@ plugins {
   alias(libs.plugins.apkscale)
 }
 
+val verifySnaVersionName: String by rootProject.extra
+
 android {
   namespace = "com.twilio.verify_sna"
   compileSdk = 36
@@ -75,7 +77,7 @@ publishing {
     create<MavenPublication>("verifySnaAndroid") {
       groupId = "com.twilio"
       artifactId = "twilio-verify-sna-android"
-      version = VersionHelper.generateVersionName(project)
+      version = verifySnaVersionName
       artifact("${layout.buildDirectory.get()}/outputs/aar/${project.name}-release.aar")
       artifact(javadocJar)
       artifact(sourcesJar)
@@ -108,9 +110,9 @@ apkscale {
   abis = setOf("x86", "x86_64", "armeabi-v7a", "arm64-v8a")
 }
 
-task("generateSizeReport") {
+tasks.register("generateSizeReport") {
   dependsOn("assembleRelease", "measureSize")
-  description = "Calculate Passkeys Android SDK Size Impact"
+  description = "Calculate Verify SNA SDK Size Impact"
   group = "Reporting"
 
   doLast {
@@ -129,7 +131,7 @@ task("generateSizeReport") {
     }
     val sizeReportDir = "$buildDir/outputs/sizeReport"
     mkdir(sizeReportDir)
-    val targetFile = file("$sizeReportDir/AndroidSDKSizeReport.txt")
+    val targetFile = file("$sizeReportDir/VerifySNASDKSizeReport.txt")
     targetFile.createNewFile()
     targetFile.writeText(sizeReport)
   }

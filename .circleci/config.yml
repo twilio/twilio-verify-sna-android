@@ -89,6 +89,16 @@ jobs:
           paths:
             - builds
 
+  release:
+    executor: *executor
+    steps:
+      - checkout
+      - *restore_gradle_cache
+      - run:
+          name: Releasing the project
+          command: bundle exec fastlane release
+      - *save_gradle_cache
+
 workflows:
   workflow:
     jobs:
@@ -102,3 +112,12 @@ workflows:
       - size_report:
           requires:
             - unit_tests
+      - release:
+          context:
+            - verify-sna
+          requires:
+            - size_report
+          filters:
+            branches:
+              only:
+                - main
