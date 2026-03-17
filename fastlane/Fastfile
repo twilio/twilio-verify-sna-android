@@ -1,0 +1,69 @@
+default_platform(:android)
+
+platform :android do
+
+  desc "Release a new production version"
+  lane :release do
+    next unless verify(title: "Android Verify SNA", tag_prefix: "*")
+    increment_version()
+    gradle(task: "assembleRelease") # todo: publish to maven
+    post_release()
+  end
+
+  desc "Verify next release"
+  lane :verify do |options|
+    if !is_ci? then
+      UI.message("#{options[:title]} deploy was triggered on local machine")
+      gradle(task: "clean")
+    else
+      UI.message("#{options[:title]} deploy was triggered on CircleCI")
+    end
+
+    # Check if there is any change since last version
+    is_releaseable = analyze_commits(
+      match: options[:tag_prefix]
+    )
+    unless is_releaseable
+      UI.important("Skip deploying #{options[:title]}. No changes since last one!")
+    end
+    is_releaseable
+  end
+
+  desc "Increment version"
+  lane :increment_version do |options|
+    next_version = lane_context[SharedValues::RELEASE_NEXT_VERSION]
+    ensure_git_status_clean(
+      ignore_files: ["Gemfile.lock"]
+    )
+    gradle(task: "-q :verify:incrementVersion", properties: { 'version_number' => next_version })
+  end
+
+  desc "Post release"
+  lane :post_release do
+    next_version = lane_context[SharedValues::RELEASE_NEXT_VERSION]
+    notes = conventional_changelog(
+      format: "markdown",
+      commit_url: "twilio-verify-sna-android"
+    )
+    tag = next_version
+    sdk_size = sh("cat ../builds/sizeReport/VerifySNASDKSizeReport.txt")
+    changelog = "#{notes}\\n\\n#{sdk_size}"
+    sh("echo \"#{changelog}\\n\" | cat - ../CHANGELOG.md > temp && mv temp ../CHANGELOG.md")
+    git_add(path: ["./verify/gradle.properties", "./CHANGELOG.md", "./docs/#{next_version}", "./docs/latest"])
+    sh("git config user.name \"#{ENV["GH_USER_NAME"]}\"")
+    sh("git config user.email \"#{ENV["GH_USER_EMAIL"]}\"")
+    sh("git commit -m \"Version bump to #{next_version} [skip ci]\"")
+    push_to_git_remote
+    add_git_tag(tag: tag)
+    push_git_tags(tag: tag)
+#    set_github_release(
+#      repository_name: "twilio/twilio-verify-sna-android",
+#      api_token: ENV["GH_TOKEN"],
+#      name: tag,
+#      tag_name: tag,
+#      description: notes,
+#      commitish: "main"
+#    )
+  end
+
+end

@@ -60,3 +60,24 @@ fun getProjectProperty(prop: String): String {
     if (project.hasProperty(prop)) project.property(prop) as String? else System.getenv(prop)
   return value ?: ""
 }
+
+tasks.register("incrementVersion") {
+  description = "Increment version in gradle.properties"
+  group = "versioning"
+
+  doLast {
+    val verifySnaVersionName: String by project.extra
+    val verifySnaVersionCode: String by project.extra
+    val versionCode = verifySnaVersionName.toInt().plus(1)
+    var versionName = verifySnaVersionCode
+    if (project.hasProperty("version_number")) {
+      versionName = project.property("version_number") as String
+    }
+    ant.withGroovyBuilder {
+      "propertyfile"("file" to "gradle.properties") {
+        "entry"("key" to "verifySnaVersionName", "value" to versionName)
+        "entry"("key" to "verifySnaVersionCode", "value" to versionCode)
+      }
+    }
+  }
+}
