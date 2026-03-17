@@ -28,5 +28,13 @@ pluginManagement {
   }
 }
 
+dependencyResolutionManagement {
+  versionCatalogs {
+    create("sampleLibs") {
+      from(files("gradle/sample-libs.versions.toml"))
+    }
+  }
+}
+
 rootProject.name = "twilio-verify-sna-android"
 include(":sample", ":verify_sna")
