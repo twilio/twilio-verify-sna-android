@@ -26,6 +26,19 @@ references:
         - ~/.gradle
 
 commands:
+  setup:
+    steps:
+      - checkout
+      - restore_cache:
+          key: v1-gems-{{ checksum "Gemfile.lock" }}
+      - run:
+          name: Install Gems
+          command: bundle check || (bundle config set --local path 'vendor/bundle' && bundle install)
+      - save_cache:
+          key: v1-gems-{{ checksum "Gemfile.lock" }}
+          paths:
+            - vendor/bundle
+
   move_directory:
     parameters:
       from:
@@ -92,6 +105,7 @@ jobs:
   release:
     executor: *executor
     steps:
+      - setup
       - checkout
       - *restore_gradle_cache
       - run:
