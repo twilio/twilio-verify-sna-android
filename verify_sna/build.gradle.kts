@@ -95,6 +95,12 @@ publishing {
   }
 }
 
+afterEvaluate {
+  tasks.named("publishVerifySnaAndroidPublicationToSonatypeRepository") {
+    dependsOn("bundleReleaseAar")
+  }
+}
+
 configure<ArtifactoryPluginConvention> {
   publish {
     contextUrl = "https://twilio.jfrog.io/artifactory"

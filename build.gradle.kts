@@ -108,10 +108,6 @@ nexusPublishing {
   connectTimeout.set(java.time.Duration.ofSeconds(60))
 }
 
-tasks.named("publishVerifySnaAndroidPublicationToSonatypeRepository") {
-  dependsOn("bundleReleaseAar")
-}
-
 tasks.register("sonatypeVerifySnaReleaseUpload", GradleBuild::class) {
   description = "Publish Verify SNA to MavenCentral"
   group = "Publishing"
