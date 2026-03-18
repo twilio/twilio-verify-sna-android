@@ -109,6 +109,7 @@ nexusPublishing {
 }
 
 tasks.register("sonatypeVerifySnaReleaseUpload", GradleBuild::class) {
+  dependsOn("verify_sna:bundleReleaseAar")
   description = "Publish Verify SNA to MavenCentral"
   group = "Publishing"
   buildName = "TwilioVerifySna"
