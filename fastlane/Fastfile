@@ -4,10 +4,10 @@ platform :android do
 
   desc "Release a new production version"
   lane :release do
-    next unless verify(title: "Android Verify SNA", tag_prefix: "*")
-    increment_version()
-    gradle(task: "assembleRelease") # todo: publish to maven
-    post_release()
+    #next unless verify(title: "Android Verify SNA", tag_prefix: "*")
+    #increment_version()
+    gradle(task: "sonatypeVerifySnaReleaseUpload")
+    #post_release()
   end
 
   desc "Verify next release"
@@ -56,14 +56,14 @@ platform :android do
     push_to_git_remote
     add_git_tag(tag: tag)
     push_git_tags(tag: tag)
-#    set_github_release(
-#      repository_name: "twilio/twilio-verify-sna-android",
-#      api_token: ENV["GH_TOKEN"],
-#      name: tag,
-#      tag_name: tag,
-#      description: notes,
-#      commitish: "main"
-#    )
+    set_github_release(
+      repository_name: "twilio/twilio-verify-sna-android",
+      api_token: ENV["GH_TOKEN"],
+      name: tag,
+      tag_name: tag,
+      description: notes,
+      commitish: "main"
+    )
   end
 
 end
