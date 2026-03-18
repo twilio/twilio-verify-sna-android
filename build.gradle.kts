@@ -20,6 +20,7 @@ plugins {
   alias(libs.plugins.androidLibrary).apply(false)
   alias(libs.plugins.kotlinAndroid).apply(false)
   alias(libs.plugins.ktlint)
+  alias(libs.plugins.nexusPublish)
 }
 
 buildscript {
@@ -35,11 +36,11 @@ allprojects {
   }
 }
 
-task("clean", Delete::class) {
+tasks.register("clean", Delete::class) {
   delete(rootProject.layout.buildDirectory)
 }
 
-task("artifactoryLibraryReleaseUpload", GradleBuild::class) {
+tasks.register("artifactoryLibraryReleaseUpload", GradleBuild::class) {
   description = "Publish Verify SNA SDK to internal artifactory"
   group = "Publishing"
   tasks = listOf(":verify_sna:assembleRelease", ":verify_sna:artifactoryPublish")
@@ -80,4 +81,68 @@ tasks.register("incrementVersion") {
       }
     }
   }
+}
+
+val mavenPublishCredentials = mapOf(
+  "signing.keyId" to getProjectProperty("SIGNING_KEY_ID"),
+  "signing.password" to getProjectProperty("SIGNING_PASSWORD"),
+  "signing.secretKeyRingFile" to getProjectProperty("SIGNING_SECRET_KEY_RING_FILE"),
+  "sonatypeUsername" to getProjectProperty("SONATYPE_USERNAME"),
+  "sonatypePassword" to getProjectProperty("SONATYPE_PASSWORD"),
+  "sonatypeStagingProfileId" to getProjectProperty("SONATYPE_STAGING_PROFILE_ID")
+)
+
+nexusPublishing {
+  repositories {
+    sonatype {
+      username = getProjectProperty("SONATYPE_USERNAME")
+      password = getProjectProperty("SONATYPE_PASSWORD")
+      stagingProfileId.set(getProjectProperty("SONATYPE_STAGING_PROFILE_ID"))
+      nexusUrl.set(uri("https://ossrh-staging-api.central.sonatype.com/service/local/"))
+      snapshotRepositoryUrl.set(uri("https://central.sonatype.com/repository/maven-snapshots/"))
+    }
+  }
+  clientTimeout.set(java.time.Duration.ofSeconds(300))
+  connectTimeout.set(java.time.Duration.ofSeconds(60))
+}
+
+tasks.register("sonatypeVerifySnaReleaseUpload", GradleBuild::class) {
+  description = "Publish Verify SNA to MavenCentral"
+  group = "Publishing"
+  buildName = "TwilioVerifySna"
+  tasks = listOf(
+    ":verify_sna:assembleRelease",
+    ":verify_sna:publishVerifySnaAndroidPublicationToSonatypeRepository",
+    "closeAndReleaseSonatypeStagingRepository"
+  )
+  startParameter.projectProperties.plusAssign(
+    gradle.startParameter.projectProperties + mavenPublishCredentials
+  )
+}
+
+tasks.register("sonatypeVerifySnaStagingReleaseUpload", GradleBuild::class) {
+  description = "Publish Verify SNA to Nexus staging repository"
+  group = "Publishing"
+  buildName = "TwilioVerifySna"
+  tasks = listOf(
+    ":verify_sna:assembleRelease",
+    "verify_sna:publishVerifySnaAndroidPublicationToSonatypeRepository",
+    "closeSonatypeStagingRepository"
+  )
+  startParameter.projectProperties.plusAssign(
+    gradle.startParameter.projectProperties + mavenPublishCredentials
+  )
+}
+
+tasks.register("mavenLocalTwilioVerifyReleaseUpload", GradleBuild::class) {
+  description = "Publish Verify SNA to maven local"
+  group = "Publishing"
+  buildName = "TwilioVerifySna"
+  tasks = listOf(
+    ":verify_sna:assembleRelease",
+    ":verify_sna:publishVerifySnaAndroidPublicationToMavenLocal"
+  )
+  startParameter.projectProperties.plusAssign(
+    gradle.startParameter.projectProperties + mavenPublishCredentials
+  )
 }
