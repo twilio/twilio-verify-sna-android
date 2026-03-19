@@ -105,6 +105,9 @@ publishing {
       groupId = pomGroup
       artifactId = pomArtifactId
       version = verifySnaVersionName
+      afterEvaluate {
+        from(components["release"])
+      }
       tasks.named("generateMetadataFileForVerifySnaAndroidPublication") {
         dependsOn(sourcesJar)
       }
