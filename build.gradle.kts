@@ -38,10 +38,6 @@ allprojects {
   }
 }
 
-val pomGroup: String by project
-val pomArtifactId: String by project
-val verifySnaVersionName: String by project
-
 tasks.register("artifactoryLibraryReleaseUpload", GradleBuild::class) {
   description = "Publish Verify SNA SDK to internal artifactory"
   group = "Publishing"
@@ -151,34 +147,4 @@ tasks.register("mavenLocalTwilioVerifyReleaseUpload", GradleBuild::class) {
 
 signing {
   sign(publishing.publications)
-}
-
-publishing {
-  publications {
-    create<MavenPublication>("mavenJava") {
-      groupId = pomGroup
-      artifactId = pomArtifactId
-      version = verifySnaVersionName
-      pom {
-        name.set("twilio-verify-sna-android")
-        description.set("Twilio Verify SNA SDK for Android")
-        url.set("https://github.com/twilio/twilio-verify-sna-android")
-        licenses {
-          name.set("Apache License, Version 2.0")
-          url.set("https://github.com/twilio/twilio-verify-sna-android/blob/main/LICENSE")
-        }
-        developers {
-          developer {
-            id.set("Twilio")
-            name.set("Twilio")
-          }
-        }
-        scm {
-          connection.set("scm:git:github.com/twilio/twilio-verify-sna-android.git")
-          developerConnection.set("scm:git:ssh://github.com/twilio/twilio-verify-sna-android.git")
-          url.set("https://github.com/twilio/twilio-verify-sna-android/tree/main")
-        }
-      }
-    }
-  }
 }
