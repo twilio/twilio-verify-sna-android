@@ -39,6 +39,12 @@ commands:
           paths:
             - vendor/bundle
 
+  signing_key:
+    steps:
+        - run:
+            name: Install signing key
+            command: echo $SIGNING_KEY | base64 -d >> $SIGNING_SECRET_KEY_RING_FILE
+
   move_directory:
     parameters:
       from:
@@ -108,6 +114,7 @@ jobs:
       - setup
       - checkout
       - *restore_gradle_cache
+      - signing_key
       - run:
           name: Releasing the project
           command: bundle exec fastlane release
