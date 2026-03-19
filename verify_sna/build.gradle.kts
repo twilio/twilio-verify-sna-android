@@ -101,11 +101,11 @@ publishing {
       }
     }*/
 
-    create<MavenPublication>("TwilioVerifySna") {
+    create<MavenPublication>("verifySnaAndroid") {
       groupId = pomGroup
       artifactId = pomArtifactId
       version = verifySnaVersionName
-      tasks.named("generateMetadataFileForTwilioVerifySnaPublication") {
+      tasks.named("generateMetadataFileForVerifySnaAndroidPublication") {
         dependsOn(sourcesJar)
       }
       pom {

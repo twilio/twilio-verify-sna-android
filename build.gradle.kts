@@ -122,7 +122,7 @@ tasks.register("sonatypeVerifySnaStagingReleaseUpload", GradleBuild::class) {
   buildName = "TwilioVerifySna"
   tasks = listOf(
     ":verify_sna:assembleRelease",
-    "verify_sna:publishVerifySnaAndroidPublicationToSonatypeRepository",
+    ":verify_sna:publishVerifySnaAndroidPublicationToSonatypeRepository",
     "closeSonatypeStagingRepository"
   )
   startParameter.projectProperties.plusAssign(
