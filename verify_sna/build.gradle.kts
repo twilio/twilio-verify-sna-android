@@ -39,6 +39,7 @@ android {
 
     testInstrumentationRunner= "androidx.test.runner.AndroidJUnitRunner"
     consumerProguardFiles("consumer-rules.pro")
+    version = verifySnaVersionName
   }
 
   buildTypes {
@@ -82,12 +83,12 @@ signing {
 publishing {
   publications {
     /*create<MavenPublication>("verifySnaAndroid") {
-      groupId = "com.twilio"
-      artifactId = "twilio-verify-sna-android"
+      groupId = pomGroup
+      artifactId = pomArtifactId
       version = verifySnaVersionName
       artifact("${layout.buildDirectory.get()}/outputs/aar/${project.name}-release.aar")
       //artifact(javadocJar)
-      artifact(sourcesJar)
+      //artifact(sourcesJar)
       pom.withXml {
         val dependenciesNode = asNode().appendNode("dependencies")
         configurations.implementation.get().allDependencies.forEach {
@@ -100,10 +101,13 @@ publishing {
       }
     }*/
 
-    create<MavenPublication>("mavenJava") {
+    create<MavenPublication>("TwilioVerifySna") {
       groupId = pomGroup
       artifactId = pomArtifactId
       version = verifySnaVersionName
+      tasks.named("generateMetadataFileForTwilioVerifySnaPublication") {
+        dependsOn(sourcesJar)
+      }
       pom {
         name.set("twilio-verify-sna-android")
         description.set("Twilio Verify SNA SDK for Android")
