@@ -81,7 +81,7 @@ signing {
 
 publishing {
   publications {
-    create<MavenPublication>("verifySnaAndroid") {
+    /*create<MavenPublication>("verifySnaAndroid") {
       groupId = "com.twilio"
       artifactId = "twilio-verify-sna-android"
       version = verifySnaVersionName
@@ -98,7 +98,7 @@ publishing {
           dependencyNode.appendNode("scope", "compile")
         }
       }
-    }
+    }*/
 
     create<MavenPublication>("mavenJava") {
       groupId = pomGroup
@@ -170,11 +170,11 @@ tasks.register("generateSizeReport") {
   }
 }
 
-afterEvaluate {
+/*afterEvaluate {
   tasks.named("publishVerifySnaAndroidPublicationToSonatypeRepository") {
     dependsOn("bundleReleaseAar")
   }
-}
+}*/
 
 dependencies {
   implementation(libs.okhttp)
