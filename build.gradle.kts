@@ -21,8 +21,6 @@ plugins {
   alias(libs.plugins.kotlinAndroid).apply(false)
   alias(libs.plugins.ktlint)
   alias(libs.plugins.nexusPublish)
-  signing
-  id("maven-publish")
 }
 
 buildscript {
@@ -143,8 +141,4 @@ tasks.register("mavenLocalTwilioVerifyReleaseUpload", GradleBuild::class) {
   startParameter.projectProperties.plusAssign(
     gradle.startParameter.projectProperties + mavenPublishCredentials
   )
-}
-
-signing {
-  sign(publishing.publications)
 }

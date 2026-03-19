@@ -22,6 +22,7 @@ plugins {
   alias(libs.plugins.jfrogFactory)
   alias(libs.plugins.mavenPublish)
   alias(libs.plugins.apkscale)
+  signing
 }
 
 val verifySnaVersionName: String by rootProject.extra
@@ -143,6 +144,10 @@ tasks.register("generateSizeReport") {
     targetFile.createNewFile()
     targetFile.writeText(sizeReport)
   }
+}
+
+signing {
+  sign(publishing.publications)
 }
 
 publishing {
