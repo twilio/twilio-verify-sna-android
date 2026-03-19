@@ -61,11 +61,11 @@ val sourcesJar by tasks.registering(Jar::class) {
   from(android.sourceSets.getByName("main").java.srcDirs)
 }
 
-val javadoc by tasks.registering(Javadoc::class) {
+/*val javadoc by tasks.registering(Javadoc::class) {
   // Exclude files that are in the internal package
-  exclude("**/internal/**")
+
   source(android.sourceSets.getByName("main").java.srcDirs)
-  classpath += project.files(android.bootClasspath.joinToString(File.pathSeparator))
+  classpath += files(android.bootClasspath)
   isFailOnError = false
 }
 
@@ -73,6 +73,10 @@ val javadocJar by tasks.registering(Jar::class) {
   dependsOn(javadoc)
   archiveClassifier.set("javadoc")
   from(javadoc.get().destinationDir)
+}*/
+
+signing {
+  sign(publishing.publications)
 }
 
 publishing {
@@ -82,7 +86,7 @@ publishing {
       artifactId = "twilio-verify-sna-android"
       version = verifySnaVersionName
       artifact("${layout.buildDirectory.get()}/outputs/aar/${project.name}-release.aar")
-      artifact(javadocJar)
+      //artifact(javadocJar)
       artifact(sourcesJar)
       pom.withXml {
         val dependenciesNode = asNode().appendNode("dependencies")
@@ -95,12 +99,32 @@ publishing {
         }
       }
     }
-  }
-}
 
-afterEvaluate {
-  tasks.named("publishVerifySnaAndroidPublicationToSonatypeRepository") {
-    dependsOn("bundleReleaseAar")
+    create<MavenPublication>("mavenJava") {
+      groupId = pomGroup
+      artifactId = pomArtifactId
+      version = verifySnaVersionName
+      pom {
+        name.set("twilio-verify-sna-android")
+        description.set("Twilio Verify SNA SDK for Android")
+        url.set("https://github.com/twilio/twilio-verify-sna-android")
+        licenses {
+          name.set("Apache License, Version 2.0")
+          url.set("https://github.com/twilio/twilio-verify-sna-android/blob/main/LICENSE")
+        }
+        developers {
+          developer {
+            id.set("Twilio")
+            name.set("Twilio")
+          }
+        }
+        scm {
+          connection.set("scm:git:github.com/twilio/twilio-verify-sna-android.git")
+          developerConnection.set("scm:git:ssh://github.com/twilio/twilio-verify-sna-android.git")
+          url.set("https://github.com/twilio/twilio-verify-sna-android/tree/main")
+        }
+      }
+    }
   }
 }
 
@@ -146,37 +170,9 @@ tasks.register("generateSizeReport") {
   }
 }
 
-signing {
-  sign(publishing.publications)
-}
-
-publishing {
-  publications {
-    create<MavenPublication>("mavenJava") {
-      groupId = pomGroup
-      artifactId = pomArtifactId
-      version = verifySnaVersionName
-      pom {
-        name.set("twilio-verify-sna-android")
-        description.set("Twilio Verify SNA SDK for Android")
-        url.set("https://github.com/twilio/twilio-verify-sna-android")
-        licenses {
-          name.set("Apache License, Version 2.0")
-          url.set("https://github.com/twilio/twilio-verify-sna-android/blob/main/LICENSE")
-        }
-        developers {
-          developer {
-            id.set("Twilio")
-            name.set("Twilio")
-          }
-        }
-        scm {
-          connection.set("scm:git:github.com/twilio/twilio-verify-sna-android.git")
-          developerConnection.set("scm:git:ssh://github.com/twilio/twilio-verify-sna-android.git")
-          url.set("https://github.com/twilio/twilio-verify-sna-android/tree/main")
-        }
-      }
-    }
+afterEvaluate {
+  tasks.named("publishVerifySnaAndroidPublicationToSonatypeRepository") {
+    dependsOn("bundleReleaseAar")
   }
 }
 
