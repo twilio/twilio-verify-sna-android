@@ -130,6 +130,7 @@ workflows:
           context:
             - verify-sna
             - verify-maven-publishing-android
+            - verify-push-android
 #          requires:
 #            - size_report
 #          filters:
