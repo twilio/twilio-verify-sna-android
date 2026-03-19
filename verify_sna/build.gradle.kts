@@ -108,6 +108,7 @@ publishing {
       afterEvaluate {
         from(components["release"])
       }
+      artifact(sourcesJar)
       tasks.named("generateMetadataFileForVerifySnaAndroidPublication") {
         dependsOn(sourcesJar)
       }
