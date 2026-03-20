@@ -108,10 +108,10 @@ publishing {
       afterEvaluate {
         from(components["release"])
       }
-      artifact(sourcesJar)
-      /*tasks.named("generateMetadataFileForVerifySnaAndroidPublication") {
+      //artifact(sourcesJar)
+      tasks.named("generateMetadataFileForVerifySnaAndroidPublication") {
         dependsOn(sourcesJar)
-      }*/
+      }
       pom {
         name.set("twilio-verify-sna-android")
         description.set("Twilio Verify SNA SDK for Android")
