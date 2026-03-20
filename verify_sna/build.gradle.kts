@@ -117,8 +117,10 @@ publishing {
         description.set("Twilio Verify SNA SDK for Android")
         url.set("https://github.com/twilio/twilio-verify-sna-android")
         licenses {
-          name.set("Apache License, Version 2.0")
-          url.set("https://github.com/twilio/twilio-verify-sna-android/blob/main/LICENSE")
+          license {
+            name.set("Apache License, Version 2.0")
+            url.set("https://github.com/twilio/twilio-verify-sna-android/blob/main/LICENSE")
+          }
         }
         developers {
           developer {
