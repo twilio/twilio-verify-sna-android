@@ -62,45 +62,12 @@ val sourcesJar by tasks.registering(Jar::class) {
   from(android.sourceSets.getByName("main").java.srcDirs)
 }
 
-/*val javadoc by tasks.registering(Javadoc::class) {
-  // Exclude files that are in the internal package
-
-  source(android.sourceSets.getByName("main").java.srcDirs)
-  classpath += files(android.bootClasspath)
-  isFailOnError = false
-}
-
-val javadocJar by tasks.registering(Jar::class) {
-  dependsOn(javadoc)
-  archiveClassifier.set("javadoc")
-  from(javadoc.get().destinationDir)
-}*/
-
 signing {
   sign(publishing.publications)
 }
 
 publishing {
   publications {
-    /*create<MavenPublication>("verifySnaAndroid") {
-      groupId = pomGroup
-      artifactId = pomArtifactId
-      version = verifySnaVersionName
-      artifact("${layout.buildDirectory.get()}/outputs/aar/${project.name}-release.aar")
-      //artifact(javadocJar)
-      //artifact(sourcesJar)
-      pom.withXml {
-        val dependenciesNode = asNode().appendNode("dependencies")
-        configurations.implementation.get().allDependencies.forEach {
-          val dependencyNode = dependenciesNode.appendNode("dependency")
-          dependencyNode.appendNode("groupId", it.group)
-          dependencyNode.appendNode("artifactId", it.name)
-          dependencyNode.appendNode("version", it.version)
-          dependencyNode.appendNode("scope", "compile")
-        }
-      }
-    }*/
-
     create<MavenPublication>("verifySnaAndroid") {
       groupId = pomGroup
       artifactId = pomArtifactId
@@ -179,12 +146,6 @@ tasks.register("generateSizeReport") {
     targetFile.writeText(sizeReport)
   }
 }
-
-/*afterEvaluate {
-  tasks.named("publishVerifySnaAndroidPublicationToSonatypeRepository") {
-    dependsOn("bundleReleaseAar")
-  }
-}*/
 
 dependencies {
   implementation(libs.okhttp)
