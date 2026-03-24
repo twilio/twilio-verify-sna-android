@@ -22,6 +22,7 @@ plugins {
   alias(libs.plugins.jfrogFactory)
   alias(libs.plugins.mavenPublish)
   alias(libs.plugins.apkscale)
+  alias(libs.plugins.kover)
 }
 
 android {

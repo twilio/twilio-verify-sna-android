@@ -13,6 +13,7 @@ okhttp = "5.3.2"
 jfrogFactory = "6.0.4"
 robolectric = "4.16.1"
 truth = "1.4.5"
+kover = "0.9.7"
 
 [libraries]
 androidx-espresso-core = { module = "androidx.test.espresso:espresso-core", version.ref = "espressoCore" }
@@ -34,3 +35,4 @@ kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 jfrogFactory = { id = "com.jfrog.artifactory", version.ref = "jfrogFactory" }
 mavenPublish = { id = "maven-publish" }
 apkscale = { id = "com.twilio.apkscale"}
+kover = {id = "org.jetbrains.kotlinx.kover", version.ref = "kover"}
