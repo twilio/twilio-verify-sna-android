@@ -123,24 +123,24 @@ jobs:
 workflows:
   workflow:
     jobs:
-#      - assemble
-#      - ktlint_check:
-#            requires:
-#                - assemble
-#      - unit_tests:
-#          requires:
-#            - ktlint_check
-#      - size_report:
-#          requires:
-#            - unit_tests
+      - assemble
+      - ktlint_check:
+            requires:
+                - assemble
+      - unit_tests:
+          requires:
+            - ktlint_check
+      - size_report:
+          requires:
+            - unit_tests
       - release:
           context:
             - verify-sna
+            - verify-sna-android
             - verify-maven-publishing-android
-            - verify-push-android
-#          requires:
-#            - size_report
-#          filters:
-#            branches:
-#              only:
-#                - main
+          requires:
+            - size_report
+          filters:
+            branches:
+              only:
+                - main
