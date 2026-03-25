@@ -142,6 +142,8 @@ workflows:
             requires:
                 - assemble
       - unit_tests:
+          context:
+            - verify-sna
           requires:
             - ktlint_check
       - size_report:
