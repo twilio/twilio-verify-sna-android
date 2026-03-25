@@ -26,6 +26,25 @@ references:
         - ~/.gradle
 
 commands:
+  setup:
+    steps:
+      - checkout
+      - restore_cache:
+          key: v1-gems-{{ checksum "Gemfile.lock" }}
+      - run:
+          name: Install Gems
+          command: bundle check || (bundle config set --local path 'vendor/bundle' && bundle install)
+      - save_cache:
+          key: v1-gems-{{ checksum "Gemfile.lock" }}
+          paths:
+            - vendor/bundle
+
+  signing_key:
+    steps:
+        - run:
+            name: Install signing key
+            command: echo $SIGNING_KEY | base64 -d >> $SIGNING_SECRET_KEY_RING_FILE
+
   move_directory:
     parameters:
       from:
@@ -89,6 +108,18 @@ jobs:
           paths:
             - builds
 
+  release:
+    executor: *executor
+    steps:
+      - setup
+      - checkout
+      - *restore_gradle_cache
+      - signing_key
+      - run:
+          name: Releasing the project
+          command: bundle exec fastlane release
+      - *save_gradle_cache
+
 workflows:
   workflow:
     jobs:
@@ -102,3 +133,14 @@ workflows:
       - size_report:
           requires:
             - unit_tests
+      - release:
+          context:
+            - verify-sna
+            - verify-sna-android
+            - verify-maven-publishing-android
+          requires:
+            - size_report
+          filters:
+            branches:
+              only:
+                - main
