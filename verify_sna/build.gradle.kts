@@ -22,8 +22,13 @@ plugins {
   alias(libs.plugins.jfrogFactory)
   alias(libs.plugins.mavenPublish)
   alias(libs.plugins.apkscale)
+  signing
   alias(libs.plugins.kover)
 }
+
+val verifySnaVersionName: String by rootProject.extra
+val pomGroup: String by project
+val pomArtifactId: String by project
 
 android {
   namespace = "com.twilio.verify_sna"
@@ -35,6 +40,7 @@ android {
 
     testInstrumentationRunner= "androidx.test.runner.AndroidJUnitRunner"
     consumerProguardFiles("consumer-rules.pro")
+    version = verifySnaVersionName
   }
 
   buildTypes {
@@ -57,37 +63,43 @@ val sourcesJar by tasks.registering(Jar::class) {
   from(android.sourceSets.getByName("main").java.srcDirs)
 }
 
-val javadoc by tasks.registering(Javadoc::class) {
-  // Exclude files that are in the internal package
-  exclude("**/internal/**")
-  source(android.sourceSets.getByName("main").java.srcDirs)
-  classpath += project.files(android.bootClasspath.joinToString(File.pathSeparator))
-  isFailOnError = false
-}
-
-val javadocJar by tasks.registering(Jar::class) {
-  dependsOn(javadoc)
-  archiveClassifier.set("javadoc")
-  from(javadoc.get().destinationDir)
+signing {
+  sign(publishing.publications)
 }
 
 publishing {
   publications {
     create<MavenPublication>("verifySnaAndroid") {
-      groupId = "com.twilio"
-      artifactId = "twilio-verify-sna-android"
-      version = VersionHelper.generateVersionName(project)
-      artifact("${layout.buildDirectory.get()}/outputs/aar/${project.name}-release.aar")
-      artifact(javadocJar)
-      artifact(sourcesJar)
-      pom.withXml {
-        val dependenciesNode = asNode().appendNode("dependencies")
-        configurations.implementation.get().allDependencies.forEach {
-          val dependencyNode = dependenciesNode.appendNode("dependency")
-          dependencyNode.appendNode("groupId", it.group)
-          dependencyNode.appendNode("artifactId", it.name)
-          dependencyNode.appendNode("version", it.version)
-          dependencyNode.appendNode("scope", "compile")
+      groupId = pomGroup
+      artifactId = pomArtifactId
+      version = verifySnaVersionName
+      afterEvaluate {
+        from(components["release"])
+      }
+      //artifact(sourcesJar)
+      tasks.named("generateMetadataFileForVerifySnaAndroidPublication") {
+        dependsOn(sourcesJar)
+      }
+      pom {
+        name.set("twilio-verify-sna-android")
+        description.set("Twilio Verify SNA SDK for Android")
+        url.set("https://github.com/twilio/twilio-verify-sna-android")
+        licenses {
+          license {
+            name.set("Apache License, Version 2.0")
+            url.set("https://github.com/twilio/twilio-verify-sna-android/blob/main/LICENSE")
+          }
+        }
+        developers {
+          developer {
+            id.set("Twilio")
+            name.set("Twilio")
+          }
+        }
+        scm {
+          connection.set("scm:git:github.com/twilio/twilio-verify-sna-android.git")
+          developerConnection.set("scm:git:ssh://github.com/twilio/twilio-verify-sna-android.git")
+          url.set("https://github.com/twilio/twilio-verify-sna-android/tree/main")
         }
       }
     }
@@ -109,7 +121,7 @@ apkscale {
   abis = setOf("x86", "x86_64", "armeabi-v7a", "arm64-v8a")
 }
 
-task("generateSizeReport") {
+tasks.register("generateSizeReport") {
   dependsOn("assembleRelease", "measureSize")
   description = "Calculate Verify SNA SDK Size Impact"
   group = "Reporting"
@@ -130,7 +142,7 @@ task("generateSizeReport") {
     }
     val sizeReportDir = "$buildDir/outputs/sizeReport"
     mkdir(sizeReportDir)
-    val targetFile = file("$sizeReportDir/AndroidSDKSizeReport.txt")
+    val targetFile = file("$sizeReportDir/VerifySNASDKSizeReport.txt")
     targetFile.createNewFile()
     targetFile.writeText(sizeReport)
   }

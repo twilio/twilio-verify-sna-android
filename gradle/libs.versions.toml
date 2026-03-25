@@ -35,4 +35,5 @@ kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 jfrogFactory = { id = "com.jfrog.artifactory", version.ref = "jfrogFactory" }
 mavenPublish = { id = "maven-publish" }
 apkscale = { id = "com.twilio.apkscale"}
+nexusPublish = { id = "io.github.gradle-nexus.publish-plugin", version = "2.0.0" }
 kover = {id = "org.jetbrains.kotlinx.kover", version.ref = "kover"}
