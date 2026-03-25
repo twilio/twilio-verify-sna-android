@@ -56,12 +56,6 @@ commands:
     steps:
       - run: cp -R <<parameters.from>> <<parameters.to>>
 
-  install_gems:
-    steps:
-      - run:
-          name: Install Gems
-          command: bundle check || (bundle config set --local path 'vendor/bundle' && bundle install)
-
 jobs:
   assemble:
     executor: *executor
@@ -76,6 +70,7 @@ jobs:
   unit_tests:
     executor: *executor
     steps:
+      - setup
       - checkout
       - *restore_gradle_cache
       - run:
@@ -91,7 +86,6 @@ jobs:
           to: test-results/verify_sna
       - store_test_results:
           path: "test-results"
-      - install_gems
       - run:
           name: Run the code coverage reporter
           command: |
