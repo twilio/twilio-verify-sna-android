@@ -158,4 +158,5 @@ dependencies {
   testImplementation(libs.robolectric)
   testImplementation(libs.kotlinx.coroutines.test)
   testImplementation(libs.truth)
+  testImplementation(libs.mockwebserver3)
 }
