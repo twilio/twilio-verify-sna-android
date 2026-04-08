@@ -5,9 +5,9 @@ import android.net.ConnectivityManager
 import android.net.ConnectivityManager.NetworkCallback
 import com.google.common.truth.Truth.assertThat
 import com.twilio.verify_sna.common.TwilioVerifySnaException
-import com.twilio.verify_sna.networking.IsMobileDataEnabledUseCase
+import com.twilio.verify_sna.networking.IsMobileDataEnabledHelper
 import com.twilio.verify_sna.networking.NetworkRequestResult
-import com.twilio.verify_sna.networking.RequestNetworkWithRetryUseCase
+import com.twilio.verify_sna.networking.RequestNetworkWithRetryHelper
 import com.twilio.verify_sna.networking.VerifySnaNetworkCallbackProvider
 import io.mockk.every
 import io.mockk.mockk
@@ -24,16 +24,16 @@ import kotlin.coroutines.resume
 class RequestManagerTest {
 
   private val context: Context = mockk(relaxed = true)
-  private val isMobileDataEnabledUseCase: IsMobileDataEnabledUseCase = mockk(relaxed = true)
+  private val isMobileDataEnabledHelper: IsMobileDataEnabledHelper = mockk(relaxed = true)
   private val verifySnaNetworkCallbackProvider: VerifySnaNetworkCallbackProvider =
     mockk(relaxed = true)
-  private val requestNetworkWithRetryUseCase: RequestNetworkWithRetryUseCase =
+  private val requestNetworkWithRetryHelper: RequestNetworkWithRetryHelper =
     mockk(relaxed = true)
   private val requestManager: RequestManager = ConcreteRequestManager(
     context,
-    isMobileDataEnabledUseCase,
+    isMobileDataEnabledHelper,
     verifySnaNetworkCallbackProvider,
-    requestNetworkWithRetryUseCase
+    requestNetworkWithRetryHelper
   )
 
   @Test
@@ -51,7 +51,7 @@ class RequestManagerTest {
     } returns connectivityManager
 
     every {
-      isMobileDataEnabledUseCase(connectivityManager)
+      isMobileDataEnabledHelper(connectivityManager)
     } returns true
 
     val continuationSlot = slot<Continuation<NetworkRequestResult>>()
@@ -64,7 +64,7 @@ class RequestManagerTest {
     } returns networkCallback
 
     every {
-      requestNetworkWithRetryUseCase(
+      requestNetworkWithRetryHelper(
         connectivityManager,
         any(),
         networkCallback
@@ -77,7 +77,7 @@ class RequestManagerTest {
 
     assertThat(result).isEqualTo(expectedResult)
     verify {
-      requestNetworkWithRetryUseCase(
+      requestNetworkWithRetryHelper(
         connectivityManager,
         any(),
         any()
@@ -95,7 +95,7 @@ class RequestManagerTest {
     } returns connectivityManager
 
     every {
-      isMobileDataEnabledUseCase(connectivityManager)
+      isMobileDataEnabledHelper(connectivityManager)
     } returns false
 
     try {

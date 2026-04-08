@@ -21,9 +21,9 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
 import com.twilio.verify_sna.common.TwilioVerifySnaException
-import com.twilio.verify_sna.networking.IsMobileDataEnabledUseCase
+import com.twilio.verify_sna.networking.IsMobileDataEnabledHelper
 import com.twilio.verify_sna.networking.NetworkRequestResult
-import com.twilio.verify_sna.networking.RequestNetworkWithRetryUseCase
+import com.twilio.verify_sna.networking.RequestNetworkWithRetryHelper
 import com.twilio.verify_sna.networking.VerifySnaNetworkCallbackProvider
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resumeWithException
@@ -36,9 +36,9 @@ interface RequestManager {
 
 class ConcreteRequestManager(
   private val context: Context,
-  private val isMobileDataEnabledUseCase: IsMobileDataEnabledUseCase,
+  private val isMobileDataEnabledHelper: IsMobileDataEnabledHelper,
   private val verifySnaNetworkCallbackProvider: VerifySnaNetworkCallbackProvider,
-  private val requestNetworkWithRetryUseCase: RequestNetworkWithRetryUseCase
+  private val requestNetworkWithRetryHelper: RequestNetworkWithRetryHelper
 ) : RequestManager {
 
   override suspend fun processUrl(url: String): NetworkRequestResult {
@@ -46,7 +46,7 @@ class ConcreteRequestManager(
       val connectivityManager = context.getSystemService(
         Context.CONNECTIVITY_SERVICE
       ) as ConnectivityManager
-      if (isMobileDataEnabledUseCase(connectivityManager)) {
+      if (isMobileDataEnabledHelper(connectivityManager)) {
         establishCellularConnection(connectivityManager, url, continuation)
       } else {
         continuation.resumeWithException(
@@ -73,7 +73,7 @@ class ConcreteRequestManager(
       connectivityManager
     )
 
-    requestNetworkWithRetryUseCase(
+    requestNetworkWithRetryHelper(
       connectivityManager,
       networkRequest,
       networkCallback

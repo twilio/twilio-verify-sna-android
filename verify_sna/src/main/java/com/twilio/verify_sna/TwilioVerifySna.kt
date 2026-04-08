@@ -21,8 +21,8 @@ import com.twilio.verify_sna.domain.requestmanager.ConcreteRequestManager
 import com.twilio.verify_sna.domain.requestmanager.RequestManager
 import com.twilio.verify_sna.domain.twilioverifysna.ConcreteTwilioVerifySna
 import com.twilio.verify_sna.networking.ConcreteNetworkRequestProvider
-import com.twilio.verify_sna.networking.RequestNetworkWithRetryUseCaseImpl
-import com.twilio.verify_sna.networking.IsMobileDataEnabledUseCaseImpl
+import com.twilio.verify_sna.networking.RequestNetworkWithRetryHelperImpl
+import com.twilio.verify_sna.networking.IsMobileDataEnabledHelperImpl
 import com.twilio.verify_sna.networking.VerifySnaNetworkCallbackProviderImpl
 
 /**
@@ -42,11 +42,11 @@ interface TwilioVerifySna {
 
     private var requestManager: RequestManager = ConcreteRequestManager(
       context,
-      IsMobileDataEnabledUseCaseImpl(),
+      IsMobileDataEnabledHelperImpl(),
       VerifySnaNetworkCallbackProviderImpl(
         ConcreteNetworkRequestProvider()
       ),
-      RequestNetworkWithRetryUseCaseImpl()
+      RequestNetworkWithRetryHelperImpl()
     )
 
     internal fun requestManager(

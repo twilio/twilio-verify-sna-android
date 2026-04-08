@@ -3,11 +3,11 @@ package com.twilio.verify_sna.networking
 import android.net.ConnectivityManager
 import java.lang.reflect.Method
 
-interface IsMobileDataEnabledUseCase {
+interface IsMobileDataEnabledHelper {
   operator fun invoke(connectivityManager: ConnectivityManager): Boolean
 }
 
-class IsMobileDataEnabledUseCaseImpl : IsMobileDataEnabledUseCase {
+class IsMobileDataEnabledHelperImpl : IsMobileDataEnabledHelper {
 
   /**
    * Android Framework doesn't count with a pre-build way of getting mobile network status,

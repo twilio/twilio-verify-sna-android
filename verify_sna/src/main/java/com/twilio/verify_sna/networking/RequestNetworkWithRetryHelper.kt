@@ -6,7 +6,7 @@ import android.net.NetworkRequest
 import android.os.Handler
 import android.os.Looper
 
-interface RequestNetworkWithRetryUseCase {
+interface RequestNetworkWithRetryHelper {
   operator fun invoke(
     connectivityManager: ConnectivityManager,
     networkRequest: NetworkRequest,
@@ -14,7 +14,7 @@ interface RequestNetworkWithRetryUseCase {
   )
 }
 
-class RequestNetworkWithRetryUseCaseImpl : RequestNetworkWithRetryUseCase {
+class RequestNetworkWithRetryHelperImpl : RequestNetworkWithRetryHelper {
 
   override operator fun invoke(
     connectivityManager: ConnectivityManager,
