@@ -9,10 +9,12 @@ kotlin = "2.1.10"
 kotlinxCoroutinesTest = "1.10.2"
 ktlint = "14.1.0"
 mockk = "1.14.9"
+mockwebserver3 = "5.3.0"
 okhttp = "5.3.2"
 jfrogFactory = "6.0.4"
 robolectric = "4.16.1"
 truth = "1.4.5"
+kover = "0.9.7"
 
 [libraries]
 androidx-espresso-core = { module = "androidx.test.espresso:espresso-core", version.ref = "espressoCore" }
@@ -21,6 +23,7 @@ core-ktx = { module = "androidx.test:core-ktx", version.ref = "coreKtxVersion" }
 junit = { module = "junit:junit", version.ref = "junit" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
+mockwebserver3 = { module = "com.squareup.okhttp3:mockwebserver3", version.ref = "mockwebserver3" }
 okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
 robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
 truth = { module = "com.google.truth:truth", version.ref = "truth" }
@@ -35,3 +38,4 @@ jfrogFactory = { id = "com.jfrog.artifactory", version.ref = "jfrogFactory" }
 mavenPublish = { id = "maven-publish" }
 apkscale = { id = "com.twilio.apkscale"}
 nexusPublish = { id = "io.github.gradle-nexus.publish-plugin", version = "2.0.0" }
+kover = {id = "org.jetbrains.kotlinx.kover", version.ref = "kover"}

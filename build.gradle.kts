@@ -21,6 +21,7 @@ plugins {
   alias(libs.plugins.kotlinAndroid).apply(false)
   alias(libs.plugins.ktlint)
   alias(libs.plugins.nexusPublish)
+  alias(libs.plugins.kover)
 }
 
 buildscript {

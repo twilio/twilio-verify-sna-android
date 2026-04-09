@@ -23,6 +23,7 @@ plugins {
   alias(libs.plugins.mavenPublish)
   alias(libs.plugins.apkscale)
   signing
+  alias(libs.plugins.kover)
 }
 
 val verifySnaVersionName: String by rootProject.extra
@@ -157,4 +158,5 @@ dependencies {
   testImplementation(libs.robolectric)
   testImplementation(libs.kotlinx.coroutines.test)
   testImplementation(libs.truth)
+  testImplementation(libs.mockwebserver3)
 }
