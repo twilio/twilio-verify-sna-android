@@ -66,10 +66,10 @@ tasks.register("incrementVersion") {
   doLast {
     val verifySnaVersionName: String by project.extra
     val verifySnaVersionCode: String by project.extra
-    val versionCode = verifySnaVersionName.toInt().plus(1)
-    var versionName = verifySnaVersionCode
-    if (project.hasProperty("version_number")) {
-      versionName = project.property("version_number") as String
+    val versionCode = verifySnaVersionCode.toInt().plus(1)
+    var versionName = verifySnaVersionName
+    if (project.hasProperty("version_name")) {
+      versionName = project.property("version_name") as String
     }
     ant.withGroovyBuilder {
       "propertyfile"("file" to "gradle.properties") {

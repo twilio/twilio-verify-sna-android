@@ -35,7 +35,7 @@ platform :android do
     ensure_git_status_clean(
       ignore_files: ["Gemfile.lock"]
     )
-    gradle(task: "-q :verify:incrementVersion", properties: { 'version_number' => next_version })
+    gradle(task: "-q incrementVersion", properties: { 'version_name' => next_version })
   end
 
   desc "Post release"
@@ -49,7 +49,7 @@ platform :android do
     sdk_size = sh("cat ../builds/sizeReport/VerifySNASDKSizeReport.txt")
     changelog = "#{notes}\\n\\n#{sdk_size}"
     sh("echo \"#{changelog}\\n\" | cat - ../CHANGELOG.md > temp && mv temp ../CHANGELOG.md")
-    git_add(path: ["./verify/gradle.properties", "./CHANGELOG.md", "./docs/#{next_version}", "./docs/latest"])
+    git_add(path: ["./verify_sna/gradle.properties", "./CHANGELOG.md"])
     sh("git config user.name \"#{ENV["GH_USER_NAME"]}\"")
     sh("git config user.email \"#{ENV["GH_USER_EMAIL"]}\"")
     sh("git commit -m \"Version bump to #{next_version} [skip ci]\"")
