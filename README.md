@@ -44,36 +44,22 @@ Offical documentation will be added via Twilio docs once this project gets relea
 
 <a name='Installation'></a>
 ## Installation
-**Important note:**
 
-We are working on having the Twilio Verify SNA SDK artifact available in a repository manager soon.
-
-Currently, it's possible to include the aar of the SDK including it as external package following the next steps:
-1. Clone the repo and open it in Android Studio.
-2. Generate the SDK aar file by building the project. The built file is located in:
+Ensure that Maven Central is listed in the repositories to look for project dependencies:
 ```
-/verify_sna/build/outputs/aar/
-```
-3. Put the aar file in `libs` folder of your app project (create the folder if it doesn't exist).
-4. On your app, in the project-level `build.gradle` file:
-```
-allprojects {
-    // ...
-  repositories {
-    // ...
-    flatDir {
-        dirs 'libs'
-    }
-  }
+repositories {
+    mavenCentral()
 }
 ```
-5. In the app-level `build.gradle` file add:
+Also, the `CHANGE_NETWORK_STATE` permission is required to use the SDK, so make sure to add it to your `AndroidManifest.xml` file:
 ```
-dependencies {
-    // ...
-    implementation (name:'aar-name', ext:'aar')
-}
+<uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
 ```
+Then, add the dependency to your app-level `build.gradle` file:
+```
+implementation("com.twilio:twilio-verify-sna-android:<latest_version>")
+```
+Check the latest version [here](https://mvnrepository.com/artifact/com.twilio/twilio-verify-sna-android).
 
 <a name='SampleApp'></a>
 ## Running the Sample App

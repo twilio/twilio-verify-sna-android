@@ -16,12 +16,25 @@
 
 pluginManagement {
   repositories {
+    google {
+      content {
+        includeGroupByRegex("com\\.android.*")
+        includeGroupByRegex("com\\.google.*")
+        includeGroupByRegex("androidx.*")
+      }
+    }
     gradlePluginPortal()
-    google()
     mavenCentral()
   }
 }
 
+dependencyResolutionManagement {
+  versionCatalogs {
+    create("sampleLibs") {
+      from(files("gradle/sample-libs.versions.toml"))
+    }
+  }
+}
+
 rootProject.name = "twilio-verify-sna-android"
-include ':sample'
-include ':verify_sna'
+include(":sample", ":verify_sna")

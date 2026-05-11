@@ -18,20 +18,14 @@ package com.twilio.verify_sna.domain.requestmanager
 
 import android.content.Context
 import android.net.ConnectivityManager
-import android.net.ConnectivityManager.NetworkCallback
-import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
-import android.os.Build.VERSION
-import android.os.Build.VERSION_CODES
-import android.os.Handler
-import android.os.Looper
 import com.twilio.verify_sna.common.TwilioVerifySnaException
-import com.twilio.verify_sna.networking.NetworkRequestProvider
+import com.twilio.verify_sna.networking.IsMobileDataEnabledHelper
 import com.twilio.verify_sna.networking.NetworkRequestResult
-import java.lang.reflect.Method
+import com.twilio.verify_sna.networking.RequestNetworkWithRetryHelper
+import com.twilio.verify_sna.networking.VerifySnaNetworkCallbackProvider
 import kotlin.coroutines.Continuation
-import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
@@ -42,7 +36,9 @@ interface RequestManager {
 
 class ConcreteRequestManager(
   private val context: Context,
-  private val networkRequestProvider: NetworkRequestProvider
+  private val isMobileDataEnabledHelper: IsMobileDataEnabledHelper,
+  private val verifySnaNetworkCallbackProvider: VerifySnaNetworkCallbackProvider,
+  private val requestNetworkWithRetryHelper: RequestNetworkWithRetryHelper
 ) : RequestManager {
 
   override suspend fun processUrl(url: String): NetworkRequestResult {
@@ -50,54 +46,13 @@ class ConcreteRequestManager(
       val connectivityManager = context.getSystemService(
         Context.CONNECTIVITY_SERVICE
       ) as ConnectivityManager
-
-      if (isMobileDataEnabled(connectivityManager)) {
+      if (isMobileDataEnabledHelper(connectivityManager)) {
         establishCellularConnection(connectivityManager, url, continuation)
       } else {
         continuation.resumeWithException(
           TwilioVerifySnaException.CellularNetworkNotAvailable
         )
       }
-    }
-  }
-
-  /**
-   * Android Framework doesn't count with a pre-build way of getting mobile network status,
-   * when Wi-Fi is active. Reflection fits well.
-   * Taken from https://stackoverflow.com/a/8243305
-   */
-  private fun isMobileDataEnabled(cm: ConnectivityManager): Boolean {
-    return try {
-      val c = Class.forName(cm.javaClass.name)
-      val m: Method = c.getDeclaredMethod("getMobileDataEnabled")
-      m.isAccessible = true
-      m.invoke(cm) as Boolean
-    } catch (exception: Exception) {
-      exception.printStackTrace()
-      false
-    }
-  }
-
-  private fun performRequest(
-    url: String,
-    network: Network,
-    continuation: Continuation<NetworkRequestResult>,
-    connectivityManager: ConnectivityManager,
-    networkCallback: NetworkCallback
-  ) {
-    try {
-      val networkRequestResult = networkRequestProvider.performRequest(url, network)
-      continuation.resume(networkRequestResult)
-    } catch (networkRequestException: TwilioVerifySnaException.NetworkRequestException) {
-      continuation.resumeWithException(
-        networkRequestException
-      )
-    } catch (e: Exception) {
-      continuation.resumeWithException(
-        TwilioVerifySnaException.NetworkRequestException(e)
-      )
-    } finally {
-      connectivityManager.unregisterNetworkCallback(networkCallback)
     }
   }
 
@@ -112,54 +67,16 @@ class ConcreteRequestManager(
       .addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED)
 
     val networkRequest = networkRequestBuilder.build()
-    val networkCallback = object : NetworkCallback() {
-      override fun onAvailable(network: Network) {
-        super.onAvailable(network)
-        if (VERSION.SDK_INT < VERSION_CODES.M) {
-          performRequest(url, network, continuation, connectivityManager, this)
-        }
-      }
+    val networkCallback = verifySnaNetworkCallbackProvider.provide(
+      url,
+      continuation,
+      connectivityManager
+    )
 
-      override fun onCapabilitiesChanged(
-        network: Network,
-        networkCapabilities: NetworkCapabilities
-      ) {
-        super.onCapabilitiesChanged(network, networkCapabilities)
-        if (VERSION.SDK_INT >= VERSION_CODES.M) {
-          if (networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)) {
-            performRequest(url, network, continuation, connectivityManager, this)
-          } else {
-            checkNetworkConnectivity(network)
-          }
-        }
-      }
-
-      private fun checkNetworkConnectivity(network: Network) {
-        try {
-          network.getByName("google.com").toString().isNotEmpty()
-        } catch (e: Exception) {
-          connectivityManager.unregisterNetworkCallback(this)
-          continuation.resumeWithException(
-            TwilioVerifySnaException.NetworkRequestException(
-              Exception("Network is not capable of connecting to internet"),
-            )
-          )
-        }
-      }
-    }
-
-    try {
-      connectivityManager.requestNetwork(
-        networkRequest,
-        networkCallback
-      )
-    } catch (e: Exception) {
-      Handler(Looper.getMainLooper()).postDelayed({
-        connectivityManager.requestNetwork(
-          networkRequest,
-          networkCallback
-        )
-      }, 500)
-    }
+    requestNetworkWithRetryHelper(
+      connectivityManager,
+      networkRequest,
+      networkCallback
+    )
   }
 }

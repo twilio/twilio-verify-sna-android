@@ -1,25 +1,19 @@
 version: 2.1
 
 orbs:
-  android: circleci/android@1.0.3
+  android: circleci/android@3.1.0
 
 references:
   workspace: &workspace
-    ~/code
+    .
 
-  ## Docker configuration
-  android_config: &android_config
-    working_directory: *workspace
-    docker:
-      - image: circleci/android:api-28
-    environment:
-      - _JAVA_OPTIONS: "-XX:+UseContainerSupport"
-      - JVM_OPTS: -Xmx3200m
-    resource_class: large
+  executor: &executor
+    name: android/android_machine
+    tag: default
 
   ## Cache
   gradle_key: &gradle_key
-    jars-{{ checksum "build.gradle" }}
+    jars-{{ checksum "build.gradle.kts" }}-{{ checksum "verify_sna/build.gradle.kts"}}
 
   restore_gradle_cache: &restore_gradle_cache
     restore_cache:
@@ -31,19 +25,74 @@ references:
       paths:
         - ~/.gradle
 
+commands:
+  setup:
+    steps:
+      - checkout
+      - restore_cache:
+          key: v1-gems-{{ checksum "Gemfile.lock" }}
+      - run:
+          name: Install Gems
+          command: bundle check || (bundle config set --local path 'vendor/bundle' && bundle install)
+      - save_cache:
+          key: v1-gems-{{ checksum "Gemfile.lock" }}
+          paths:
+            - vendor/bundle
+
+  signing_key:
+    steps:
+        - run:
+            name: Install signing key
+            command: echo $SIGNING_KEY | base64 -d >> $SIGNING_SECRET_KEY_RING_FILE
+
+  move_directory:
+    parameters:
+      from:
+        description: Directory to move
+        type: string
+      to:
+        description: Destination directory
+        type: string
+    steps:
+      - run: cp -R <<parameters.from>> <<parameters.to>>
+
 jobs:
-  build_and_unit_test:
-    <<: *android_config
+  assemble:
+    executor: *executor
     steps:
       - checkout
       - *restore_gradle_cache
       - run:
-          name: Running Unit Tests
-          command: ./gradlew verify_sna:test --no-daemon
+          name: Assembling the project
+          command: ./gradlew assemble --no-daemon
       - *save_gradle_cache
-  
+
+  unit_tests:
+    executor: *executor
+    steps:
+      - setup
+      - checkout
+      - *restore_gradle_cache
+      - run:
+          name: Running Unit Tests
+          command: ./gradlew --no-daemon verify_sna:koverXmlReportDebug verify_sna:koverVerify
+      - *save_gradle_cache
+      - store_artifacts:
+          path: "verify_sna/build/reports/kover"
+          destination: verify_sna_code_coverage
+      - run: mkdir -p test-results
+      - move_directory:
+          from: verify_sna/build/test-results/testDebugUnitTest/
+          to: test-results/verify_sna
+      - store_test_results:
+          path: "test-results"
+      - run:
+          name: Run the code coverage reporter
+          command: |
+            bundle exec danger --danger_id=code_coverage_report --dangerfile=dangerfiles/code_coverage_reporter
+
   ktlint_check:
-    <<: *android_config
+    executor: *executor
     steps:
       - checkout
       - *restore_gradle_cache
@@ -52,10 +101,62 @@ jobs:
           command: ./gradlew ktlintCheck
       - *save_gradle_cache
 
+  size_report:
+    executor: *executor
+    steps:
+      - checkout
+      - *restore_gradle_cache
+      - run:
+          name: Generating Size Report
+          command: ./gradlew :verify_sna:generateSizeReport
+      - *save_gradle_cache
+      - store_artifacts:
+          path: "verify_sna/build/outputs/sizeReport"
+          destination: sizeReport
+      - run: mkdir -p builds
+      - move_directory:
+          from: verify_sna/build/outputs/sizeReport/
+          to: builds
+      - persist_to_workspace:
+          root: *workspace
+          paths:
+            - builds
+
+  release:
+    executor: *executor
+    steps:
+      - setup
+      - checkout
+      - *restore_gradle_cache
+      - signing_key
+      - run:
+          name: Releasing the project
+          command: bundle exec fastlane release
+      - *save_gradle_cache
+
 workflows:
   workflow:
     jobs:
-      - ktlint_check
-      - build_and_unit_test:
+      - assemble
+      - ktlint_check:
+            requires:
+                - assemble
+      - unit_tests:
+          context:
+            - verify-sna
           requires:
             - ktlint_check
+      - size_report:
+          requires:
+            - unit_tests
+      - release:
+          context:
+            - verify-sna
+            - verify-sna-android
+            - verify-maven-publishing-android
+          requires:
+            - size_report
+          filters:
+            branches:
+              only:
+                - main
