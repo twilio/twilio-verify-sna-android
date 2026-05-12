@@ -158,7 +158,3 @@ workflows:
             - verify-maven-publishing-android
           requires:
             - size_report
-          filters:
-            branches:
-              only:
-                - main
