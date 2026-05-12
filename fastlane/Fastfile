@@ -4,9 +4,10 @@ platform :android do
 
   desc "Release a new production version"
   lane :release do
-    sdk_size = sh("cat ../builds/sizeReport/VerifySNASDKSizeReport.txt")
-    UI.message("SDK size report:")
-    UI.message("#{sdk_size}")
+    next unless verify(title: "Android Verify SNA", tag_prefix: "*")
+    increment_version()
+    gradle(task: "sonatypeVerifySnaReleaseUpload")
+    post_release()
   end
 
   desc "Verify next release"
