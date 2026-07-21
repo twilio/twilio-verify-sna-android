@@ -25,9 +25,17 @@ import com.twilio.verify_sna.networking.IsMobileDataEnabledHelper
 import com.twilio.verify_sna.networking.NetworkRequestResult
 import com.twilio.verify_sna.networking.RequestNetworkWithRetryHelper
 import com.twilio.verify_sna.networking.VerifySnaNetworkCallbackProvider
-import kotlin.coroutines.Continuation
+import kotlinx.coroutines.CancellableContinuation
+import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withTimeout
 import kotlin.coroutines.resumeWithException
-import kotlin.coroutines.suspendCoroutine
+
+/**
+ * Maximum time to wait for the cellular network callback to resume. If the cellular network
+ * never becomes available/validated, the request is cancelled instead of hanging forever.
+ */
+private const val NETWORK_TIMEOUT_MS = 30_000L
 
 interface RequestManager {
 
@@ -42,24 +50,36 @@ class ConcreteRequestManager(
 ) : RequestManager {
 
   override suspend fun processUrl(url: String): NetworkRequestResult {
-    return suspendCoroutine { continuation ->
-      val connectivityManager = context.getSystemService(
-        Context.CONNECTIVITY_SERVICE
-      ) as ConnectivityManager
-      if (isMobileDataEnabledHelper(connectivityManager)) {
-        establishCellularConnection(connectivityManager, url, continuation)
-      } else {
-        continuation.resumeWithException(
-          TwilioVerifySnaException.CellularNetworkNotAvailable
-        )
+    return try {
+      withTimeout(NETWORK_TIMEOUT_MS) {
+        suspendCancellableCoroutine { continuation ->
+          val connectivityManager = context.getSystemService(
+            Context.CONNECTIVITY_SERVICE
+          ) as? ConnectivityManager
+          if (connectivityManager == null) {
+            continuation.resumeWithException(
+              TwilioVerifySnaException.CellularNetworkNotAvailable
+            )
+            return@suspendCancellableCoroutine
+          }
+          if (isMobileDataEnabledHelper(connectivityManager)) {
+            establishCellularConnection(connectivityManager, url, continuation)
+          } else {
+            continuation.resumeWithException(
+              TwilioVerifySnaException.CellularNetworkNotAvailable
+            )
+          }
+        }
       }
+    } catch (timeout: TimeoutCancellationException) {
+      throw TwilioVerifySnaException.NetworkRequestException(timeout)
     }
   }
 
   private fun establishCellularConnection(
     connectivityManager: ConnectivityManager,
     url: String,
-    continuation: Continuation<NetworkRequestResult>
+    continuation: CancellableContinuation<NetworkRequestResult>
   ) {
     val networkRequestBuilder = NetworkRequest.Builder()
       .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
@@ -72,6 +92,15 @@ class ConcreteRequestManager(
       continuation,
       connectivityManager
     )
+
+    // If the request times out or is cancelled, unregister the callback so it doesn't leak.
+    continuation.invokeOnCancellation {
+      try {
+        connectivityManager.unregisterNetworkCallback(networkCallback)
+      } catch (e: IllegalArgumentException) {
+        // The callback may have already been unregistered on the success/failure path.
+      }
+    }
 
     requestNetworkWithRetryHelper(
       connectivityManager,

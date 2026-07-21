@@ -104,4 +104,52 @@ class RequestManagerTest {
       assertThat(e).isInstanceOf(TwilioVerifySnaException.CellularNetworkNotAvailable::class.java)
     }
   }
+
+  @Test
+  fun `Process an Url resumes with Cellular Network Not Available when ConnectivityManager is null`() =
+    runTest {
+      val testUrl = "test.url.com"
+
+      every {
+        context.getSystemService(Context.CONNECTIVITY_SERVICE)
+      } returns null
+
+      var thrown: Throwable? = null
+      try {
+        requestManager.processUrl(testUrl)
+      } catch (e: Throwable) {
+        thrown = e
+      }
+      assertThat(thrown)
+        .isInstanceOf(TwilioVerifySnaException.CellularNetworkNotAvailable::class.java)
+    }
+
+  @Test
+  fun `Process an Url resumes with Network Request Exception when the callback never resumes`() =
+    runTest {
+      val testUrl = "test.url.com"
+      val connectivityManager: ConnectivityManager = mockk(relaxed = true)
+
+      every {
+        context.getSystemService(Context.CONNECTIVITY_SERVICE)
+      } returns connectivityManager
+
+      every {
+        isMobileDataEnabledHelper(connectivityManager)
+      } returns true
+
+      // requestNetworkWithRetryHelper is a relaxed mock that never resumes the continuation,
+      // so the 30s timeout must fire (runTest auto-advances virtual time when the dispatcher idles).
+      var thrown: Throwable? = null
+      try {
+        requestManager.processUrl(testUrl)
+      } catch (e: Throwable) {
+        thrown = e
+      }
+      assertThat(thrown)
+        .isInstanceOf(TwilioVerifySnaException.NetworkRequestException::class.java)
+      verify {
+        connectivityManager.unregisterNetworkCallback(any<NetworkCallback>())
+      }
+    }
 }

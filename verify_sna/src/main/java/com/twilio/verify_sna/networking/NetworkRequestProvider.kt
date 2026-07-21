@@ -21,6 +21,7 @@ import com.twilio.verify_sna.common.TwilioVerifySnaException
 import okhttp3.OkHttpClient
 import okhttp3.Protocol
 import okhttp3.Request
+import java.io.IOException
 
 interface NetworkRequestProvider {
 
@@ -41,7 +42,13 @@ class ConcreteNetworkRequestProvider : NetworkRequestProvider {
       )
       .build()
     val request = Request.Builder().url(urlText).build()
-    val response = okHttpClient.newCall(request).execute()
+    val response = try {
+      okHttpClient.newCall(request).execute()
+    } catch (e: IOException) {
+      // Network errors, DNS failures, etc. are surfaced as a typed exception instead of an
+      // uncaught IOException.
+      throw TwilioVerifySnaException.NetworkRequestException(e)
+    }
     if (response.isSuccessful) {
       val status = response.code
       val message = response.body?.string()
