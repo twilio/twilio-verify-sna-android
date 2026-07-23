@@ -45,4 +45,13 @@ class IsMobileDataEnabledHelperTest {
 
     assertThat(helper(connectivityManager)).isFalse()
   }
+
+  @Config(sdk = [28])
+  @Test
+  fun `Returns false when reading data enabled state throws a SecurityException`() {
+    every { context.getSystemService(Context.TELEPHONY_SERVICE) } returns telephonyManager
+    every { telephonyManager.isDataEnabled } throws SecurityException("READ_PHONE_STATE denied")
+
+    assertThat(helper(connectivityManager)).isFalse()
+  }
 }

@@ -42,18 +42,21 @@ class ConcreteNetworkRequestProvider : NetworkRequestProvider {
       )
       .build()
     val request = Request.Builder().url(urlText).build()
-    val response = try {
-      okHttpClient.newCall(request).execute()
+    return try {
+      val response = okHttpClient.newCall(request).execute()
+      if (response.isSuccessful) {
+        val status = response.code
+        val message = response.body?.string()
+        NetworkRequestResult(status, message)
+      } else {
+        throw TwilioVerifySnaException.NetworkRequestException(
+          Exception("SNA_URL wasn't successful")
+        )
+      }
     } catch (e: IOException) {
-      // Network errors, DNS failures, etc. are surfaced as a typed exception instead of an
-      // uncaught IOException.
+      // Network errors, DNS failures, truncated reads, etc. are surfaced as a typed exception
+      // instead of an uncaught IOException.
       throw TwilioVerifySnaException.NetworkRequestException(e)
     }
-    if (response.isSuccessful) {
-      val status = response.code
-      val message = response.body?.string()
-      return NetworkRequestResult(status, message)
-    }
-    throw TwilioVerifySnaException.NetworkRequestException(Exception("SNA_URL wasn't successful"))
   }
 }
