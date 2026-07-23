@@ -54,8 +54,6 @@ class ConcreteNetworkRequestProvider : NetworkRequestProvider {
         )
       }
     } catch (e: IOException) {
-      // Network errors, DNS failures, truncated reads, etc. are surfaced as a typed exception
-      // instead of an uncaught IOException.
       throw TwilioVerifySnaException.NetworkRequestException(e)
     }
   }

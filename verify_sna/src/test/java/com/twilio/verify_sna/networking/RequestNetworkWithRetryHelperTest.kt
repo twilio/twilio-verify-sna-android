@@ -39,7 +39,6 @@ class RequestNetworkWithRetryHelperTest {
     val networkRequest: NetworkRequest = mockk(relaxed = true)
     val networkCallback: NetworkCallback = mockk(relaxed = true)
 
-    // First call throws, second (retry) succeeds.
     every {
       connectivityManager.requestNetwork(networkRequest, networkCallback)
     } throws RuntimeException("first attempt failed") andThenAnswer { }
@@ -47,7 +46,6 @@ class RequestNetworkWithRetryHelperTest {
     val requestNetworkWithRetryHelper = RequestNetworkWithRetryHelperImpl()
 
     requestNetworkWithRetryHelper(connectivityManager, networkRequest, networkCallback)
-    // Advance past the 500ms postDelayed retry.
     shadowOf(Looper.getMainLooper()).idleFor(500, TimeUnit.MILLISECONDS)
 
     verify(exactly = 2) {
@@ -61,7 +59,6 @@ class RequestNetworkWithRetryHelperTest {
     val networkRequest: NetworkRequest = mockk(relaxed = true)
     val networkCallback: NetworkCallback = mockk(relaxed = true)
 
-    // Both the first call and the retry fail; the helper must swallow both.
     every {
       connectivityManager.requestNetwork(networkRequest, networkCallback)
     } throws RuntimeException("attempt failed")
@@ -69,7 +66,6 @@ class RequestNetworkWithRetryHelperTest {
     val requestNetworkWithRetryHelper = RequestNetworkWithRetryHelperImpl()
 
     requestNetworkWithRetryHelper(connectivityManager, networkRequest, networkCallback)
-    // Advancing past the 500ms retry must not throw.
     shadowOf(Looper.getMainLooper()).idleFor(500, TimeUnit.MILLISECONDS)
 
     verify(exactly = 2) {

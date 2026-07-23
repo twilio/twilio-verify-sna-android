@@ -101,11 +101,9 @@ class WelcomeFragment : Fragment() {
   }
 
   /**
-   * Checks whether mobile data is enabled.
-   *
-   * On Android O (API 26) and above we use the public [TelephonyManager.isDataEnabled] API. The
-   * old reflection approach (ConnectivityManager.getMobileDataEnabled) is greylisted/blocked on
-   * Android P+ and would always return false, wrongly blocking the flow on modern devices.
+   * Android Framework doesn't count with a pre-build way of getting mobile network status,
+   * when Wi-Fi is active. Reflection fits well.
+   * Taken from https://stackoverflow.com/a/8243305
    */
   private fun isMobileDataEnabled(cm: ConnectivityManager): Boolean {
     val telephonyManager = requireActivity().getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager

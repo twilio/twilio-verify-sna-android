@@ -48,7 +48,6 @@ class VerifySnaNetworkCallbackProviderTest {
     val callback = provider.provide(url, continuation, connectivityManager)
     val capabilities = validatedCapabilities()
 
-    // Simulate onCapabilitiesChanged firing repeatedly before the callback is unregistered.
     callback.onCapabilitiesChanged(network, capabilities)
     callback.onCapabilitiesChanged(network, capabilities)
     callback.onCapabilitiesChanged(network, capabilities)

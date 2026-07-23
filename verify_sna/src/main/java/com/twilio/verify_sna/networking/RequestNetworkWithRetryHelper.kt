@@ -28,9 +28,6 @@ class RequestNetworkWithRetryHelperImpl : RequestNetworkWithRetryHelper {
       )
     } catch (e: Exception) {
       Handler(Looper.getMainLooper()).postDelayed({
-        // Guard the retry so a second failure doesn't crash the main thread. If the retry also
-        // fails the continuation won't resume here, but the timeout in RequestManager backstops
-        // that case by cancelling the request and unregistering the callback.
         try {
           connectivityManager.requestNetwork(
             networkRequest,

@@ -66,7 +66,6 @@ class NetworkRequestProviderTest {
   fun `Perform request wraps an IOException in a Network Request Exception`() {
     server.start()
     val baseUrl = server.url("/test")
-    // Close the server so the connection attempt fails with an IOException.
     server.close()
     every {
       mockNetwork.socketFactory

@@ -138,8 +138,6 @@ class RequestManagerTest {
         isMobileDataEnabledHelper(connectivityManager)
       } returns true
 
-      // requestNetworkWithRetryHelper is a relaxed mock that never resumes the continuation,
-      // so the 30s timeout must fire (runTest auto-advances virtual time when the dispatcher idles).
       var thrown: Throwable? = null
       try {
         requestManager.processUrl(testUrl)

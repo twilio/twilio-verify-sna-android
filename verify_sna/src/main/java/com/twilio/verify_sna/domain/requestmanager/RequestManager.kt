@@ -31,10 +31,6 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withTimeout
 import kotlin.coroutines.resumeWithException
 
-/**
- * Maximum time to wait for the cellular network callback to resume. If the cellular network
- * never becomes available/validated, the request is cancelled instead of hanging forever.
- */
 private const val NETWORK_TIMEOUT_MS = 30_000L
 
 interface RequestManager {
@@ -93,12 +89,10 @@ class ConcreteRequestManager(
       connectivityManager
     )
 
-    // If the request times out or is cancelled, unregister the callback so it doesn't leak.
     continuation.invokeOnCancellation {
       try {
         connectivityManager.unregisterNetworkCallback(networkCallback)
       } catch (e: IllegalArgumentException) {
-        // The callback may have already been unregistered on the success/failure path.
       }
     }
 

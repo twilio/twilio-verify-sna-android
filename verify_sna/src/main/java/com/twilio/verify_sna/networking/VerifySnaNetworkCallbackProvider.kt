@@ -30,9 +30,6 @@ class VerifySnaNetworkCallbackProviderImpl(
     continuation: Continuation<NetworkRequestResult>,
     connectivityManager: ConnectivityManager
   ): NetworkCallback {
-    // Network callbacks such as onCapabilitiesChanged can fire multiple times before the
-    // callback is unregistered. This guard guarantees the continuation is resumed exactly once,
-    // preventing "IllegalStateException: Already resumed" crashes.
     val hasResumed = AtomicBoolean(false)
     return object : NetworkCallback() {
       override fun onAvailable(network: Network) {
@@ -51,9 +48,6 @@ class VerifySnaNetworkCallbackProviderImpl(
           if (networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)) {
             performRequest(url, network, continuation, connectivityManager, this, hasResumed)
           }
-          // If the network is not validated yet we simply wait for a subsequent
-          // onCapabilitiesChanged. A network that never validates is backstopped by the
-          // timeout in RequestManager, which cancels the request and unregisters this callback.
         }
       }
     }
@@ -67,7 +61,6 @@ class VerifySnaNetworkCallbackProviderImpl(
     networkCallback: NetworkCallback,
     hasResumed: AtomicBoolean
   ) {
-    // Only the first invocation is allowed to resume the continuation and unregister the callback.
     if (!hasResumed.compareAndSet(false, true)) {
       return
     }

@@ -25,8 +25,6 @@ class IsMobileDataEnabledHelperImpl(
       return try {
         telephonyManager?.isDataEnabled ?: false
       } catch (securityException: SecurityException) {
-        // isDataEnabled may require READ_PHONE_STATE on some devices/OS versions. The SDK does not
-        // declare that permission, so treat a denial as "not available" rather than crashing.
         securityException.printStackTrace()
         false
       }
@@ -38,8 +36,6 @@ class IsMobileDataEnabledHelperImpl(
    * Android Framework doesn't count with a pre-build way of getting mobile network status,
    * when Wi-Fi is active. Reflection fits well.
    * Taken from https://stackoverflow.com/a/8243305
-   *
-   * Only used below Android O, where the hidden API is still accessible.
    */
   private fun isMobileDataEnabledByReflection(connectivityManager: ConnectivityManager): Boolean {
     return try {
