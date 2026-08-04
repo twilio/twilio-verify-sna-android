@@ -28,14 +28,13 @@ class RequestNetworkWithRetryHelperImpl : RequestNetworkWithRetryHelper {
       )
     } catch (e: Exception) {
       Handler(Looper.getMainLooper()).postDelayed({
+        // Retry after 500ms is the requestNetwork call fails for any reason.
         try {
           connectivityManager.requestNetwork(
             networkRequest,
             networkCallback
           )
         } catch (retryException: Exception) {
-          // A failed retry is backstopped by the timeout in RequestManager. A logging hook will
-          // report this once the SDK has a logging mechanism.
         }
       }, 500)
     }
