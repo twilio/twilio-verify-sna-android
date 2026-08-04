@@ -74,9 +74,16 @@ class WelcomeFragment : Fragment() {
     }
     // save in cache the phone number and backend URL
     saveInPreferences(phoneNumber, backendUrl)
-    if (!hasCellularCoverage()) {
-      showErrorMessage(R.string.cellular_network_required)
-      return
+    when (cellularCoverageStatus()) {
+      CellularCoverageStatus.SIM_NOT_READY -> {
+        showErrorMessage(R.string.sim_not_ready_error)
+        return
+      }
+      CellularCoverageStatus.MOBILE_DATA_DISABLED -> {
+        showErrorMessage(R.string.mobile_data_disabled_error)
+        return
+      }
+      CellularCoverageStatus.AVAILABLE -> Unit
     }
     val action = WelcomeFragmentDirections
       .actionWelcomeFragmentToVerifyingFragment(
@@ -90,14 +97,25 @@ class WelcomeFragment : Fragment() {
   }
 
   /**
-   * Verifies cellular network is on
+   * Verifies cellular network is on, returning the specific reason when it isn't so the user
+   * can be told what to do about it.
    */
-  private fun hasCellularCoverage(): Boolean {
+  private fun cellularCoverageStatus(): CellularCoverageStatus {
+    val telephonyManager =
+      requireActivity().getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
+    if (telephonyManager.simState != TelephonyManager.SIM_STATE_READY) {
+      return CellularCoverageStatus.SIM_NOT_READY
+    }
+
     val connectivityManager = requireContext().getSystemService(
       Context.CONNECTIVITY_SERVICE
     ) as ConnectivityManager
 
-    return isMobileDataEnabled(connectivityManager)
+    return if (isMobileDataEnabled(telephonyManager, connectivityManager)) {
+      CellularCoverageStatus.AVAILABLE
+    } else {
+      CellularCoverageStatus.MOBILE_DATA_DISABLED
+    }
   }
 
   /**
@@ -105,12 +123,10 @@ class WelcomeFragment : Fragment() {
    * when Wi-Fi is active. Reflection fits well.
    * Taken from https://stackoverflow.com/a/8243305
    */
-  private fun isMobileDataEnabled(cm: ConnectivityManager): Boolean {
-    val telephonyManager = requireActivity().getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
-    if (telephonyManager.simState != TelephonyManager.SIM_STATE_READY) {
-      return false
-    }
-
+  private fun isMobileDataEnabled(
+    telephonyManager: TelephonyManager,
+    cm: ConnectivityManager
+  ): Boolean {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
       return try {
         telephonyManager.isDataEnabled
@@ -138,5 +154,11 @@ class WelcomeFragment : Fragment() {
       putString(BACKEND_URL_KEY, backendUrl)
       apply()
     }
+  }
+
+  private enum class CellularCoverageStatus {
+    AVAILABLE,
+    SIM_NOT_READY,
+    MOBILE_DATA_DISABLED
   }
 }

@@ -117,6 +117,7 @@ The app will ask the network carrier if the provided phone number is the same us
 | CellularNetworkNotAvailable | Cellular network not available                       | Cellular network not available, check if the device has cellular internet connection or you are not using a simulator or tablet. |
 | NoResultFromUrl             | Unable to get a valid result from the requested URL. | Unable to get a redirection path or a result path from the url, probably the SNA URL is corrupted (or maybe expired)             |
 | NetworkRequestException     | Error processing the network request.                | An error was thrown in the network layer, check the inner exception property for more details.                                   |
+| NetworkRequestTimeoutException | The network request timed out.                    | The cellular network did not become available within the timeout window, e.g. no cellular coverage or the network never validated. |
 | RunInMainThreadException    | The SDK detected it was running in the main thread.  | The SDK is performing long-time tasks that can freeze or stop the app, it's required to run the SDK in a background thread.      |
 | UnexpectedException         | An unknown error was thrown.                         | Check the inner exception for more details.                                                                                      |
 

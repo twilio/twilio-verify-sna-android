@@ -145,7 +145,7 @@ class RequestManagerTest {
         thrown = e
       }
       assertThat(thrown)
-        .isInstanceOf(TwilioVerifySnaException.NetworkRequestException::class.java)
+        .isInstanceOf(TwilioVerifySnaException.NetworkRequestTimeoutException::class.java)
       verify {
         connectivityManager.unregisterNetworkCallback(any<NetworkCallback>())
       }

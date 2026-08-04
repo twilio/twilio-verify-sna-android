@@ -68,7 +68,7 @@ class ConcreteRequestManager(
         }
       }
     } catch (timeout: TimeoutCancellationException) {
-      throw TwilioVerifySnaException.NetworkRequestException(timeout)
+      throw TwilioVerifySnaException.NetworkRequestTimeoutException
     }
   }
 

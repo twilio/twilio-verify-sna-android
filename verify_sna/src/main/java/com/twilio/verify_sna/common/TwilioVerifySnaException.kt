@@ -47,6 +47,11 @@ sealed class TwilioVerifySnaException(
     cause = exception
   )
 
+  object NetworkRequestTimeoutException : TwilioVerifySnaException(
+    description = "The network request timed out.",
+    technicalError = "The cellular network did not become available within the timeout window."
+  )
+
   object RunInMainThreadException : TwilioVerifySnaException(
     description = "Can't run inside main thread."
   )
