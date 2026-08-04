@@ -25,7 +25,8 @@ class IsMobileDataEnabledHelperImpl(
       return try {
         telephonyManager?.isDataEnabled ?: false
       } catch (securityException: SecurityException) {
-        securityException.printStackTrace()
+        // Recoverable: treat an undeterminable data state as "not available". A logging hook
+        // will report this once the SDK has a logging mechanism.
         false
       }
     }
@@ -44,7 +45,8 @@ class IsMobileDataEnabledHelperImpl(
       m.isAccessible = true
       m.invoke(connectivityManager) as Boolean
     } catch (exception: Exception) {
-      exception.printStackTrace()
+      // Recoverable: treat an undeterminable data state as "not available". A logging hook
+      // will report this once the SDK has a logging mechanism.
       false
     }
   }

@@ -131,7 +131,6 @@ class WelcomeFragment : Fragment() {
       return try {
         telephonyManager.isDataEnabled
       } catch (securityException: SecurityException) {
-        securityException.printStackTrace()
         false
       }
     }
@@ -142,7 +141,6 @@ class WelcomeFragment : Fragment() {
       m.isAccessible = true
       m.invoke(cm) as Boolean
     } catch (exception: Exception) {
-      exception.printStackTrace()
       false
     }
   }

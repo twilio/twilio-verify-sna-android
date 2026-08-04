@@ -34,7 +34,8 @@ class RequestNetworkWithRetryHelperImpl : RequestNetworkWithRetryHelper {
             networkCallback
           )
         } catch (retryException: Exception) {
-          retryException.printStackTrace()
+          // A failed retry is backstopped by the timeout in RequestManager. A logging hook will
+          // report this once the SDK has a logging mechanism.
         }
       }, 500)
     }
