@@ -51,7 +51,7 @@ class RequestManagerTest {
     } returns connectivityManager
 
     every {
-      isMobileDataEnabledHelper(connectivityManager)
+      isMobileDataEnabledHelper()
     } returns true
 
     val continuationSlot = slot<Continuation<NetworkRequestResult>>()
@@ -95,7 +95,7 @@ class RequestManagerTest {
     } returns connectivityManager
 
     every {
-      isMobileDataEnabledHelper(connectivityManager)
+      isMobileDataEnabledHelper()
     } returns false
 
     try {
@@ -135,7 +135,7 @@ class RequestManagerTest {
       } returns connectivityManager
 
       every {
-        isMobileDataEnabledHelper(connectivityManager)
+        isMobileDataEnabledHelper()
       } returns true
 
       var thrown: Throwable? = null

@@ -26,7 +26,7 @@ class IsMobileDataEnabledHelperTest {
     every { context.getSystemService(Context.TELEPHONY_SERVICE) } returns telephonyManager
     every { telephonyManager.isDataEnabled } returns true
 
-    assertThat(helper(connectivityManager)).isTrue()
+    assertThat(helper()).isTrue()
   }
 
   @Config(sdk = [28])
@@ -35,7 +35,7 @@ class IsMobileDataEnabledHelperTest {
     every { context.getSystemService(Context.TELEPHONY_SERVICE) } returns telephonyManager
     every { telephonyManager.isDataEnabled } returns false
 
-    assertThat(helper(connectivityManager)).isFalse()
+    assertThat(helper()).isFalse()
   }
 
   @Config(sdk = [28])
@@ -43,7 +43,7 @@ class IsMobileDataEnabledHelperTest {
   fun `Returns false when TelephonyManager is unavailable`() {
     every { context.getSystemService(Context.TELEPHONY_SERVICE) } returns null
 
-    assertThat(helper(connectivityManager)).isFalse()
+    assertThat(helper()).isFalse()
   }
 
   @Config(sdk = [28])
@@ -52,6 +52,22 @@ class IsMobileDataEnabledHelperTest {
     every { context.getSystemService(Context.TELEPHONY_SERVICE) } returns telephonyManager
     every { telephonyManager.isDataEnabled } throws SecurityException("READ_PHONE_STATE denied")
 
-    assertThat(helper(connectivityManager)).isFalse()
+    assertThat(helper()).isFalse()
+  }
+
+  @Config(sdk = [25])
+  @Test
+  fun `Returns false when ConnectivityManager is unavailable below Android O`() {
+    every { context.getSystemService(Context.CONNECTIVITY_SERVICE) } returns null
+
+    assertThat(helper()).isFalse()
+  }
+
+  @Config(sdk = [25])
+  @Test
+  fun `Returns false when the hidden method is missing below Android O`() {
+    every { context.getSystemService(Context.CONNECTIVITY_SERVICE) } returns connectivityManager
+
+    assertThat(helper()).isFalse()
   }
 }

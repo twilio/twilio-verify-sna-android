@@ -16,8 +16,6 @@
 package com.twilio.verify.sna.sample
 
 import android.content.Context
-import android.net.ConnectivityManager
-import android.os.Build
 import android.os.Bundle
 import android.telephony.TelephonyManager
 import android.view.LayoutInflater
@@ -27,7 +25,8 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.twilio.verify.sna.sample.databinding.FragmentWelcomeBinding
-import java.lang.reflect.Method
+import com.twilio.verify_sna.networking.IsMobileDataEnabledHelper
+import com.twilio.verify_sna.networking.IsMobileDataEnabledHelperImpl
 
 private const val PHONE_NUMBER_KEY = "phoneNumber"
 private const val BACKEND_URL_KEY = "backendUrl"
@@ -35,6 +34,10 @@ private const val BACKEND_URL_KEY = "backendUrl"
 class WelcomeFragment : Fragment() {
 
   private lateinit var binding: FragmentWelcomeBinding
+
+  private val isMobileDataEnabledHelper: IsMobileDataEnabledHelper by lazy {
+    IsMobileDataEnabledHelperImpl(requireContext().applicationContext)
+  }
 
   override fun onCreateView(
     inflater: LayoutInflater,
@@ -107,41 +110,10 @@ class WelcomeFragment : Fragment() {
       return CellularCoverageStatus.SIM_NOT_READY
     }
 
-    val connectivityManager = requireContext().getSystemService(
-      Context.CONNECTIVITY_SERVICE
-    ) as ConnectivityManager
-
-    return if (isMobileDataEnabled(telephonyManager, connectivityManager)) {
+    return if (isMobileDataEnabledHelper()) {
       CellularCoverageStatus.AVAILABLE
     } else {
       CellularCoverageStatus.MOBILE_DATA_DISABLED
-    }
-  }
-
-  /**
-   * Android Framework doesn't count with a pre-build way of getting mobile network status,
-   * when Wi-Fi is active. Reflection fits well.
-   * Taken from https://stackoverflow.com/a/8243305
-   */
-  private fun isMobileDataEnabled(
-    telephonyManager: TelephonyManager,
-    cm: ConnectivityManager
-  ): Boolean {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-      return try {
-        telephonyManager.isDataEnabled
-      } catch (securityException: SecurityException) {
-        false
-      }
-    }
-
-    return try {
-      val c = Class.forName(cm.javaClass.name)
-      val m: Method = c.getDeclaredMethod("getMobileDataEnabled")
-      m.isAccessible = true
-      m.invoke(cm) as Boolean
-    } catch (exception: Exception) {
-      false
     }
   }
 

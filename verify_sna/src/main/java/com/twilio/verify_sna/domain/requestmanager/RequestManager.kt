@@ -30,6 +30,7 @@ import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withTimeout
 import kotlin.coroutines.resumeWithException
+import kotlin.time.Duration.Companion.milliseconds
 
 private const val NETWORK_TIMEOUT_MS = 30_000L
 
@@ -47,7 +48,7 @@ class ConcreteRequestManager(
 
   override suspend fun processUrl(url: String): NetworkRequestResult {
     return try {
-      withTimeout(NETWORK_TIMEOUT_MS) {
+      withTimeout(NETWORK_TIMEOUT_MS.milliseconds) {
         suspendCancellableCoroutine { continuation ->
           val connectivityManager = context.getSystemService(
             Context.CONNECTIVITY_SERVICE
@@ -58,7 +59,7 @@ class ConcreteRequestManager(
             )
             return@suspendCancellableCoroutine
           }
-          if (isMobileDataEnabledHelper(connectivityManager)) {
+          if (isMobileDataEnabledHelper()) {
             establishCellularConnection(connectivityManager, url, continuation)
           } else {
             continuation.resumeWithException(
