@@ -101,6 +101,12 @@ class ConcreteRequestManager(
       connectivityManager,
       networkRequest,
       networkCallback
-    )
+    ) { requestNetworkException ->
+      // Both attempts failed, so the callback was never registered and nothing else will resume
+      // the continuation. Surface the cause instead of letting the caller wait out the timeout.
+      continuation.resumeWithException(
+        TwilioVerifySnaException.NetworkRequestException(requestNetworkException)
+      )
+    }
   }
 }

@@ -67,7 +67,8 @@ class RequestManagerTest {
       requestNetworkWithRetryHelper(
         connectivityManager,
         any(),
-        networkCallback
+        networkCallback,
+        any()
       )
     } answers {
       continuationSlot.captured.resume(expectedResult)
@@ -80,10 +81,85 @@ class RequestManagerTest {
       requestNetworkWithRetryHelper(
         connectivityManager,
         any(),
+        any(),
         any()
       )
     }
   }
+
+  @Test
+  fun `Process an Url surfaces the original cause when requesting the network keeps failing`() =
+    runTest {
+      val testUrl = "test.url.com"
+      val connectivityManager: ConnectivityManager = mockk(relaxed = true)
+      val requestNetworkException = SecurityException("CHANGE_NETWORK_STATE denied")
+
+      every {
+        context.getSystemService(Context.CONNECTIVITY_SERVICE)
+      } returns connectivityManager
+
+      every { isMobileDataEnabledHelper() } returns true
+
+      val onFailureSlot = slot<(Exception) -> Unit>()
+      every {
+        requestNetworkWithRetryHelper(
+          connectivityManager,
+          any(),
+          any(),
+          capture(onFailureSlot)
+        )
+      } answers {
+        onFailureSlot.captured(requestNetworkException)
+      }
+
+      var thrown: Throwable? = null
+      try {
+        requestManager.processUrl(testUrl)
+      } catch (e: Throwable) {
+        thrown = e
+      }
+
+      assertThat(thrown)
+        .isInstanceOf(TwilioVerifySnaException.NetworkRequestException::class.java)
+      assertThat(thrown).hasCauseThat().isSameInstanceAs(requestNetworkException)
+    }
+
+  @Test
+  fun `Process an Url ignores a retry failure reported after the request already timed out`() =
+    runTest {
+      val testUrl = "test.url.com"
+      val connectivityManager: ConnectivityManager = mockk(relaxed = true)
+
+      every {
+        context.getSystemService(Context.CONNECTIVITY_SERVICE)
+      } returns connectivityManager
+
+      every { isMobileDataEnabledHelper() } returns true
+
+      // Capture onFailure without resuming, so the request times out first.
+      val onFailureSlot = slot<(Exception) -> Unit>()
+      every {
+        requestNetworkWithRetryHelper(
+          connectivityManager,
+          any(),
+          any(),
+          capture(onFailureSlot)
+        )
+      } answers { }
+
+      var thrown: Throwable? = null
+      try {
+        requestManager.processUrl(testUrl)
+      } catch (e: Throwable) {
+        thrown = e
+      }
+      assertThat(thrown)
+        .isInstanceOf(TwilioVerifySnaException.NetworkRequestTimeoutException::class.java)
+
+      // The delayed retry reports its failure after the continuation was already cancelled.
+      // Resuming a cancelled continuation must be a no-op rather than a crash.
+      onFailureSlot.captured(SecurityException("CHANGE_NETWORK_STATE denied"))
+    }
 
   @Test
   fun `Process an Url returns Cellular Network Not Available exception`() = runTest {
