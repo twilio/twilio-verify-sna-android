@@ -17,5 +17,11 @@
 
 <manifest
     xmlns:android="http://schemas.android.com/apk/res/android">
+  <!-- Declared here so integrators do not have to. Each is required by SDK internals rather
+       than by anything the app chooses: requestNetwork needs CHANGE_NETWORK_STATE, the
+       mobile data check needs ACCESS_NETWORK_STATE, and the cellular request needs INTERNET.
+       None is a dangerous permission, so they merge into the consuming app at build time. -->
   <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+  <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
+  <uses-permission android:name="android.permission.INTERNET" />
 </manifest>

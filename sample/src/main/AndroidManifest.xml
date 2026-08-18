@@ -16,10 +16,8 @@
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.twilio.verify.sna.sample">
 
-  <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-
-  <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
-
+  <!-- ACCESS_NETWORK_STATE and CHANGE_NETWORK_STATE come from the SDK manifest. INTERNET is
+       declared here because the sample calls its own backend directly with Retrofit. -->
   <uses-permission android:name="android.permission.INTERNET" />
 
   <application

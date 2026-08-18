@@ -51,15 +51,22 @@ repositories {
     mavenCentral()
 }
 ```
-Also, the `CHANGE_NETWORK_STATE` permission is required to use the SDK, so make sure to add it to your `AndroidManifest.xml` file:
-```
-<uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
-```
 Then, add the dependency to your app-level `build.gradle` file:
 ```
 implementation("com.twilio:twilio-verify-sna-android:<latest_version>")
 ```
 Check the latest version [here](https://mvnrepository.com/artifact/com.twilio/twilio-verify-sna-android).
+
+The SDK declares the permissions it needs, so no manifest changes are required in your app. These
+are merged into your app at build time:
+
+| Permission | Used for |
+|------------|----------|
+| `ACCESS_NETWORK_STATE` | Reading whether mobile data is enabled. |
+| `CHANGE_NETWORK_STATE` | Requesting the cellular network used to process the SNA URL. |
+| `INTERNET`             | Performing the request over that cellular network. |
+
+None of these is a [dangerous permission](https://developer.android.com/guide/topics/permissions/overview#dangerous_permissions), so they are granted at install time with no runtime prompt.
 
 <a name='SampleApp'></a>
 ## Running the Sample App
