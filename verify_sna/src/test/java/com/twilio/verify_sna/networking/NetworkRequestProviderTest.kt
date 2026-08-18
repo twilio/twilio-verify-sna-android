@@ -61,4 +61,17 @@ class NetworkRequestProviderTest {
     networkRequestProvider.performRequest(baseUrl.toString(), mockNetwork)
     fail("Expected a TwilioVerifySnaException.NetworkRequestException to be thrown")
   }
+
+  @Test(expected = TwilioVerifySnaException.NetworkRequestException::class)
+  fun `Perform request wraps an IOException in a Network Request Exception`() {
+    server.start()
+    val baseUrl = server.url("/test")
+    server.close()
+    every {
+      mockNetwork.socketFactory
+    } returns SocketFactory.getDefault()
+
+    networkRequestProvider.performRequest(baseUrl.toString(), mockNetwork)
+    fail("Expected a TwilioVerifySnaException.NetworkRequestException to be thrown")
+  }
 }

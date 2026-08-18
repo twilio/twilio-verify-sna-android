@@ -40,7 +40,7 @@ class VerifyingFragment : Fragment() {
   // Create TwilioVerifySna instance using builder
   private val twilioVerifySna: TwilioVerifySna by lazy {
     TwilioVerifySna
-      .Builder(requireContext())
+      .Builder(requireContext().applicationContext)
       .build()
   }
 
@@ -68,7 +68,7 @@ class VerifyingFragment : Fragment() {
    * 3. Check with the backend URL provided if verification was successful.
    */
   private fun invokeVerifySna() {
-    lifecycleScope.launch {
+    viewLifecycleOwner.lifecycleScope.launch {
       val snaUrl = getSnaUrl(args.backendUrl, args.phoneNumber)
       if (snaUrl.isNullOrEmpty()) {
         onFail()
@@ -135,6 +135,7 @@ class VerifyingFragment : Fragment() {
    * Redirect to successful validation screen
    */
   private fun onSuccess() {
+    if (!isAdded) return
     val action = VerifyingFragmentDirections
       .actionVerifyingFragmentToVerificationSuccessfulFragment()
     findNavController().navigate(action)
@@ -144,6 +145,7 @@ class VerifyingFragment : Fragment() {
    * Redirect to failed validation screen
    */
   private fun onFail() {
+    if (!isAdded) return
     val action = VerifyingFragmentDirections
       .actionVerifyingFragmentToVerificationFailedFragment()
     findNavController().navigate(action)
