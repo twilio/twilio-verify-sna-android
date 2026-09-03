@@ -1,0 +1,26 @@
+name: Set up build environment
+description: >
+  Installs the JDK, Gradle and Ruby toolchains every CI job needs. Every job
+  drives fastlane, so all three are required everywhere -- keeping them in one
+  composite action stops the versions drifting between jobs.
+
+runs:
+  using: composite
+  steps:
+    # JDK 17 is required, not optional: verify_sna sets kotlin { jvmToolchain(17) }
+    # and settings.gradle.kts has no toolchain resolver, so CI must supply it.
+    - name: Set up JDK 17
+      uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v6.0.0
+      with:
+        distribution: temurin
+        java-version: '17'
+
+    - name: Set up Gradle
+      uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
+
+    # ruby-version is deliberately omitted: setup-ruby reads .ruby-version, so
+    # local and CI share a single source of truth and cannot drift.
+    - name: Set up Ruby and install gems
+      uses: ruby/setup-ruby@95ef2b042f9d7a56d8268cba8559e2842e2ad01b # v1.321.0
+      with:
+        bundler-cache: true
