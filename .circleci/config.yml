@@ -26,6 +26,7 @@ references:
         - ~/.gradle
 
 commands:
+  # Every job drives fastlane now, so every job needs the gem bundle.
   setup:
     steps:
       - checkout
@@ -39,84 +40,66 @@ commands:
           paths:
             - vendor/bundle
 
-  signing_key:
-    steps:
-        - run:
-            name: Install signing key
-            command: echo $SIGNING_KEY | base64 -d >> $SIGNING_SECRET_KEY_RING_FILE
-
-  move_directory:
-    parameters:
-      from:
-        description: Directory to move
-        type: string
-      to:
-        description: Destination directory
-        type: string
-    steps:
-      - run: cp -R <<parameters.from>> <<parameters.to>>
-
 jobs:
   assemble:
     executor: *executor
     steps:
-      - checkout
+      - setup
       - *restore_gradle_cache
       - run:
           name: Assembling the project
-          command: ./gradlew assemble --no-daemon
+          command: bundle exec fastlane assemble
+      - *save_gradle_cache
+
+  ktlint_check:
+    executor: *executor
+    steps:
+      - setup
+      - *restore_gradle_cache
+      - run:
+          name: Running Ktlint
+          command: bundle exec fastlane lint
       - *save_gradle_cache
 
   unit_tests:
     executor: *executor
     steps:
       - setup
-      - checkout
       - *restore_gradle_cache
       - run:
           name: Running Unit Tests
-          command: ./gradlew --no-daemon verify_sna:koverXmlReportDebug verify_sna:koverVerify
+          command: bundle exec fastlane test
       - *save_gradle_cache
       - store_artifacts:
           path: "verify_sna/build/reports/kover"
           destination: verify_sna_code_coverage
-      - run: mkdir -p test-results
-      - move_directory:
-          from: verify_sna/build/test-results/testDebugUnitTest/
-          to: test-results/verify_sna
+      # CircleCI-only staging: store_test_results needs results laid out in its
+      # own directory. GitHub Actions' upload-artifact takes the source path
+      # directly, so this deliberately is NOT a fastlane lane -- it is deleted
+      # at cutover rather than ported.
+      - run:
+          name: Staging JUnit results for store_test_results
+          command: |
+            mkdir -p test-results
+            cp -R verify_sna/build/test-results/testDebugUnitTest/ test-results/verify_sna
       - store_test_results:
           path: "test-results"
       - run:
           name: Run the code coverage reporter
-          command: |
-            bundle exec danger --danger_id=code_coverage_report --dangerfile=dangerfiles/code_coverage_reporter
-
-  ktlint_check:
-    executor: *executor
-    steps:
-      - checkout
-      - *restore_gradle_cache
-      - run:
-          name: Running Ktlint
-          command: ./gradlew ktlintCheck
-      - *save_gradle_cache
+          command: bundle exec fastlane report_code_coverage
 
   size_report:
     executor: *executor
     steps:
-      - checkout
+      - setup
       - *restore_gradle_cache
       - run:
           name: Generating Size Report
-          command: ./gradlew :verify_sna:generateSizeReport
+          command: bundle exec fastlane size_report
       - *save_gradle_cache
       - store_artifacts:
           path: "verify_sna/build/outputs/sizeReport"
           destination: sizeReport
-      - run: mkdir -p builds
-      - move_directory:
-          from: verify_sna/build/outputs/sizeReport/
-          to: builds
       - persist_to_workspace:
           root: *workspace
           paths:
@@ -126,11 +109,12 @@ jobs:
     executor: *executor
     steps:
       - setup
-      - checkout
       - attach_workspace:
           at: *workspace
       - *restore_gradle_cache
-      - signing_key
+      - run:
+          name: Install signing key
+          command: bundle exec fastlane install_signing_key
       - run:
           name: Releasing the project
           command: bundle exec fastlane release
