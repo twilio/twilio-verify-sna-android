@@ -16,18 +16,23 @@ concurrency:
 permissions:
   contents: read
 
-# Every job resolves its runner from `vars.CI_RUNNER`, falling back to
-# ubuntu-latest. Setting that one repo variable moves the whole pipeline to a
-# self-hosted label with no code change. It is left unset because the
-# twilio-internal-* labels used elsewhere in the org are unconfirmed for this
-# public repo. Daemon usage is controlled per-task inside the lanes rather than
-# by a global GRADLE_OPTS, which would fight setup-gradle's cache handling.
+# Runner: ubuntu-latest-large, the `github-hosted-large` pool this repo is a
+# member of. Plain `ubuntu-latest` does NOT work here -- jobs queue forever with
+# no runner ever assigned. Membership is self-service Terraform in
+# twilio-internal/secure-supply-chain-domain
+# (iac/terraform/.../github-hosted-large-repos.txt), where twilio/twilio-verify-sna-android
+# is already listed; the pool's labels are ubuntu-latest-large / windows-latest-large.
+#
+# `vars.CI_RUNNER` overrides this per-repo without a code change.
+#
+# Daemon usage is controlled per-task inside the lanes rather than by a global
+# GRADLE_OPTS, which would fight setup-gradle's cache handling.
 jobs:
   # Job bodies are deliberately a single fastlane call: all build logic lives in
   # fastlane/Fastfile so it runs identically here, on any other CI, or locally.
   assemble:
     name: Assemble
-    runs-on: ${{ vars.CI_RUNNER || 'ubuntu-latest' }}
+    runs-on: ${{ vars.CI_RUNNER || 'ubuntu-latest-large' }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: ./.github/actions/setup-build-env
@@ -37,7 +42,7 @@ jobs:
   ktlint:
     name: Ktlint
     needs: [assemble]
-    runs-on: ${{ vars.CI_RUNNER || 'ubuntu-latest' }}
+    runs-on: ${{ vars.CI_RUNNER || 'ubuntu-latest-large' }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: ./.github/actions/setup-build-env
@@ -47,7 +52,7 @@ jobs:
   unit_tests:
     name: Unit tests
     needs: [ktlint]
-    runs-on: ${{ vars.CI_RUNNER || 'ubuntu-latest' }}
+    runs-on: ${{ vars.CI_RUNNER || 'ubuntu-latest-large' }}
     permissions:
       contents: read
       pull-requests: write # Danger comments on the PR
@@ -89,7 +94,7 @@ jobs:
   size_report:
     name: Size report
     needs: [unit_tests]
-    runs-on: ${{ vars.CI_RUNNER || 'ubuntu-latest' }}
+    runs-on: ${{ vars.CI_RUNNER || 'ubuntu-latest-large' }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: ./.github/actions/setup-build-env
