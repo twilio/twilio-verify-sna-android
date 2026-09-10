@@ -1,14 +1,10 @@
 name: CI
 
-# Mirrors the CircleCI trigger exactly: every push to every branch. Only the
-# release work is branch-gated. Note that Danger cannot comment without a
-# pull_request context -- add `pull_request: {branches: [dev, main]}` here and
-# widen the concurrency group below if PR comments are wanted.
+# Mirrors CircleCI: every push to every branch. Danger needs a pull_request
+# context to comment, so add `pull_request:` here if PR comments are wanted.
 on:
   push:
 
-# Not parity, but an unfiltered push trigger stacks runs on force-pushed
-# branches. Superseded runs are cancelled instead.
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
@@ -16,20 +12,10 @@ concurrency:
 permissions:
   contents: read
 
-# Runner: ubuntu-latest-large, the `github-hosted-large` pool this repo is a
-# member of. Plain `ubuntu-latest` does NOT work here -- jobs queue forever with
-# no runner ever assigned. Membership is self-service Terraform in
-# twilio-internal/secure-supply-chain-domain
-# (iac/terraform/.../github-hosted-large-repos.txt), where twilio/twilio-verify-sna-android
-# is already listed; the pool's labels are ubuntu-latest-large / windows-latest-large.
-#
-# `vars.CI_RUNNER` overrides this per-repo without a code change.
-#
-# Daemon usage is controlled per-task inside the lanes rather than by a global
-# GRADLE_OPTS, which would fight setup-gradle's cache handling.
+# ubuntu-latest-large is required: on plain ubuntu-latest jobs queue forever and
+# are never assigned a runner. This repo is a member of the org's
+# `github-hosted-large` pool. `vars.CI_RUNNER` overrides the label.
 jobs:
-  # Job bodies are deliberately a single fastlane call: all build logic lives in
-  # fastlane/Fastfile so it runs identically here, on any other CI, or locally.
   assemble:
     name: Assemble
     runs-on: ${{ vars.CI_RUNNER || 'ubuntu-latest-large' }}
@@ -63,9 +49,7 @@ jobs:
       - name: Run unit tests with coverage
         run: bundle exec fastlane test
 
-      # Replaces CircleCI's store_test_results. There is no native test-results
-      # UI here, and upload-artifact takes the source path directly, so the
-      # mkdir/cp staging the CircleCI job needed is gone rather than ported.
+      # Replaces CircleCI's store_test_results.
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -83,8 +67,6 @@ jobs:
           if-no-files-found: error
 
       # Non-blocking, matching danger-shroud's failIfUnderProjectThreshold: false.
-      # Also cannot post on a bare push (no PR context) or from a fork PR, whose
-      # token is read-only -- so a failure here must not fail the build.
       - name: Report code coverage
         continue-on-error: true
         env:
@@ -102,8 +84,7 @@ jobs:
       - name: Generate the size report
         run: bundle exec fastlane size_report
 
-      # Replaces persist_to_workspace. The release flow reads
-      # builds/sizeReport/VerifySNASDKSizeReport.txt from this artifact.
+      # Replaces persist_to_workspace; the release flow reads this artifact.
       - name: Upload size report
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:

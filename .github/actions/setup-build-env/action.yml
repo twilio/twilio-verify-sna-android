@@ -1,8 +1,5 @@
 name: Set up build environment
-description: >
-  Installs the JDK and Ruby toolchains every CI job needs, and restores the Gradle
-  cache. Every job drives fastlane, so both toolchains are required everywhere --
-  keeping them in one composite action stops the versions drifting between jobs.
+description: Installs the JDK and Ruby toolchains and restores the Gradle cache.
 
 runs:
   using: composite
@@ -15,15 +12,10 @@ runs:
         distribution: temurin
         java-version: '17'
 
-    # NOTE: gradle/actions/setup-gradle would be the idiomatic choice here, but it
-    # is not on this org's allowed-actions list, so a workflow using it fails at
-    # startup. actions/cache is GitHub-owned and needs no allow-list entry.
-    # To switch back, add
-    #   gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb
-    # to allowed-actions/twilio.txt in twilio-internal/github-actions-allowlist.
-    #
-    # The key hashes more than CircleCI's did: its key covered only two build
-    # files, so version-catalog and wrapper changes never invalidated the cache.
+    # gradle/actions/setup-gradle is not on this org's allowed-actions list, so a
+    # workflow using it fails at startup. To switch back, allow-list
+    # gradle/actions@9c971963bec38e04b3d30dcc455b5382be2fdbfb (repo-level: the
+    # parser requires owner/repo) in twilio-internal/github-actions-allowlist.
     - name: Restore Gradle cache
       uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:

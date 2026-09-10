@@ -2,17 +2,11 @@ require 'fileutils'
 
 default_platform(:android)
 
-# Absolute path to the repository root.
-#
-# fastlane evaluates the Fastfile with the working directory set to fastlane/, so
-# repo-relative paths are not safe to assume (hence the "../" in the release lanes
-# below). Resolve paths through this helper instead of guessing at the CWD.
+# fastlane runs with the working directory set to fastlane/, not the repo root.
 def repo_root
   @repo_root ||= `git rev-parse --show-toplevel`.strip
 end
 
-# Resolve the Android SDK location the same way the root Gradle build does:
-# ANDROID_HOME, then ANDROID_SDK_ROOT, then sdk.dir in local.properties.
 def android_sdk_dir
   %w[ANDROID_HOME ANDROID_SDK_ROOT].each do |var|
     value = ENV[var].to_s
@@ -28,17 +22,9 @@ def android_sdk_dir
   ""
 end
 
-# apkscale needs more of the SDK environment than the root Gradle build does, and
-# neither requirement is satisfied on a stock developer machine:
-#
-#   1. It runs measureSize in a NESTED Gradle build under verify_sna/build/apkscale/,
-#      which does not inherit the root project's local.properties and so can find
-#      the SDK only through ANDROID_HOME.
-#   2. It shells out to `apkanalyzer`, which ships in cmdline-tools and is not
-#      necessarily on PATH.
-#
-# CI images generally provide both, which is why this never surfaced in CircleCI.
-# Setting them here keeps the lane runnable anywhere.
+# apkscale runs measureSize in a nested Gradle build that ignores the root
+# local.properties, and shells out to apkanalyzer from cmdline-tools. It needs
+# ANDROID_HOME set and cmdline-tools on PATH -- CI images have both, laptops don't.
 def ensure_android_sdk_env
   sdk_dir = android_sdk_dir
   if sdk_dir.empty?
@@ -64,14 +50,6 @@ def ensure_android_sdk_env
 end
 
 platform :android do
-
-  # ---------------------------------------------------------------------------
-  # CI lanes
-  #
-  # One lane per CI job. These hold the logic that used to sit inline in
-  # .circleci/config.yml, so the CI config carries no logic of its own and the
-  # whole pipeline can be run from any CI platform or a laptop.
-  # ---------------------------------------------------------------------------
 
   desc "Assemble all variants"
   lane :assemble do
@@ -110,9 +88,7 @@ platform :android do
     # the corrected environment.
     gradle(task: ":verify_sna:generateSizeReport", flags: "--no-daemon")
 
-    # builds/ is this lane's output contract: the release lanes read
-    # builds/sizeReport/VerifySNASDKSizeReport.txt from it, and it is the
-    # directory that crosses job boundaries as a CI artifact.
+    # builds/ is this lane's output contract -- the release lanes read it from here.
     destination = File.join(repo_root, "builds")
     FileUtils.mkdir_p(destination)
     FileUtils.cp_r(File.join(repo_root, "verify_sna/build/outputs/sizeReport"), destination)
@@ -136,10 +112,6 @@ platform :android do
     File.binwrite(path, key.unpack1("m"))
     UI.success("Signing keyring written to #{path} (#{File.size(path)} bytes)")
   end
-
-  # ---------------------------------------------------------------------------
-  # Release lanes
-  # ---------------------------------------------------------------------------
 
   desc "Release a new production version"
   lane :release do
