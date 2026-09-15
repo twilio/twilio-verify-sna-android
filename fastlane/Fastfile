@@ -1,4 +1,6 @@
 require 'fileutils'
+require 'net/http'
+require 'uri'
 
 default_platform(:android)
 
@@ -47,6 +49,32 @@ def ensure_android_sdk_env
   entries = ENV["PATH"].to_s.split(File::PATH_SEPARATOR)
   ENV["PATH"] = ([tools_bin] + entries).join(File::PATH_SEPARATOR) unless entries.include?(tools_bin)
   UI.message("Android SDK: #{sdk_dir} (apkanalyzer available for apkscale)")
+end
+
+def gradle_property(key)
+  properties_file = File.join(repo_root, "gradle.properties")
+  entry = File.readlines(properties_file).find { |line| line.start_with?("#{key}=") }
+  UI.user_error!("#{key} not found in gradle.properties") unless entry
+  entry.split("=", 2).last.strip
+end
+
+# Guards `publish` against re-publishing a version Central already has. Checked
+# against Central directly rather than the git tag: 0.0.4 shipped to Central but
+# its tag/CHANGELOG/GitHub release were lost when the old release lane died
+# mid-way, so a tag-based check would have let a duplicate publish through.
+def already_published_to_maven_central?(version)
+  uri = URI("https://repo1.maven.org/maven2/com/twilio/twilio-verify-sna-android/#{version}/twilio-verify-sna-android-#{version}.pom")
+  Net::HTTP.get_response(uri).is_a?(Net::HTTPSuccess)
+end
+
+# The topmost "# x.y.z (date)" section of CHANGELOG.md -- the entry a human
+# reviewed and merged in the release PR, used verbatim as the GitHub release
+# description rather than regenerating notes from commits a second time.
+def latest_changelog_entry
+  changelog = File.read(File.join(repo_root, "CHANGELOG.md"))
+  sections = changelog.split(/^# /)
+  UI.user_error!("CHANGELOG.md has no version entries") if sections.size < 2
+  "# #{sections[1]}".strip
 end
 
 platform :android do
@@ -113,70 +141,85 @@ platform :android do
     UI.success("Signing keyring written to #{path} (#{File.size(path)} bytes)")
   end
 
-  desc "Release a new production version"
-  lane :release do
-    next unless verify(title: "Android Verify SNA", tag_prefix: "*")
-    increment_version()
-    gradle(task: "sonatypeVerifySnaReleaseUpload")
-    post_release()
-  end
+  desc "Compute the next version, bump gradle.properties + CHANGELOG.md, and open the release PR"
+  lane :prepare_release do
+    ensure_git_status_clean(ignore_files: ["Gemfile.lock"])
 
-  desc "Verify next release"
-  lane :verify do |options|
-    if !is_ci? then
-      UI.message("#{options[:title]} deploy was triggered on local machine")
-      gradle(task: "clean")
-    else
-      UI.message("#{options[:title]} deploy was triggered on CI")
+    is_releaseable = analyze_commits(match: "*")
+    UI.user_error!("Nothing releasable since the last tag") unless is_releaseable
+    next_version = lane_context[SharedValues::RELEASE_NEXT_VERSION]
+
+    # analyze_commits computes the next version from the last TAG, not from
+    # gradle.properties or Maven Central. 0.0.4 shipped to Central without ever
+    # being tagged, so it will keep computing "0.0.4" as next until a 0.0.4 tag
+    # exists. Catch that here rather than opening a release PR for a version
+    # that is already published.
+    if already_published_to_maven_central?(next_version)
+      UI.user_error!(
+        "#{next_version} is already on Maven Central but has no matching git tag "         "-- back-fill the tag on the commit that was actually published, then re-run."
+      )
     end
 
-    # Check if there is any change since last version
-    is_releaseable = analyze_commits(
-      match: options[:tag_prefix]
-    )
-    unless is_releaseable
-      UI.important("Skip deploying #{options[:title]}. No changes since last one!")
-    end
-    is_releaseable
-  end
+    branch = "release/#{next_version}"
+    existing = sh("git ls-remote --heads origin #{branch}", log: false).strip
+    UI.user_error!("#{branch} already exists on origin -- delete it or merge its PR first.") unless existing.empty?
 
-  desc "Increment version"
-  lane :increment_version do |options|
-    next_version = lane_context[SharedValues::RELEASE_NEXT_VERSION]
-    ensure_git_status_clean(
-      ignore_files: ["Gemfile.lock"]
-    )
-    gradle(task: "-q incrementVersion", properties: { 'version_name' => next_version })
-  end
+    gradle(task: "-q incrementVersion", properties: { "version_name" => next_version })
 
-  desc "Post release"
-  lane :post_release do
-    next_version = lane_context[SharedValues::RELEASE_NEXT_VERSION]
     notes = conventional_changelog(
       format: "markdown",
-      commit_url: "twilio-verify-sna-android"
+      commit_url: "https://github.com/twilio/twilio-verify-sna-android/commit"
     )
-    tag = next_version
-    sdk_size = sh("cat ../builds/sizeReport/VerifySNASDKSizeReport.txt")
-    changelog = "#{notes}\\n\\n#{sdk_size}"
-    sh("echo \"#{changelog}\\n\" | cat - ../CHANGELOG.md > temp && mv temp ../CHANGELOG.md")
-    git_add(path: ["./verify_sna/gradle.properties", "./CHANGELOG.md"])
-    sh("git config user.name \"#{ENV["GH_USER_NAME"]}\"")
-    sh("git config user.email \"#{ENV["GH_USER_EMAIL"]}\"")
-    sh("git commit -m \"Version bump to #{next_version} [skip ci]\"")
-    push_to_git_remote
-    add_git_tag(tag: tag)
-    push_git_tags(tag: tag)
+    sdk_size = File.read(File.join(repo_root, "builds/sizeReport/VerifySNASDKSizeReport.txt"))
+    changelog_path = File.join(repo_root, "CHANGELOG.md")
+    File.write(changelog_path, "#{notes}\n\n#{sdk_size}\n#{File.read(changelog_path)}")
+
+    sh("git checkout -b #{branch}")
+    git_add(path: ["./gradle.properties", "./CHANGELOG.md"])
+    sh("git config user.name \"#{ENV.fetch('GH_USER_NAME')}\"")
+    sh("git config user.email \"#{ENV.fetch('GH_USER_EMAIL')}\"")
+    sh("git commit -m \"Version bump to #{next_version}\"")
+    push_to_git_remote(local_branch: branch, remote_branch: branch)
+
+    # create_pull_request swallows GitHub API errors (its error handler returns
+    # from the action rather than raising -- a proc {} `return` returns from the
+    # enclosing method), so a failed request would otherwise look like success.
+    create_pull_request(
+      api_token: ENV.fetch("GH_TOKEN"),
+      repo: "twilio/twilio-verify-sna-android",
+      title: "Release #{next_version}",
+      base: "main",
+      head: branch,
+      body: notes
+    )
+    pr_url = lane_context[SharedValues::CREATE_PULL_REQUEST_HTML_URL]
+    UI.user_error!("Failed to open the release PR for #{branch} -- see the GitHub API error above.") unless pr_url
+    UI.success("Opened release PR: #{pr_url}")
+  end
+
+  desc "Publish the version in gradle.properties to Maven Central, Artifactory, and GitHub"
+  lane :publish do
+    version = gradle_property("verifySnaVersionName")
+
+    if already_published_to_maven_central?(version)
+      UI.important("#{version} is already on Maven Central; nothing to publish.")
+      next
+    end
+
+    gradle(task: "sonatypeVerifySnaReleaseUpload")
+
+    add_git_tag(tag: version)
+    push_git_tags(tag: version)
+
     set_github_release(
       repository_name: "twilio/twilio-verify-sna-android",
-      api_token: ENV["GH_TOKEN"],
-      name: tag,
-      tag_name: tag,
-      description: notes,
+      api_token: ENV.fetch("GH_TOKEN"),
+      name: version,
+      tag_name: version,
+      description: latest_changelog_entry,
       commitish: "main"
     )
 
     gradle(task: "artifactoryLibraryReleaseUpload")
   end
-
 end
