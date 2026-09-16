@@ -58,18 +58,11 @@ def gradle_property(key)
   entry.split("=", 2).last.strip
 end
 
-# Guards `publish` against re-publishing a version Central already has. Checked
-# against Central directly rather than the git tag: 0.0.4 shipped to Central but
-# its tag/CHANGELOG/GitHub release were lost when the old release lane died
-# mid-way, so a tag-based check would have let a duplicate publish through.
 def already_published_to_maven_central?(version)
   uri = URI("https://repo1.maven.org/maven2/com/twilio/twilio-verify-sna-android/#{version}/twilio-verify-sna-android-#{version}.pom")
   Net::HTTP.get_response(uri).is_a?(Net::HTTPSuccess)
 end
 
-# The topmost "# x.y.z (date)" section of CHANGELOG.md -- the entry a human
-# reviewed and merged in the release PR, used verbatim as the GitHub release
-# description rather than regenerating notes from commits a second time.
 def latest_changelog_entry
   changelog = File.read(File.join(repo_root, "CHANGELOG.md"))
   sections = changelog.split(/^# /)
@@ -149,11 +142,6 @@ platform :android do
     UI.user_error!("Nothing releasable since the last tag") unless is_releaseable
     next_version = lane_context[SharedValues::RELEASE_NEXT_VERSION]
 
-    # analyze_commits computes the next version from the last TAG, not from
-    # gradle.properties or Maven Central. 0.0.4 shipped to Central without ever
-    # being tagged, so it will keep computing "0.0.4" as next until a 0.0.4 tag
-    # exists. Catch that here rather than opening a release PR for a version
-    # that is already published.
     if already_published_to_maven_central?(next_version)
       UI.user_error!(
         "#{next_version} is already on Maven Central but has no matching git tag "         "-- back-fill the tag on the commit that was actually published, then re-run."
@@ -181,9 +169,6 @@ platform :android do
     sh("git commit -m \"Version bump to #{next_version}\"")
     push_to_git_remote(local_branch: branch, remote_branch: branch)
 
-    # create_pull_request swallows GitHub API errors (its error handler returns
-    # from the action rather than raising -- a proc {} `return` returns from the
-    # enclosing method), so a failed request would otherwise look like success.
     create_pull_request(
       api_token: ENV.fetch("GH_TOKEN"),
       repo: "twilio/twilio-verify-sna-android",

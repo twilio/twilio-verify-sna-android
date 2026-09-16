@@ -14,11 +14,10 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: dev # always start from dev, regardless of which ref was dispatched
-          fetch-depth: 0 # analyze_commits and conventional_changelog need full history + tags
+          ref: dev
+          fetch-depth: 0
       - uses: ./.github/actions/setup-build-env
 
-      # Produces builds/sizeReport/, which prepare_release folds into the changelog.
       - name: Generate the size report
         run: bundle exec fastlane size_report
 
