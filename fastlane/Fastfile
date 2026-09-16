@@ -144,7 +144,8 @@ platform :android do
 
     if already_published_to_maven_central?(next_version)
       UI.user_error!(
-        "#{next_version} is already on Maven Central but has no matching git tag "         "-- back-fill the tag on the commit that was actually published, then re-run."
+        "#{next_version} is already on Maven Central but has no matching git tag " \
+        "-- back-fill the tag on the commit that was actually published, then re-run."
       )
     end
 
