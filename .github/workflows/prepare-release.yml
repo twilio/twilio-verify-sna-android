@@ -3,27 +3,48 @@ name: Prepare release
 on:
   workflow_dispatch:
 
+concurrency:
+  group: prepare-release
+
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
 
 jobs:
   prepare_release:
     name: Prepare release
+    if: github.repository_owner == 'twilio' && github.ref == 'refs/heads/main'
     runs-on: ${{ vars.CI_RUNNER || 'ubuntu-latest-large' }}
+    environment: production
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: dev
           fetch-depth: 0
+          persist-credentials: false
       - uses: ./.github/actions/setup-build-env
 
       - name: Generate the size report
         run: bundle exec fastlane size_report
 
-      - name: Prepare release
+      - name: Set the release commit author
         env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
           GH_USER_NAME: ${{ secrets.GH_USER_NAME }}
           GH_USER_EMAIL: ${{ secrets.GH_USER_EMAIL }}
+        run: |
+          git config user.name "$GH_USER_NAME"
+          git config user.email "$GH_USER_EMAIL"
+
+      - name: Commit the release
+        id: release
         run: bundle exec fastlane prepare_release
+
+      # Pushed with the bot's token so the release branch gets CI.
+      - name: Push the branch and open the release PR
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_BOT_TOKEN }}
+          BRANCH: ${{ steps.release.outputs.branch }}
+          VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          gh auth setup-git
+          git push origin "$BRANCH"
+          gh pr create --base main --head "$BRANCH" --title "Release $VERSION" --body-file builds/release-notes.md

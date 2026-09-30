@@ -165,37 +165,39 @@ platform :android do
 
     sh("git checkout -b #{branch}")
     git_add(path: ["./gradle.properties", "./CHANGELOG.md"])
-    sh("git config user.name \"#{ENV.fetch('GH_USER_NAME')}\"")
-    sh("git config user.email \"#{ENV.fetch('GH_USER_EMAIL')}\"")
     sh("git commit -m \"Version bump to #{next_version}\"")
-    push_to_git_remote(local_branch: branch, remote_branch: branch)
 
-    create_pull_request(
-      api_token: ENV.fetch("GH_TOKEN"),
-      repo: "twilio/twilio-verify-sna-android",
-      title: "Release #{next_version}",
-      base: "main",
-      head: branch,
-      body: notes
-    )
-    pr_url = lane_context[SharedValues::CREATE_PULL_REQUEST_HTML_URL]
-    UI.user_error!("Failed to open the release PR for #{branch} -- see the GitHub API error above.") unless pr_url
-    UI.success("Opened release PR: #{pr_url}")
+    File.write(File.join(repo_root, "builds", "release-notes.md"), notes)
+    if ENV["GITHUB_OUTPUT"]
+      File.open(ENV["GITHUB_OUTPUT"], "a") do |f|
+        f.puts("version=#{next_version}")
+        f.puts("branch=#{branch}")
+      end
+    end
   end
 
-  desc "Publish the version in gradle.properties to Maven Central, Artifactory, and GitHub"
+  desc "Publish the version in gradle.properties to Maven Central and Artifactory"
   lane :publish do
     version = gradle_property("verifySnaVersionName")
-
     if already_published_to_maven_central?(version)
-      UI.important("#{version} is already on Maven Central; nothing to publish.")
+      UI.important("#{version} is already on Maven Central; skipping the upload.")
       next
     end
 
     gradle(task: "sonatypeVerifySnaReleaseUpload")
+    gradle(task: "artifactoryLibraryReleaseUpload")
+  end
 
-    add_git_tag(tag: version)
-    push_git_tags(tag: version)
+  desc "Tag the version in gradle.properties and create its GitHub release, if they don't exist yet"
+  lane :tag_release do
+    version = gradle_property("verifySnaVersionName")
+    if sh("git ls-remote --tags origin refs/tags/#{version}", log: false).strip.empty?
+      add_git_tag(tag: version)
+      push_git_tags(tag: version)
+    end
+
+    existing = get_github_release(url: "twilio/twilio-verify-sna-android", version: version, api_token: ENV.fetch("GH_TOKEN"))
+    next if existing
 
     set_github_release(
       repository_name: "twilio/twilio-verify-sna-android",
@@ -205,7 +207,5 @@ platform :android do
       description: latest_changelog_entry,
       commitish: "main"
     )
-
-    gradle(task: "artifactoryLibraryReleaseUpload")
   end
 end
