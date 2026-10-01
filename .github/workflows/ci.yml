@@ -107,6 +107,14 @@ jobs:
           persist-credentials: false
       - uses: ./.github/actions/setup-build-env
 
+      # Tagged before uploading, so a failed upload can be re-run against the same tag.
+      - name: Tag the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh auth setup-git
+          bundle exec fastlane tag_version
+
       - name: Publish to Maven Central and Artifactory
         env:
           SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
@@ -126,9 +134,7 @@ jobs:
         if: always()
         run: rm -f "$RUNNER_TEMP/signing-key.gpg"
 
-      - name: Tag and create the GitHub release
+      - name: Create the GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: |
-          gh auth setup-git
-          bundle exec fastlane tag_release
+        run: bundle exec fastlane github_release

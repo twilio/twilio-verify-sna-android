@@ -188,16 +188,21 @@ platform :android do
     gradle(task: "artifactoryLibraryReleaseUpload")
   end
 
-  desc "Tag the version in gradle.properties and create its GitHub release, if they don't exist yet"
-  lane :tag_release do
+  desc "Tag the current commit with the version in gradle.properties, unless that tag exists"
+  lane :tag_version do
     version = gradle_property("verifySnaVersionName")
-    if sh("git ls-remote --tags origin refs/tags/#{version}", log: false).strip.empty?
-      add_git_tag(tag: version)
-      push_git_tags(tag: version)
+    next unless sh("git ls-remote --tags origin refs/tags/#{version}", log: false).strip.empty?
+    if already_published_to_maven_central?(version)
+      UI.user_error!("#{version} is already on Maven Central but has no git tag. Back-fill the tag on the commit that was published, then re-run.")
     end
+    add_git_tag(tag: version)
+    push_git_tags(tag: version)
+  end
 
-    existing = get_github_release(url: "twilio/twilio-verify-sna-android", version: version, api_token: ENV.fetch("GH_TOKEN"))
-    next if existing
+  desc "Create the GitHub release for the version in gradle.properties, unless it exists"
+  lane :github_release do
+    version = gradle_property("verifySnaVersionName")
+    next if get_github_release(url: "twilio/twilio-verify-sna-android", version: version, api_token: ENV.fetch("GH_TOKEN"))
 
     set_github_release(
       repository_name: "twilio/twilio-verify-sna-android",
