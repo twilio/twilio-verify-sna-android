@@ -1,9 +1,9 @@
 name: CI
 
-# Mirrors CircleCI: every push to every branch. Danger needs a pull_request
-# context to comment, so add `pull_request:` here if PR comments are wanted.
 on:
   push:
+    branches: [main, dev]
+  pull_request:
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -42,8 +42,11 @@ jobs:
     permissions:
       contents: read
       pull-requests: write # Danger comments on the PR
+      statuses: write # and reports its danger status
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0 # Danger diffs the PR against its base branch
       - uses: ./.github/actions/setup-build-env
 
       - name: Run unit tests with coverage
@@ -68,6 +71,7 @@ jobs:
 
       # Non-blocking, matching danger-shroud's failIfUnderProjectThreshold: false.
       - name: Report code coverage
+        if: github.event_name == 'pull_request' && !github.event.pull_request.head.repo.fork
         continue-on-error: true
         env:
           DANGER_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
