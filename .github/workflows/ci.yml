@@ -95,3 +95,50 @@ jobs:
           name: size-report
           path: builds/sizeReport/
           if-no-files-found: error
+
+  publish:
+    name: Publish
+    needs: [size_report]
+    if: github.ref == 'refs/heads/main'
+    environment: production
+    runs-on: ${{ vars.CI_RUNNER || 'ubuntu-latest-large' }}
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: ./.github/actions/setup-build-env
+
+      # Tagged before uploading, so a failed upload can be re-run against the same tag.
+      - name: Tag the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh auth setup-git
+          bundle exec fastlane tag_version
+
+      - name: Publish to Maven Central and Artifactory
+        env:
+          SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+          SIGNING_KEY_ID: ${{ secrets.SIGNING_KEY_ID }}
+          SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
+          SIGNING_SECRET_KEY_RING_FILE: ${{ runner.temp }}/signing-key.gpg
+          SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+          SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+          SONATYPE_STAGING_PROFILE_ID: ${{ secrets.SONATYPE_STAGING_PROFILE_ID }}
+          ARTIFACTORY_USER: ${{ secrets.ARTIFACTORY_USER }}
+          ARTIFACTORY_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
+        run: |
+          bundle exec fastlane install_signing_key
+          bundle exec fastlane publish
+
+      - name: Remove the signing key
+        if: always()
+        run: rm -f "$RUNNER_TEMP/signing-key.gpg"
+
+      - name: Create the GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: bundle exec fastlane github_release
