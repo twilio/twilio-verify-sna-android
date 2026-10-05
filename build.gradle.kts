@@ -37,19 +37,6 @@ allprojects {
   }
 }
 
-tasks.register("artifactoryLibraryReleaseUpload", GradleBuild::class) {
-  description = "Publish Verify SNA SDK to internal artifactory"
-  group = "Publishing"
-  tasks = listOf(":verify_sna:assembleRelease", ":verify_sna:artifactoryPublish")
-  startParameter.projectProperties.putAll(
-    gradle.startParameter.projectProperties + mapOf(
-      "artifactory.username" to getProjectProperty("ARTIFACTORY_USER"),
-      "artifactory.password" to getProjectProperty("ARTIFACTORY_PASSWORD"),
-      "artifactory.repository" to "releases"
-    )
-  )
-}
-
 /*
  * Check for the property in the project followed by the property in the environment
  */

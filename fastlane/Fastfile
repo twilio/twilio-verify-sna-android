@@ -176,7 +176,7 @@ platform :android do
     end
   end
 
-  desc "Publish the version in gradle.properties to Maven Central and Artifactory"
+  desc "Publish the version in gradle.properties to Maven Central"
   lane :publish do
     version = gradle_property("verifySnaVersionName")
     if already_published_to_maven_central?(version)
@@ -185,7 +185,6 @@ platform :android do
     end
 
     gradle(task: "sonatypeVerifySnaReleaseUpload")
-    gradle(task: "artifactoryLibraryReleaseUpload")
   end
 
   desc "Tag the current commit with the version in gradle.properties, unless that tag exists"
