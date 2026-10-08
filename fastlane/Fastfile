@@ -139,7 +139,10 @@ platform :android do
     ensure_git_status_clean(ignore_files: ["Gemfile.lock"])
 
     is_releaseable = analyze_commits(match: "*")
-    UI.user_error!("Nothing releasable since the last tag") unless is_releaseable
+    unless is_releaseable
+      UI.important("Nothing releasable since the last tag; not opening a release PR.")
+      next
+    end
     next_version = lane_context[SharedValues::RELEASE_NEXT_VERSION]
 
     if already_published_to_maven_central?(next_version)
