@@ -1,0 +1,142 @@
+name: CI
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+# ubuntu-latest-large is required: on plain ubuntu-latest jobs queue forever and
+# are never assigned a runner. This repo is a member of the org's
+# `github-hosted-large` pool. `vars.CI_RUNNER` overrides the label.
+jobs:
+  assemble:
+    name: Assemble
+    runs-on: ${{ vars.CI_RUNNER || 'ubuntu-latest-large' }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: ./.github/actions/setup-build-env
+      - name: Assemble the project
+        run: bundle exec fastlane assemble
+
+  ktlint:
+    name: Ktlint
+    needs: [assemble]
+    runs-on: ${{ vars.CI_RUNNER || 'ubuntu-latest-large' }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: ./.github/actions/setup-build-env
+      - name: Run ktlint
+        run: bundle exec fastlane lint
+
+  unit_tests:
+    name: Unit tests
+    needs: [ktlint]
+    runs-on: ${{ vars.CI_RUNNER || 'ubuntu-latest-large' }}
+    permissions:
+      contents: read
+      pull-requests: write # Danger comments on the PR
+      statuses: write # and reports its danger status
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0 # Danger diffs the PR against its base branch
+      - uses: ./.github/actions/setup-build-env
+
+      - name: Run unit tests with coverage
+        run: bundle exec fastlane test
+
+      # Replaces CircleCI's store_test_results.
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: test-results
+          path: verify_sna/build/test-results/testDebugUnitTest/
+          if-no-files-found: error
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: verify-sna-code-coverage
+          path: verify_sna/build/reports/kover/
+          if-no-files-found: error
+
+      # Non-blocking, matching danger-shroud's failIfUnderProjectThreshold: false.
+      - name: Report code coverage
+        if: github.event_name == 'pull_request' && !github.event.pull_request.head.repo.fork
+        continue-on-error: true
+        env:
+          DANGER_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: bundle exec fastlane report_code_coverage
+
+  size_report:
+    name: Size report
+    needs: [unit_tests]
+    runs-on: ${{ vars.CI_RUNNER || 'ubuntu-latest-large' }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: ./.github/actions/setup-build-env
+
+      - name: Generate the size report
+        run: bundle exec fastlane size_report
+
+      # Replaces persist_to_workspace; the release flow reads this artifact.
+      - name: Upload size report
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: size-report
+          path: builds/sizeReport/
+          if-no-files-found: error
+
+  publish:
+    name: Publish
+    needs: [size_report]
+    if: github.ref == 'refs/heads/main'
+    environment: production
+    runs-on: ${{ vars.CI_RUNNER || 'ubuntu-latest-large' }}
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: ./.github/actions/setup-build-env
+
+      # Tagged before uploading, so a failed upload can be re-run against the same tag.
+      - name: Tag the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh auth setup-git
+          bundle exec fastlane tag_version
+
+      - name: Publish to Maven Central
+        env:
+          SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+          SIGNING_KEY_ID: ${{ secrets.SIGNING_KEY_ID }}
+          SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
+          SIGNING_SECRET_KEY_RING_FILE: ${{ runner.temp }}/signing-key.gpg
+          SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+          SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+          SONATYPE_STAGING_PROFILE_ID: ${{ secrets.SONATYPE_STAGING_PROFILE_ID }}
+        run: |
+          bundle exec fastlane install_signing_key
+          bundle exec fastlane publish
+
+      - name: Remove the signing key
+        if: always()
+        run: rm -f "$RUNNER_TEMP/signing-key.gpg"
+
+      - name: Create the GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: bundle exec fastlane github_release

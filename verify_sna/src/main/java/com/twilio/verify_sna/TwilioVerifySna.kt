@@ -42,7 +42,7 @@ interface TwilioVerifySna {
 
     private var requestManager: RequestManager = ConcreteRequestManager(
       context,
-      IsMobileDataEnabledHelperImpl(),
+      IsMobileDataEnabledHelperImpl(context),
       VerifySnaNetworkCallbackProviderImpl(
         ConcreteNetworkRequestProvider()
       ),

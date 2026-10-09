@@ -30,4 +30,6 @@
   <string name="successful_verification_description">We were able to verify your phone number automatically, now you can continue, welcome!</string>
   <string name="missing_field_error">Missing country code, phone number or backend URL.</string>
   <string name="cellular_network_required">For silent network authentication, you will need a working sim card.</string>
+  <string name="sim_not_ready_error">No active SIM detected. Insert a working SIM card to continue with silent network authentication.</string>
+  <string name="mobile_data_disabled_error">Mobile data is turned off. Enable mobile data in your device settings to continue with silent network authentication.</string>
 </resources>
