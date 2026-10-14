@@ -46,6 +46,7 @@ jobs:
 
       # Pushed with the bot's token so the release branch gets CI.
       - name: Push the branch and open the release PR
+        if: steps.release.outputs.branch != ''
         env:
           GH_TOKEN: ${{ secrets.RELEASE_BOT_TOKEN }}
           BRANCH: ${{ steps.release.outputs.branch }}

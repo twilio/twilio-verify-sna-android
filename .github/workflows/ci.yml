@@ -96,10 +96,39 @@ jobs:
           path: builds/sizeReport/
           if-no-files-found: error
 
+  # Every push to main runs CI, but only a release PR's merge brings a version that isn't
+  # tagged, published and released yet. Checking first means a dev -> main merge doesn't
+  # request a production approval for a publish that would do nothing.
+  release_check:
+    name: Check release
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ${{ vars.CI_RUNNER || 'ubuntu-latest-large' }}
+    outputs:
+      needed: ${{ steps.check.outputs.needed }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - id: check
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version=$(sed -n 's/^verifySnaVersionName=//p' gradle.properties)
+          tagged=false
+          git ls-remote --exit-code --tags origin "refs/tags/$version" >/dev/null && tagged=true
+          on_central=false
+          curl -fsI "https://repo1.maven.org/maven2/com/twilio/twilio-verify-sna-android/$version/twilio-verify-sna-android-$version.pom" >/dev/null && on_central=true
+          released=false
+          gh release view "$version" -R "$GITHUB_REPOSITORY" >/dev/null 2>&1 && released=true
+          echo "$version: tagged=$tagged, on Maven Central=$on_central, GitHub release=$released"
+          needed=true
+          [ "$tagged" = true ] && [ "$on_central" = true ] && [ "$released" = true ] && needed=false
+          echo "needed=$needed" >> "$GITHUB_OUTPUT"
+
   publish:
     name: Publish
-    needs: [size_report]
-    if: github.ref == 'refs/heads/main'
+    needs: [size_report, release_check]
+    if: needs.release_check.outputs.needed == 'true'
     environment: production
     runs-on: ${{ vars.CI_RUNNER || 'ubuntu-latest-large' }}
     permissions:
