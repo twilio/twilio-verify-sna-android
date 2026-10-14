@@ -16,7 +16,6 @@
 package com.twilio.verify.sna.sample
 
 import android.content.Context
-import android.net.ConnectivityManager
 import android.os.Bundle
 import android.telephony.TelephonyManager
 import android.view.LayoutInflater
@@ -26,7 +25,8 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.twilio.verify.sna.sample.databinding.FragmentWelcomeBinding
-import java.lang.reflect.Method
+import com.twilio.verify_sna.networking.IsMobileDataEnabledHelper
+import com.twilio.verify_sna.networking.IsMobileDataEnabledHelperImpl
 
 private const val PHONE_NUMBER_KEY = "phoneNumber"
 private const val BACKEND_URL_KEY = "backendUrl"
@@ -34,6 +34,10 @@ private const val BACKEND_URL_KEY = "backendUrl"
 class WelcomeFragment : Fragment() {
 
   private lateinit var binding: FragmentWelcomeBinding
+
+  private val isMobileDataEnabledHelper: IsMobileDataEnabledHelper by lazy {
+    IsMobileDataEnabledHelperImpl(requireContext().applicationContext)
+  }
 
   override fun onCreateView(
     inflater: LayoutInflater,
@@ -73,9 +77,16 @@ class WelcomeFragment : Fragment() {
     }
     // save in cache the phone number and backend URL
     saveInPreferences(phoneNumber, backendUrl)
-    if (!hasCellularCoverage()) {
-      showErrorMessage(R.string.cellular_network_required)
-      return
+    when (cellularCoverageStatus()) {
+      CellularCoverageStatus.SIM_NOT_READY -> {
+        showErrorMessage(R.string.sim_not_ready_error)
+        return
+      }
+      CellularCoverageStatus.MOBILE_DATA_DISABLED -> {
+        showErrorMessage(R.string.mobile_data_disabled_error)
+        return
+      }
+      CellularCoverageStatus.AVAILABLE -> Unit
     }
     val action = WelcomeFragmentDirections
       .actionWelcomeFragmentToVerifyingFragment(
@@ -89,35 +100,20 @@ class WelcomeFragment : Fragment() {
   }
 
   /**
-   * Verifies cellular network is on
+   * Verifies cellular network is on, returning the specific reason when it isn't so the user
+   * can be told what to do about it.
    */
-  private fun hasCellularCoverage(): Boolean {
-    val connectivityManager = requireContext().getSystemService(
-      Context.CONNECTIVITY_SERVICE
-    ) as ConnectivityManager
-
-    return isMobileDataEnabled(connectivityManager)
-  }
-
-  /**
-   * Android Framework doesn't count with a pre-build way of getting mobile network status,
-   * when Wi-Fi is active. Reflection fits well.
-   * Taken from https://stackoverflow.com/a/8243305
-   */
-  private fun isMobileDataEnabled(cm: ConnectivityManager): Boolean {
-    val telephonyManager = requireActivity().getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
+  private fun cellularCoverageStatus(): CellularCoverageStatus {
+    val telephonyManager =
+      requireActivity().getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
     if (telephonyManager.simState != TelephonyManager.SIM_STATE_READY) {
-      return false
+      return CellularCoverageStatus.SIM_NOT_READY
     }
 
-    return try {
-      val c = Class.forName(cm.javaClass.name)
-      val m: Method = c.getDeclaredMethod("getMobileDataEnabled")
-      m.isAccessible = true
-      m.invoke(cm) as Boolean
-    } catch (exception: Exception) {
-      exception.printStackTrace()
-      false
+    return if (isMobileDataEnabledHelper()) {
+      CellularCoverageStatus.AVAILABLE
+    } else {
+      CellularCoverageStatus.MOBILE_DATA_DISABLED
     }
   }
 
@@ -128,5 +124,11 @@ class WelcomeFragment : Fragment() {
       putString(BACKEND_URL_KEY, backendUrl)
       apply()
     }
+  }
+
+  private enum class CellularCoverageStatus {
+    AVAILABLE,
+    SIM_NOT_READY,
+    MOBILE_DATA_DISABLED
   }
 }
