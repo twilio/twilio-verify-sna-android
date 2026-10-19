@@ -1,5 +1,3 @@
-import org.jfrog.gradle.plugin.artifactory.dsl.ArtifactoryPluginConvention
-
 /*
  * Copyright (c) 2022 Twilio Inc.
  *
@@ -19,7 +17,6 @@ import org.jfrog.gradle.plugin.artifactory.dsl.ArtifactoryPluginConvention
 plugins {
   alias(libs.plugins.androidLibrary)
   alias(libs.plugins.kotlinAndroid)
-  alias(libs.plugins.jfrogFactory)
   alias(libs.plugins.mavenPublish)
   alias(libs.plugins.apkscale)
   signing
@@ -102,17 +99,6 @@ publishing {
           url.set("https://github.com/twilio/twilio-verify-sna-android/tree/main")
         }
       }
-    }
-  }
-}
-
-configure<ArtifactoryPluginConvention> {
-  publish {
-    contextUrl = "https://twilio.jfrog.io/artifactory"
-    repository {
-      repoKey = findProperty("artifactoryRepository").toString()
-      username = findProperty("artifactoryUsername").toString()
-      password = findProperty("artifactoryPassword").toString()
     }
   }
 }
