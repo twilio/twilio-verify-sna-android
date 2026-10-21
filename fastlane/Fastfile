@@ -63,13 +63,6 @@ def already_published_to_maven_central?(version)
   Net::HTTP.get_response(uri).is_a?(Net::HTTPSuccess)
 end
 
-def latest_changelog_entry
-  changelog = File.read(File.join(repo_root, "CHANGELOG.md"))
-  sections = changelog.split(/^# /)
-  UI.user_error!("CHANGELOG.md has no version entries") if sections.size < 2
-  "# #{sections[1]}".strip
-end
-
 platform :android do
 
   desc "Assemble all variants"
@@ -188,31 +181,5 @@ platform :android do
     end
 
     gradle(task: "sonatypeVerifySnaReleaseUpload")
-  end
-
-  desc "Tag the current commit with the version in gradle.properties, unless that tag exists"
-  lane :tag_version do
-    version = gradle_property("verifySnaVersionName")
-    next unless sh("git ls-remote --tags origin refs/tags/#{version}", log: false).strip.empty?
-    if already_published_to_maven_central?(version)
-      UI.user_error!("#{version} is already on Maven Central but has no git tag. Back-fill the tag on the commit that was published, then re-run.")
-    end
-    add_git_tag(tag: version)
-    push_git_tags(tag: version)
-  end
-
-  desc "Create the GitHub release for the version in gradle.properties, unless it exists"
-  lane :github_release do
-    version = gradle_property("verifySnaVersionName")
-    next if get_github_release(url: "twilio/twilio-verify-sna-android", version: version, api_token: ENV.fetch("GH_TOKEN"))
-
-    set_github_release(
-      repository_name: "twilio/twilio-verify-sna-android",
-      api_token: ENV.fetch("GH_TOKEN"),
-      name: version,
-      tag_name: version,
-      description: latest_changelog_entry,
-      commitish: "main"
-    )
   end
 end
