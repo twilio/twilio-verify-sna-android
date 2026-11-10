@@ -56,6 +56,11 @@ class WelcomeFragment : Fragment() {
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
     readValuesFromPreferences()
+    binding.logsButton.setOnClickListener {
+      findNavController().navigate(
+        WelcomeFragmentDirections.actionWelcomeFragmentToLogsFragment()
+      )
+    }
     binding.verifySnaUrlButton.setOnClickListener {
       submit()
     }
