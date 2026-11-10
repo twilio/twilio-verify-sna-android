@@ -84,7 +84,8 @@ class TwilioVerifySnaTest {
   @Test
   fun `Process an Url throws a verify Sna exception`() {
     runBlocking {
-      val twilioVerifySnaException: TwilioVerifySnaException = mockk()
+      val twilioVerifySnaException: TwilioVerifySnaException =
+        TwilioVerifySnaException.NetworkRequestTimeoutException
       val url = "https://www.test.com"
 
       coEvery { requestManager.processUrl(url) } throws twilioVerifySnaException

@@ -12,6 +12,7 @@
 - [Running the Sample App](#SampleApp)
 - [Running the Sample Backend](#SampleBackend)
 - [Using the Sample App](#UsingSampleApp)
+- [Logger](#Logger)
 - [Errors](#Errors)
 - [Contributing](#Contributing)
 - [License](#License)
@@ -111,6 +112,22 @@ Currently it's not possible to test the functionality using a virtual device.
 
 **Expected behavior:**
 The app will ask the network carrier if the provided phone number is the same used on the network request, if the phone number is correct, then the app will redirect to a success screen.
+
+<a name='Logger'></a>
+## Logger
+The SDK keeps an in-memory log of what it did while processing an SNA URL: the cellular network request, the HTTP request, redirects, the response and any error. Only the latest 500 entries are kept.
+
+```kotlin
+// Clear the logs before starting a new verification
+Logger.startNewSession()
+
+val result = twilioVerifySna.processUrl(snaUrl)
+
+// Read the logs, e.g. to show them in a debug screen
+val logs: String = Logger.getText()
+```
+
+Each entry has the format `<timestamp> [<file>:<line>]: <message>`. Logs can include the SNA URL and the carrier's response, so avoid sending them anywhere you wouldn't send those.
 
 <a name='Errors'></a>
 ## Errors

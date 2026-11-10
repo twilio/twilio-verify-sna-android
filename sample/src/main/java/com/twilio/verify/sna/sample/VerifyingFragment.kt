@@ -27,6 +27,7 @@ import com.twilio.verify.sna.sample.data.SampleRepository
 import com.twilio.verify.sna.sample.databinding.FragmentVerifyingBinding
 import com.twilio.verify_sna.ProcessUrlResult
 import com.twilio.verify_sna.TwilioVerifySna
+import com.twilio.verify_sna.common.Logger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -68,6 +69,9 @@ class VerifyingFragment : Fragment() {
    * 3. Check with the backend URL provided if verification was successful.
    */
   private fun invokeVerifySna() {
+    // Each verification starts a new log session, so the Logs screen shows only the latest one
+    Logger.startNewSession()
+    Logger.log("Sample: starting verification for ${args.phoneNumber}")
     viewLifecycleOwner.lifecycleScope.launch {
       val snaUrl = getSnaUrl(args.backendUrl, args.phoneNumber)
       if (snaUrl.isNullOrEmpty()) {
@@ -78,6 +82,7 @@ class VerifyingFragment : Fragment() {
       // Validate the result
       if (result is ProcessUrlResult.Fail) {
         // The validation gets a result equals to ProcessUrlResult.Fail
+        Logger.log("Sample: SDK failed: ${result.twilioVerifySnaException.message}")
         onFail()
         return@launch
       }
@@ -98,9 +103,10 @@ class VerifyingFragment : Fragment() {
         // Get SNA URL from Backend URL sending the phone number
         SampleRepository.getSnaUrl(
           backendUrl, phoneNumber
-        )
+        ).also { Logger.log("Sample: got SNA URL from backend: $it") }
       } catch (e: Exception) {
         // An exception was thrown getting the SNA URL
+        Logger.log("Sample: getting SNA URL from backend failed: $e")
         null
       }
     }
@@ -122,9 +128,10 @@ class VerifyingFragment : Fragment() {
       try {
         SampleRepository.checkVerification(
           args.backendUrl, args.phoneNumber
-        )
+        ).also { Logger.log("Sample: backend verification check result: $it") }
       } catch (e: Exception) {
         // An exception was thrown checking the verification status
+        Logger.log("Sample: backend verification check failed: $e")
         false
       }
     }
