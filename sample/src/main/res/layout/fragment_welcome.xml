@@ -39,6 +39,18 @@
       app:layout_constraintVertical_chainStyle="packed"
       />
 
+  <Button
+      android:id="@+id/logsButton"
+      style="@style/Widget.MaterialComponents.Button.TextButton"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="@string/logs"
+      android:textAllCaps="false"
+      app:layout_constraintBottom_toBottomOf="@id/pill"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintTop_toTopOf="@id/pill"
+      />
+
   <TextView
       android:id="@+id/titleText"
       style="@style/TextView.Bold"

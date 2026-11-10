@@ -113,6 +113,9 @@ Currently it's not possible to test the functionality using a virtual device.
 **Expected behavior:**
 The app will ask the network carrier if the provided phone number is the same used on the network request, if the phone number is correct, then the app will redirect to a success screen.
 
+**Logs:**
+Tap `Logs` on the main screen to see what the SDK and the sample app logged during the latest verification. Use `Copy` to copy them, for example to attach to a support request.
+
 <a name='Logger'></a>
 ## Logger
 The SDK keeps an in-memory log of what it did while processing an SNA URL: the cellular network request, the HTTP request, redirects, the response and any error. Only the latest 500 entries are kept.
