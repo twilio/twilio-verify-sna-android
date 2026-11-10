@@ -32,4 +32,9 @@
   <string name="cellular_network_required">For silent network authentication, you will need a working sim card.</string>
   <string name="sim_not_ready_error">No active SIM detected. Insert a working SIM card to continue with silent network authentication.</string>
   <string name="mobile_data_disabled_error">Mobile data is turned off. Enable mobile data in your device settings to continue with silent network authentication.</string>
+  <string name="logs">Logs</string>
+  <string name="copy">Copy</string>
+  <string name="back">Back</string>
+  <string name="logs_copied">Logs copied to clipboard</string>
+  <string name="no_logs">No logs yet. Run a verification to see the SDK logs here.</string>
 </resources>
