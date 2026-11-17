@@ -5,6 +5,7 @@ import android.net.ConnectivityManager.NetworkCallback
 import android.net.NetworkRequest
 import android.os.Handler
 import android.os.Looper
+import com.twilio.verify_sna.common.Logger
 
 interface RequestNetworkWithRetryHelper {
   /**
@@ -36,6 +37,7 @@ class RequestNetworkWithRetryHelperImpl : RequestNetworkWithRetryHelper {
         networkCallback
       )
     } catch (e: Exception) {
+      Logger.log("Requesting cellular network failed, retrying in 500ms: $e")
       Handler(Looper.getMainLooper()).postDelayed({
         // Retry after 500ms is the requestNetwork call fails for any reason.
         try {

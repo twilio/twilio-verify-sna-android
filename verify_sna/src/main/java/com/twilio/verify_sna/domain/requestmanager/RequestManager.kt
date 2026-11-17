@@ -20,6 +20,7 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
+import com.twilio.verify_sna.common.Logger
 import com.twilio.verify_sna.common.TwilioVerifySnaException
 import com.twilio.verify_sna.networking.IsMobileDataEnabledHelper
 import com.twilio.verify_sna.networking.NetworkRequestResult
@@ -54,14 +55,17 @@ class ConcreteRequestManager(
             Context.CONNECTIVITY_SERVICE
           ) as? ConnectivityManager
           if (connectivityManager == null) {
+            Logger.log("ConnectivityManager not available")
             continuation.resumeWithException(
               TwilioVerifySnaException.CellularNetworkNotAvailable
             )
             return@suspendCancellableCoroutine
           }
           if (isMobileDataEnabledHelper()) {
+            Logger.log("Mobile data is enabled")
             establishCellularConnection(connectivityManager, url, continuation)
           } else {
+            Logger.log("Mobile data is disabled")
             continuation.resumeWithException(
               TwilioVerifySnaException.CellularNetworkNotAvailable
             )
@@ -69,6 +73,7 @@ class ConcreteRequestManager(
         }
       }
     } catch (timeout: TimeoutCancellationException) {
+      Logger.log("Timed out after ${NETWORK_TIMEOUT_MS}ms waiting for the cellular network request")
       throw TwilioVerifySnaException.NetworkRequestTimeoutException
     }
   }
@@ -91,12 +96,14 @@ class ConcreteRequestManager(
     )
 
     continuation.invokeOnCancellation {
+      Logger.log("Cellular network request cancelled")
       try {
         connectivityManager.unregisterNetworkCallback(networkCallback)
       } catch (e: IllegalArgumentException) {
       }
     }
 
+    Logger.log("Requesting cellular network")
     requestNetworkWithRetryHelper(
       connectivityManager,
       networkRequest,
@@ -104,6 +111,7 @@ class ConcreteRequestManager(
     ) { requestNetworkException ->
       // Both attempts failed, so the callback was never registered and nothing else will resume
       // the continuation. Surface the cause instead of letting the caller wait out the timeout.
+      Logger.log("Requesting cellular network failed after retry: $requestNetworkException")
       continuation.resumeWithException(
         TwilioVerifySnaException.NetworkRequestException(requestNetworkException)
       )

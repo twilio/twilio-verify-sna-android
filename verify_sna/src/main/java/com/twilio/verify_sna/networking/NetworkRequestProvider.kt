@@ -17,10 +17,12 @@
 package com.twilio.verify_sna.networking
 
 import android.net.Network
+import com.twilio.verify_sna.common.Logger
 import com.twilio.verify_sna.common.TwilioVerifySnaException
 import okhttp3.OkHttpClient
 import okhttp3.Protocol
 import okhttp3.Request
+import okhttp3.Response
 import java.io.IOException
 
 interface NetworkRequestProvider {
@@ -42,19 +44,34 @@ class ConcreteNetworkRequestProvider : NetworkRequestProvider {
       )
       .build()
     val request = Request.Builder().url(urlText).build()
+    Logger.log("Start cellular connection")
+    Logger.log("Request:\n${request.method} ${request.url}")
     return try {
       val response = okHttpClient.newCall(request).execute()
+      logRedirects(response)
       if (response.isSuccessful) {
         val status = response.code
         val message = response.body?.string()
+        Logger.log("Response:\n$status\n$message")
         NetworkRequestResult(status, message)
       } else {
+        Logger.log("Response:\n${response.code} ${response.message}")
         throw TwilioVerifySnaException.NetworkRequestException(
           Exception("SNA_URL wasn't successful")
         )
       }
     } catch (e: IOException) {
+      Logger.log("Request failed: $e")
       throw TwilioVerifySnaException.NetworkRequestException(e)
+    }
+  }
+
+  private fun logRedirects(response: Response) {
+    val redirects = generateSequence(response.priorResponse) { it.priorResponse }
+      .toList()
+      .asReversed()
+    redirects.forEach { prior ->
+      Logger.log("HTTP redirect (${prior.code}) to: ${prior.header("Location")}")
     }
   }
 }

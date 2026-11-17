@@ -20,6 +20,7 @@ import android.os.Looper
 import android.util.Patterns
 import com.twilio.verify_sna.ProcessUrlResult
 import com.twilio.verify_sna.TwilioVerifySna
+import com.twilio.verify_sna.common.Logger
 import com.twilio.verify_sna.common.TwilioVerifySnaException
 import com.twilio.verify_sna.domain.requestmanager.RequestManager
 
@@ -33,6 +34,7 @@ class ConcreteTwilioVerifySna(
 ) : TwilioVerifySna {
 
   override suspend fun processUrl(snaUrl: String): ProcessUrlResult {
+    Logger.log("Processing SNA URL: $snaUrl")
     return try {
       if (!Patterns.WEB_URL.matcher(snaUrl).matches()) {
         throw TwilioVerifySnaException.InvalidUrlException
@@ -42,12 +44,15 @@ class ConcreteTwilioVerifySna(
       }
       val snaResponse = requestManager.processUrl(snaUrl)
       if (isMessageValid(snaResponse.message)) {
+        Logger.log("SNA URL processed successfully")
         return ProcessUrlResult.Success(snaResponse)
       }
       throw TwilioVerifySnaException.NoResultFromUrl(snaResponse.message.toString())
     } catch (twilioVerifySnaException: TwilioVerifySnaException) {
+      Logger.log("Processing SNA URL failed: ${twilioVerifySnaException.message}")
       ProcessUrlResult.Fail(twilioVerifySnaException)
     } catch (exception: Exception) {
+      Logger.log("Processing SNA URL failed with unexpected error: $exception")
       ProcessUrlResult.Fail(TwilioVerifySnaException.UnexpectedException(exception))
     }
   }
